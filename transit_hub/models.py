@@ -1,4 +1,3 @@
-from enum import unique
 from django.db import models
 
 # Create your models here.
@@ -12,8 +11,8 @@ class Driver(models.Model):
     license_class = models.CharField(max_length=10)
     license_country = models.CharField(max_length=30)
     license_issued = models.DateField()
-    license_photo = models.ImageField(upload_to='license_photos')
-    driver_photo = models.ImageField(upload_to='driver_photos')
+    license_photo = models.ImageField(upload_to='license_photos', null=True, blank=True)
+    driver_photo = models.ImageField(upload_to='driver_photos', null=True, blank=True)
     driver_status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -23,7 +22,7 @@ class Driver(models.Model):
     
     class Meta:
         unique_together = ['phone_number', 'license_number']
-    
+
 class Bus(models.Model):
     bus_name = models.CharField(max_length=30)
     bus_number = models.CharField(max_length=30)
@@ -36,23 +35,33 @@ class Bus(models.Model):
 
     def __str__(self):
         return self.bus_name + ' ' + str(self.bus_number)
-    
+
     class Meta:
         verbose_name_plural = 'Buses'
         unique_together = ['bus_name', 'bus_number']
 
+
+class Stopage(models.Model):
+    stopage_name = models.CharField(max_length=30,unique=True)
+    stopage_status = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.stopage_name
+
+
+
 class Route(models.Model):
     route_name = models.CharField(max_length=30)
     route_number = models.CharField(max_length=30)
-    route_distance = models.FloatField()
-    route_duration = models.FloatField()
+    route_details = models.ManyToManyField(Stopage)
     route_status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.route_name + ' ' + str(self.route_number)
-    
 
     class Meta:
         unique_together = ['route_name', 'route_number']
