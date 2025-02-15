@@ -24,7 +24,7 @@ class Driver(models.Model):
         unique_together = ['phone_number', 'license_number']
 
 class Bus(models.Model):
-    bus_name = models.CharField(max_length=30)
+    bus_name = models.CharField(max_length=100)
     bus_number = models.CharField(max_length=30)
     bus_model = models.CharField(max_length=30)
     bus_capacity = models.IntegerField()
@@ -41,22 +41,22 @@ class Bus(models.Model):
         unique_together = ['bus_name', 'bus_number']
 
 
-class Stopage(models.Model):
-    stopage_name = models.CharField(max_length=30,unique=True)
-    stopage_status = models.BooleanField(default=True)
+class Stoppage(models.Model):
+    stoppage_name = models.CharField(max_length=100, unique=True)
+    stoppage_status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.stopage_name
-
+        return self.stoppage_name
 
 
 class Route(models.Model):
-    route_name = models.CharField(max_length=30)
+    route_name = models.CharField(max_length=100)
     route_number = models.CharField(max_length=30)
-    route_details = models.ManyToManyField(Stopage)
     route_status = models.BooleanField(default=True)
+    from_dsc = models.BooleanField(default=False)
+    to_dsc = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -65,3 +65,17 @@ class Route(models.Model):
 
     class Meta:
         unique_together = ['route_name', 'route_number']
+
+
+class RouteStoppage(models.Model):
+    route = models.ForeignKey(Route, on_delete=models.CASCADE)
+    stoppage = models.ForeignKey(Stoppage, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(
+        auto_now_add=True,blank=True, null=True
+    )  # ✅ This keeps track of Stoppage 1, 2, 3, etc.
+
+    class Meta: # ✅ Prevent duplicate order numbers for the same route
+        ordering = ["created_at"]  # ✅ Always show stoppages in order
+
+    def __str__(self):
+        return f"{self.route} - Stoppage {self.stoppage}"
