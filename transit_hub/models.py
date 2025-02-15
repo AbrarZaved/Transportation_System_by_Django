@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 
@@ -55,8 +57,8 @@ class Route(models.Model):
     route_name = models.CharField(max_length=100)
     route_number = models.CharField(max_length=30)
     route_status = models.BooleanField(default=True)
-    from_dsc = models.BooleanField(default=False)
-    to_dsc = models.BooleanField(default=False)
+    from_dsc = models.BooleanField(default=False, verbose_name="From DSC")
+    to_dsc = models.BooleanField(default=False, verbose_name="To DSC")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -65,6 +67,14 @@ class Route(models.Model):
 
     class Meta:
         unique_together = ['route_name', 'route_number']
+
+    def save(self, *args, **kwargs):
+        route_name = str(self.route_name[:3])
+        if route_name == "DSC":
+            self.from_dsc = True
+        else:
+            self.to_dsc = True
+        return super(Route, self).save(*args, **kwargs)
 
 
 class RouteStoppage(models.Model):
@@ -75,7 +85,7 @@ class RouteStoppage(models.Model):
     )  # ✅ This keeps track of Stoppage 1, 2, 3, etc.
 
     class Meta: # ✅ Prevent duplicate order numbers for the same route
-        ordering = ["created_at"]  # ✅ Always show stoppages in order
+        ordering = ["-created_at"]  # ✅ Always show stoppages in order
 
     def __str__(self):
         return f"{self.route} - Stoppage {self.stoppage}"

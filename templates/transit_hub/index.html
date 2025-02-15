@@ -3,16 +3,54 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Route Stoppages</title>
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+      th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+    </style>
   </head>
   <body>
-    {% for route in routes %}
-      <h1>{{ route.route_name }} -> {{ route.route_number }}</h1> <!-- Show Route Name and Number -->
-      <ul>
-        {% for route_stoppage in route.routestoppage_set.all %}
-          <li>{{ route_stoppage.stoppage.stoppage_name }}</li> <!-- Show Stoppage Name -->
+    <h1>Route Stoppages</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Route Name</th>
+          <th>Route Number</th>
+          <th>Stoppages</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for route in routes %}
+          <tr>
+            <td>{{ route.route_name }}</td>
+            <td>{{ route.route_number }}</td>
+            <td>
+              <ul>
+                {% for route_stoppage in route.routestoppage_set.all %}
+                  <li>{{ route_stoppage.stoppage.stoppage_name }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
         {% endfor %}
-      </ul>
-    {% endfor %}
+      </tbody>
+    </table>
   </body>
 </html>

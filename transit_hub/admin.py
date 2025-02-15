@@ -69,6 +69,8 @@ class RouteAdmin(admin.ModelAdmin):
     list_filter = ["route_status", "from_dsc", "to_dsc", "created_at", "updated_at"]
     inlines = [RouteStoppageInline]  # ✅ Inline stoppages inside Route
 
+    def get_queryset(self,*args, **kwargs):
+        return super().get_queryset(*args, **kwargs).order_by('created_at')
 
 @admin.register(Stoppage)
 class StoppageAdmin(admin.ModelAdmin):
