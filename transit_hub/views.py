@@ -9,7 +9,6 @@ from .models import RouteStoppage, Stoppage
 
 def index(request):
     routes = Route.objects.all()
-    print(routes)
     # for route in routes:
     #     print(f"Route: {route.route_name}")
     #     print("Stopages:", route.route_details.all())  # Debugging
