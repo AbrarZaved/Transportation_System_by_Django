@@ -35,17 +35,16 @@ class RouteDetails(APIView):
     def get(self, request, id=None):
         if id:
             route_id = self.kwargs["id"]
-            # Get the Route object for the given ID
             try:
                 route = Route.objects.get(id=route_id)
                 route_details = RouteStoppageModel.objects.filter(route=route)
                 stoppages = RouteStoppageSerializer(route_details, many=True).data
-
-                # Return the related RouteStoppage objects for the found route
                 return Response(
                     {
-                        "route": RouteSerializer(route).data,
-                        "route_stoppages": stoppages,  # This now includes stoppage names
+                        "route": RouteSerializer(route).data,  # Full data
+                        "stoppage_names": [
+                            stoppage["stoppage_name"] for stoppage in stoppages
+                        ],
                     }
                 )
             except Route.DoesNotExist:
