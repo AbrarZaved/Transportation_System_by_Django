@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account - BAHON</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <a href="index.html">
+            <img src="images/logo.png" alt="BAHON">
+            <span>BAHON</span>
+          </a>
+        </div>
+        <nav>
+          <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="bus-search.html">Bus Search</a></li>
+            <li><a href="view-ticket.html">View Ticket</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="my-account.html" class="active">My account</a></li>
+            <li><a href="cart.html"><i class="fas fa-shopping-cart"></i> <span class="cart-count">0</span></a></li>
+          </ul>
+          <div class="search-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="hamburger">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Account Dashboard -->
+  <section class="account-dashboard">
+    <div class="container">
+      <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="dashboard-sidebar">
+          <div class="user-info">
+            <div class="user-avatar">
+              <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg" alt="User Avatar">
+            </div>
+            <div class="user-details">
+              <h3>John Doe</h3>
+              <p>john.doe@example.com</p>
+            </div>
+          </div>
+          <ul class="dashboard-menu">
+            <li class="active"><a href="#dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="#bookings"><i class="fas fa-ticket-alt"></i> My Bookings</a></li>
+            <li><a href="#profile"><i class="fas fa-user"></i> Profile</a></li>
+            <li><a href="#saved-travelers"><i class="fas fa-users"></i> Saved Travelers</a></li>
+            <li><a href="#payment-methods"><i class="fas fa-credit-card"></i> Payment Methods</a></li>
+            <li><a href="#notifications"><i class="fas fa-bell"></i> Notifications</a></li>
+            <li><a href="#preferences"><i class="fas fa-cog"></i> Preferences</a></li>
+            <li class="logout"><a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+          </ul>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+          <!-- Welcome Section -->
+          <div class="welcome-section">
+            <div class="welcome-text">
+              <h2>Welcome, John!</h2>
+              <p>Here's a summary of your activity and upcoming trips.</p>
+            </div>
+            <div class="quick-actions">
+              <a href="bus-search.html" class="action-btn"><i class="fas fa-search"></i> Search Buses</a>
+              <a href="#bookings" class="action-btn"><i class="fas fa-history"></i> View History</a>
+            </div>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="stats-cards">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-bus"></i>
+              </div>
+              <div class="stat-info">
+                <h3>12</h3>
+                <p>Total Trips</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-calendar"></i>
+              </div>
+              <div class="stat-info">
+                <h3>2</h3>
+                <p>Upcoming Trips</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-ticket-alt"></i>
+              </div>
+              <div class="stat-info">
+                <h3>10</h3>
+                <p>Completed Trips</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-star"></i>
+              </div>
+              <div class="stat-info">
+                <h3>4.8/5</h3>
+                <p>Average Rating</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upcoming Trips -->
+          <div class="upcoming-trips">
+            <div class="section-header">
+              <h3>Upcoming Trips</h3>
+              <a href="#bookings" class="view-all">View All</a>
+            </div>
+            <div class="trips-container">
+              <div class="trip-card">
+                <div class="trip-route">
+                  <div class="route-point">
+                    <div class="point-time">6:30 AM</div>
+                    <div class="point-place">Rajshahi</div>
+                    <div class="point-date">22 Jan 2025</div>
+                  </div>
+                  <div class="route-line">
+                    <div class="route-icon">
+                      <i class="fas fa-bus"></i>
+                    </div>
+                  </div>
+                  <div class="route-point">
+                    <div class="point-time">12:00 PM</div>
+                    <div class="point-place">Dhaka</div>
+                    <div class="point-date">22 Jan 2025</div>
+                  </div>
+                </div>
+                <div class="trip-details">
+                  <div class="operator">
+                    <span class="label">Operator:</span>
+                    <span class="value">Grameen Travels</span>
+                  </div>
+                  <div class="seat-info">
+                    <span class="label">Seats:</span>
+                    <span class="value">A1, A2</span>
+                  </div>
+                  <div class="booking-id">
+                    <span class="label">Booking ID:</span>
+                    <span class="value">BHN123456</span>
+                  </div>
+                  <div class="trip-actions">
+                    <a href="#view-ticket" class="action-link">View Ticket</a>
+                    <a href="#cancel-ticket" class="action-link">Cancel</a>
+                  </div>
+                </div>
+              </div>
+              <div class="trip-card">
+                <div class="trip-route">
+                  <div class="route-point">
+                    <div class="point-time">7:00 AM</div>
+                    <div class="point-place">Dhaka</div>
+                    <div class="point-date">25 Jan 2025</div>
+                  </div>
+                  <div class="route-line">
+                    <div class="route-icon">
+                      <i class="fas fa-bus"></i>
+                    </div>
+                  </div>
+                  <div class="route-point">
+                    <div class="point-time">1:00 PM</div>
+                    <div class="point-place">Rajshahi</div>
+                    <div class="point-date">25 Jan 2025</div>
+                  </div>
+                </div>
+                <div class="trip-details">
+                  <div class="operator">
+                    <span class="label">Operator:</span>
+                    <span class="value">Desh Travels</span>
+                  </div>
+                  <div class="seat-info">
+                    <span class="label">Seats:</span>
+                    <span class="value">B3, B4</span>
+                  </div>
+                  <div class="booking-id">
+                    <span class="label">Booking ID:</span>
+                    <span class="value">BHN123457</span>
+                  </div>
+                  <div class="trip-actions">
+                    <a href="#view-ticket" class="action-link">View Ticket</a>
+                    <a href="#cancel-ticket" class="action-link">Cancel</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activities -->
+          <div class="recent-activities">
+            <div class="section-header">
+              <h3>Recent Activities</h3>
+            </div>
+            <div class="activities-list">
+              <div class="activity-item">
+                <div class="activity-icon booking">
+                  <i class="fas fa-ticket-alt"></i>
+                </div>
+                <div class="activity-details">
+                  <p class="activity-text">You booked a ticket from <strong>Rajshahi to Dhaka</strong></p>
+                  <p class="activity-time">2 days ago</p>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon payment">
+                  <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="activity-details">
+                  <p class="activity-text">Payment of <strong>৳1,230</strong> completed via bKash</p>
+                  <p class="activity-time">2 days ago</p>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon login">
+                  <i class="fas fa-sign-in-alt"></i>
+                </div>
+                <div class="activity-details">
+                  <p class="activity-text">Login from <strong>Dhaka, Bangladesh</strong></p>
+                  <p class="activity-time">3 days ago</p>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon search">
+                  <i class="fas fa-search"></i>
+                </div>
+                <div class="activity-details">
+                  <p class="activity-text">Searched for buses from <strong>Dhaka to Chittagong</strong></p>
+                  <p class="activity-time">5 days ago</p>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon booking">
+                  <i class="fas fa-ticket-alt"></i>
+                </div>
+                <div class="activity-details">
+                  <p class="activity-text">You booked a ticket from <strong>Dhaka to Rajshahi</strong></p>
+                  <p class="activity-time">1 week ago</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Favorite Routes -->
+          <div class="favorite-routes">
+            <div class="section-header">
+              <h3>Your Favorite Routes</h3>
+            </div>
+            <div class="routes-grid">
+              <div class="route-card">
+                <div class="route-info">
+                  <div class="route-cities">
+                    <span class="from">Rajshahi</span>
+                    <i class="fas fa-long-arrow-alt-right"></i>
+                    <span class="to">Dhaka</span>
+                  </div>
+                  <p class="route-stats">6 trips in last 3 months</p>
+                </div>
+                <a href="bus-search.html" class="search-route-btn">Search</a>
+              </div>
+              <div class="route-card">
+                <div class="route-info">
+                  <div class="route-cities">
+                    <span class="from">Dhaka</span>
+                    <i class="fas fa-long-arrow-alt-right"></i>
+                    <span class="to">Rajshahi</span>
+                  </div>
+                  <p class="route-stats">5 trips in last 3 months</p>
+                </div>
+                <a href="bus-search.html" class="search-route-btn">Search</a>
+              </div>
+              <div class="route-card">
+                <div class="route-info">
+                  <div class="route-cities">
+                    <span class="from">Dhaka</span>
+                    <i class="fas fa-long-arrow-alt-right"></i>
+                    <span class="to">Chittagong</span>
+                  </div>
+                  <p class="route-stats">2 trips in last 3 months</p>
+                </div>
+                <a href="bus-search.html" class="search-route-btn">Search</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Preview -->
+          <div class="profile-preview">
+            <div class="section-header">
+              <h3>Profile Information</h3>
+              <a href="#profile" class="edit-link">Edit</a>
+            </div>
+            <div class="profile-info-grid">
+              <div class="info-group">
+                <span class="info-label">Full Name</span>
+                <span class="info-value">John Doe</span>
+              </div>
+              <div class="info-group">
+                <span class="info-label">Email</span>
+                <span class="info-value">john.doe@example.com</span>
+              </div>
+              <div class="info-group">
+                <span class="info-label">Phone</span>
+                <span class="info-value">+880 1700 123456</span>
+              </div>
+              <div class="info-group">
+                <span class="info-label">Date of Birth</span>
+                <span class="info-value">15 January 1990</span>
+              </div>
+              <div class="info-group">
+                <span class="info-label">Address</span>
+                <span class="info-value">123 Main Street, Dhaka 1000, Bangladesh</span>
+              </div>
+              <div class="info-group">
+                <span class="info-label">Member Since</span>
+                <span class="info-value">March 2022</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-column">
+          <div class="footer-logo">
+            <img src="images/logo.png" alt="BAHON">
+            <span>BAHON</span>
+          </div>
+          <p>Your trusted partner for bus tickets across Bangladesh. We provide the easiest way to book bus tickets online.</p>
+          <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+        <div class="footer-column">
+          <h3>Quick Links</h3>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="bus-search.html">Bus Search</a></li>
+            <li><a href="view-ticket.html">View Ticket</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h3>Support</h3>
+          <ul class="footer-links">
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="privacy-policy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms & Conditions</a></li>
+            <li><a href="refund-policy.html">Refund Policy</a></li>
+            <li><a href="help.html">Help Center</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h3>Contact</h3>
+          <ul class="contact-info">
+            <li><i class="fas fa-map-marker-alt"></i> 123 Main Street, Dhaka 1000, Bangladesh</li>
+            <li><i class="fas fa-phone-alt"></i> +880 1700 000000</li>
+            <li><i class="fas fa-envelope"></i> info@bahon.com</li>
+          </ul>
+          <div class="newsletter">
+            <h4>Subscribe to Newsletter</h4>
+            <form class="newsletter-form">
+              <input type="email" placeholder="Your email address">
+              <button type="submit"><i class="fas fa-paper-plane"></i></button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 BAHON. All rights reserved.</p>
+        <div class="payment-methods">
+          <span>Accepted Payment Methods:</span>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/100px-Mastercard-logo.svg.png" alt="Mastercard">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/100px-Visa_Inc._logo.svg.png" alt="Visa">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Stripe_Logo%2C_revised_2016.svg/100px-Stripe_Logo%2C_revised_2016.svg.png" alt="Stripe">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Bkash_logo.svg/100px-Bkash_logo.svg.png" alt="bKash">
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/account.js"></script>
+</body>
+</html>

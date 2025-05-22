@@ -1,23 +1,75 @@
+import time
+from asgiref.sync import sync_to_async
 from django.shortcuts import render
-from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from transit_hub.models import Route
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 import json
-
 from transit_hub.serializer import RouteSerializer, RouteStoppageSerializer
+from transport_manager.models import Transportation_schedules
 from .models import RouteStoppage as RouteStoppageModel
 
 
 def index(request):
-    routes = Route.objects.all()
-    # for route in routes:
-    #     print(f"Route: {route.route_name}")
-    #     print("Stopages:", route.route_details.all())  # Debugging
-    return render(request, "transit_hub/index.html", {"routes": routes})
+    return render(request, "transit_hub/index.html")
+
+
+@sync_to_async
+def get_schedules(trip_type, place):
+    schedules = Transportation_schedules.objects.select_related(
+        "bus", "driver", "route"
+    ).filter(from_dsc=(trip_type == "From DSC"), route__route_name__icontains=place)
+
+    route_ids = schedules.values_list("route__id", flat=True).distinct()
+    route_details = RouteStoppageModel.objects.filter(route_id__in=route_ids)
+
+    stoppages_by_route = {}
+    for stop in route_details:
+        stoppages_by_route.setdefault(stop.route_id, []).append(stop)
+
+    data = []
+    for schedule in schedules:
+        route_obj = schedule.route
+        route_id = route_obj.id
+
+        data.append(
+            {
+                "route": RouteSerializer(route_obj).data,
+                "route_name": route_obj.route_name,
+                "audience": schedule.get_audience_display(),
+                "departure_time": schedule.departure_time,
+                "stoppage_names": [
+                    stoppage.stoppage.stoppage_name
+                    for stoppage in stoppages_by_route.get(route_id, [])
+                ],
+                "bus": {
+                    "id": schedule.bus.id,
+                    "name": schedule.bus.bus_name,
+                    "capacity": schedule.bus.bus_capacity,
+                    "bus_image": (
+                        schedule.bus.bus_photo.url if schedule.bus.bus_photo else None
+                    ),
+                },
+                "driver": {
+                    "id": schedule.driver.id,
+                    "name": f"{schedule.driver.first_name} {schedule.driver.last_name}",
+                    "phone_number": schedule.driver.phone_number,
+                },
+            }
+        )
+
+    return data
+
+
+async def search_route(request):
+    if request.method == "POST":
+        body = json.loads(request.body)
+        trip_type = body.get("tripType")
+        place = body.get("place")
+
+        data = await get_schedules(trip_type, place)
+        return JsonResponse({"routes": data})
 
 
 class RouteStoppage(APIView):

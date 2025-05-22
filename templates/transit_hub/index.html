@@ -1,56 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Route Stoppages</title>
-    <style>
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 20px 0;
-      }
-      th, td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-      }
-      th {
-        background-color: #f2f2f2;
-      }
-      tr:nth-child(even) {
-        background-color: #f9f9f9;
-      }
-      tr:hover {
-        background-color: #f1f1f1;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Route Stoppages</h1>
-    <table>
-      <thead>
-        <tr>
-          <th>Route Name</th>
-          <th>Route Number</th>
-          <th>Stoppages</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for route in routes %}
-          <tr>
-            <td>{{ route.route_name }}</td>
-            <td>{{ route.route_number }}</td>
-            <td>
-              <ul>
-                {% for route_stoppage in route.routestoppage_set.all %}
-                  <li>{{ route_stoppage.stoppage.stoppage_name }}</li>
-                {% endfor %}
-              </ul>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </body>
-</html>
+{% extends 'kits/main.html' %}
+{% load static %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="hero" style="background-image: url('{% static 'img/pexels-photo-1178448.jpg' %}');">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="hero-content">
+        <h1>Find Next Place To <span>Visit</span></h1>
+        <p>Discover amazing places at exclusive deals</p>
+        <form method="POST">
+          {% csrf_token %}
+        <div class="search-form">
+          <div class="trip-type">
+            <label class="radio-container">
+              <input type="radio" name="trip-type" value="From DSC" checked />
+              <span class="radio-custom"></span>
+              From DSC
+            </label>
+            <label class="radio-container">
+              <input type="radio" name="trip-type" value="To DSC" />
+              <span class="radio-custom"></span>
+              To DSC
+            </label>
+          </div>
+
+          <div class="search-inputs">
+            <div class="input-group">
+              <i class="fas fa-map-marker-alt"></i>
+              <input type="text" placeholder="Enter your place" id='place' />
+            </div>
+            <button class="search-btn" id="search">SEARCH</button>
+          </div>
+        </div>
+      </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bus Search Results -->
+  <section class="search-results" id="results">
+    
+  </section>
+
+  <div></div>
+  <!-- Bus Detail Modal -->
+  <div id="busModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2 id="modalBusName"></h2>
+      <img id="modalBusImage" src="" alt="Bus Image" style="width: 100%; max-height: 300px; object-fit: contain;" />
+      <p><strong>Driver:</strong> <span id="modalDriverName"></span></p>
+      <p><strong>Phone:</strong> <span id="modalDriverPhone"></span></p>
+    </div>
+  </div>
+
+  {% include 'kits/footer.html' %}
+
+  <script type="module" src="{% static 'js/main.js' %}"></script>
+  {% comment %} <script src="{% static 'js/search.js' %}"></script>  {% endcomment %}
+{% endblock %}
