@@ -23,11 +23,10 @@
         </div>
         <nav>
           <ul class="nav-links">
-            <li><a href="{% url "index" %}" class="active">Home</a></li>
+            <li><a href="{% url "index" %}" class="{% if request.resolver_match.url_name == 'index' %} active {% endif %}">Home</a></li>
             <li><a href="about.html">About Us</a></li>
             <li><a href="contact.html">Contact Us</a></li>
-            <li><a href="{% url "my_account" %}">My account</a></li>
-            <li><a href="cart.html"><i class="fas fa-shopping-cart"></i> <span class="cart-count">0</span></a></li>
+            <li><a href="{% url "my_account" %}" class="{% if request.resolver_match.url_name == 'my_account' %} active {% endif %}">My account</a></li>
           </ul>
           <div class="search-icon">
             <i class="fas fa-search"></i>

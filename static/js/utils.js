@@ -101,5 +101,89 @@ export function setupModalHandlers(routeData) {
 }
 
 export function renderNoRoutesFound() {
-  return `<p>No routes found matching your criteria.</p>`;
+  // Show a modal popup with the "No Routes Found" message
+  const modalId = "noRoutesModal";
+  let modal = document.getElementById(modalId);
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = modalId;
+    modal.style.position = "fixed";
+    modal.style.top = "0";
+    modal.style.left = "0";
+    modal.style.width = "100vw";
+    modal.style.height = "100vh";
+    modal.style.background = "rgba(0,0,0,0.4)";
+    modal.style.display = "flex";
+    modal.style.alignItems = "center";
+    modal.style.justifyContent = "center";
+    modal.style.zIndex = "9999";
+
+    // Add a wrapper for animation
+    modal.innerHTML = `
+      <div id="noRoutesModalContent" style="
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+        padding: 40px 32px;
+        text-align: center;
+        min-width: 320px;
+        position: relative;
+        opacity: 0;
+        transform: scale(0.9);
+        transition: opacity 0.3s cubic-bezier(0.4,0,0.2,1), transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      ">
+        <button id="closeNoRoutesModal" style="
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          background: transparent;
+          border: none;
+          font-size: 1.5em;
+          color: #aaa;
+          cursor: pointer;
+        ">&times;</button>
+        <svg width="64" height="64" fill="none" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="32" fill="#f2f2f2"/>
+          <path d="M20 44h24M32 20v16M32 36a2 2 0 100-4 2 2 0 000 4z" stroke="#bbb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h2 style="margin: 20px 0 10px 0; font-size: 1.5em; color: #888;">No Routes Found</h2>
+        <p style="font-size: 1em; color: #888;">Sorry, we couldn't find any routes matching your criteria.<br>Try adjusting your search.</p>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Animate in after appending
+    setTimeout(() => {
+      const content = document.getElementById("noRoutesModalContent");
+      if (content) {
+        content.style.opacity = "1";
+        content.style.transform = "scale(1)";
+      }
+    }, 10);
+
+    document.getElementById("closeNoRoutesModal").onclick = () => {
+      modal.style.display = "none";
+    };
+
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+      }
+    };
+  } else {
+    modal.style.display = "flex";
+    // Animate in again if needed
+    const content = document.getElementById("noRoutesModalContent");
+    if (content) {
+      content.style.opacity = "0";
+      content.style.transform = "scale(0.9)";
+      setTimeout(() => {
+        content.style.opacity = "1";
+        content.style.transform = "scale(1)";
+      }, 10);
+    }
+  }
+
+  return "";
 }
