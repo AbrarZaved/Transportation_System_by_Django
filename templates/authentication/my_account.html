@@ -1,0 +1,130 @@
+{% extends "kits/main.html" %}
+{% load static %}
+{% block title %}
+<title>My Account - BAHON</title>
+{% endblock title %}
+{% block content %}
+  <!-- Account Dashboard -->
+  <section class="account-dashboard">
+    <div class="container">
+      <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="dashboard-sidebar">
+          <div class="user-info">
+            <div class="user-avatar">
+              <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg" alt="User Avatar">
+            </div>
+            <div class="user-details">
+              <h3>John Doe</h3>
+              <p>john.doe@example.com</p>
+            </div>
+          </div>
+          <ul class="dashboard-menu">
+            <li class="active"><a href="#dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="#bookings"><i class="fas fa-ticket-alt"></i> My Bookings</a></li>
+            <li><a href="#profile"><i class="fas fa-user"></i> Profile</a></li>
+            <li><a href="#saved-travelers"><i class="fas fa-users"></i> Saved Travelers</a></li>
+            <li><a href="#payment-methods"><i class="fas fa-credit-card"></i> Payment Methods</a></li>
+            <li><a href="#notifications"><i class="fas fa-bell"></i> Notifications</a></li>
+            <li><a href="#preferences"><i class="fas fa-cog"></i> Preferences</a></li>
+            <li class="logout"><a href="#logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+          </ul>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+          <!-- Welcome Section -->
+          <div class="welcome-section">
+            <div class="welcome-text">
+              <h2>Welcome, John!</h2>
+              <p>Here's a summary of your activity and upcoming trips.</p>
+            </div>
+            <div class="quick-actions">
+              <a href="bus-search.html" class="action-btn"><i class="fas fa-search"></i> Search Buses</a>
+              <a href="#bookings" class="action-btn"><i class="fas fa-history"></i> View History</a>
+            </div>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="stats-cards">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-bus"></i>
+              </div>
+              <div class="stat-info">
+                <h3>12</h3>
+                <p>Total Trips</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-calendar"></i>
+              </div>
+              <div class="stat-info">
+                <h3>2</h3>
+                <p>Upcoming Trips</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-ticket-alt"></i>
+              </div>
+              <div class="stat-info">
+                <h3>10</h3>
+                <p>Completed Trips</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-star"></i>
+              </div>
+              <div class="stat-info">
+                <h3>4.8/5</h3>
+                <p>Average Rating</p>
+              </div>
+            </div>
+          </div>
+
+            <!-- Profile Preview -->
+          <div class="profile-preview">
+            <div class="section-header">
+              <h3>Profile Information</h3>
+              <a href="#profile" class="edit-link">Edit</a>
+            </div>
+            <div class="profile-info-grid">
+              <div class="info-group">
+                <span class="info-label">Full Name</span>
+                <span class="info-value">John Doe</span>
+              </div>
+              <div class="info-group">
+                <span class="info-label">Email</span>
+                <span class="info-value">john.doe@example.com</span>
+              </div>
+              <div class="info-group">
+                <span class="info-label">Phone</span>
+                <span class="info-value">+880 1700 123456</span>
+              </div>
+              <div class="info-group">
+                <span class="info-label">Date of Birth</span>
+                <span class="info-value">15 January 1990</span>
+              </div>
+              <div class="info-group">
+                <span class="info-label">Address</span>
+                <span class="info-value">123 Main Street, Dhaka 1000, Bangladesh</span>
+              </div>
+              <div class="info-group">
+                <span class="info-label">Member Since</span>
+                <span class="info-value">March 2022</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock content %}
+{% include "kits/footer.html" %}
+
+</body>
+</html>
