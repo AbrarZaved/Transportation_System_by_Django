@@ -8,6 +8,7 @@ import {
 
 document.addEventListener("DOMContentLoaded", function () {
   console.log("loaded");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 
   const results = document.getElementById("results");
   results.style.display = "none";
