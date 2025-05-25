@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const startTime = performance.now();
 
-      const response = await csrfFetch("http://127.0.0.1:8000/search_route", {
+      const response = await csrfFetch(`${location.origin}/search_route`, {
         method: "POST",
         body: JSON.stringify({ tripType, place }),
       });

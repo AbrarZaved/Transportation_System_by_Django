@@ -64,11 +64,14 @@ def get_schedules(trip_type, place):
 
 async def search_route(request):
     if request.method == "POST":
+        start_time=time.time()
         body = json.loads(request.body)
         trip_type = body.get("tripType")
         place = body.get("place")
 
         data = await get_schedules(trip_type, place)
+        end_time=time.time()
+        print((end_time-start_time) *1000)
         return JsonResponse({"routes": data})
 
 

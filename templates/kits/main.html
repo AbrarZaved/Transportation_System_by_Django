@@ -35,7 +35,6 @@
       <div class="container mx-auto px-4 flex items-center justify-between h-16">
         <!-- Logo -->
         <a href="{% url 'index' %}" class="flex items-center space-x-2">
-          <img src="{% static 'images/logo.png' %}" alt="BAHON" class="h-8 w-auto" />
           <span class="text-xl font-bold text-pink-500">BAHON</span>
         </a>
     
@@ -97,21 +96,7 @@
       </div>
     
       <style>
-        .hamburger .bar {
-          transition: all 0.3s ease;
-        }
-    
-        .hamburger.active .bar:nth-child(1) {
-          transform: rotate(45deg) translate(5px, 5px);
-        }
-    
-        .hamburger.active .bar:nth-child(2) {
-          opacity: 0;
-        }
-    
-        .hamburger.active .bar:nth-child(3) {
-          transform: rotate(-45deg) translate(5px, -5px);
-        }
+
       </style>
     
       <script>

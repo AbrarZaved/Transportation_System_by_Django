@@ -1,4 +1,4 @@
-import { getCookie } from "./utils.js";
+import { getCookie } from "/static/js/utils.js";
 
 export async function csrfFetch(url, options = {}) {
   const csrftoken = getCookie("csrftoken");
