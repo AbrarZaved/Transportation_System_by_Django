@@ -5,8 +5,8 @@ register = template.Library()
 
 @register.filter
 def first_name(name):
-    names = name.split()
-    if names[0] == "Md." or names[0] == "MD.":
-        return names[1]
-    else:
-        return names[0]
+    tags=['mst.', 'most.', 'md.', 'md']
+    names = name.lower().split(" ")
+    if names[0] in tags:
+        return names[1].title()
+    return names[0].title()
