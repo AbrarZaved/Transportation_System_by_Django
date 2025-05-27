@@ -107,3 +107,9 @@ class RouteDetails(APIView):
         return Response(
             {"Routes": RouteSerializer(Route.objects.all(), many=True).data}
         )
+
+def about_us(request):
+    return render(request, "transit_hub/about.html")
+
+def contact_us(request):
+    return render(request, "transit_hub/contact.html")

@@ -9,9 +9,9 @@ from authentication.models import Student
 def my_account(request):
     student_id = request.session.get("student_id")
     if not student_id:
-        return redirect("student_login")
+        return redirect("index")
 
-    student = get_object_or_404(Student, id=student_id)
+    student = get_object_or_404(Student, student_id=student_id)
     return render(request, "authentication/my_account.html", {"student": student})
 
 
