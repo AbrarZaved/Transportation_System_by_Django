@@ -50,12 +50,12 @@
             <li>
               <a href="contact.html" class="hover:text-pink-500 transition">Contact Us</a>
             </li>
-            {% if request.user.is_authenticated %}
+            {% if request.session.is_student_authenticated %}
               <li>
                 <a href="{% url 'my_account' %}"
                   class="{% if request.resolver_match.url_name == 'my_account' %}
                     
-                    
+          
                     text-pink-500 active
 
 
@@ -97,7 +97,7 @@
           <li>
             <a href="contact.html" class="block hover:text-pink-500 transition">Contact Us</a>
           </li>
-          {% if request.user.is_authenticated %}
+          {% if request.session.is_student_authenticated %}
             <li>
               <a href="{% url 'my_account' %}" class="block hover:text-pink-500 transition">My Account</a>
             </li>
@@ -133,7 +133,7 @@
     <div id="customModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
       <div id="modalContent" class="bg-white w-full max-w-md p-6 rounded-xl shadow-lg transform scale-90 opacity-0 transition-all duration-300">
         <h3 class="text-lg font-bold text-pink-600 text-center">Student Login</h3>
-        <form method="POST" action="#" class="mt-4 space-y-4">
+        <form method="POST" action="{% url "sign_in" %}" class="mt-4 space-y-4">
           {% csrf_token %}
           <div>
             <input type="text" placeholder="Enter your Student ID" name="student_id" id="student_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" required />

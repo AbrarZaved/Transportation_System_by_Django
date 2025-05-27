@@ -58,3 +58,13 @@ class Supervisor(AbstractBaseUser):
         return True
 
     objects = SuperVisorManager()
+
+
+class Student(models.Model):
+    name = models.CharField(max_length=50)
+    student_id = models.CharField(max_length=20, unique=True)
+    dept_name = models.CharField(max_length=50)
+    semester_enrolled = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name

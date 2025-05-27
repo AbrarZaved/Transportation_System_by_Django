@@ -31,8 +31,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*",".devtunnels.ms"]
 CSRF_TRUSTED_ORIGINS = [
-    "https://*.devtunnels.ms",
+    "https://*.loca.lt",
+    "https://*.ngrok.io",
+    "https://*.trycloudflare.com",
 ]
+
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = "None"  # Enables cookie across sites for HTTPS
 SESSION_COOKIE_SAMESITE = "None"
