@@ -3,6 +3,7 @@ from asgiref.sync import sync_to_async
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from authentication.models import Preference, Student
 from transit_hub.models import Route
 from django.http import JsonResponse
@@ -10,12 +11,15 @@ import json
 from transit_hub.serializer import RouteSerializer, RouteStoppageSerializer
 from transport_manager.models import Transportation_schedules
 from .models import RouteStoppage as RouteStoppageModel
+from django.db.models import F
 import sys, os
 from django.shortcuts import render
 import requests
 
 
 def index(request):
+    user = request.session.get("student_id")
+    print("User ID:", user)
     return render(request, "transit_hub/index.html")
 
 
@@ -70,8 +74,22 @@ def get_schedules(trip_type, place):
 @sync_to_async(thread_sensitive=False)
 def save_preference_by_session(student_id, place):
     student = Student.objects.filter(student_id=student_id).first()
-    if student:
-        Preference.objects.create(student=student, searched_locations=place)
+
+    if (
+        student
+        and not Preference.objects.filter(
+            student=student, searched_locations=place
+        ).exists()
+    ):
+        Preference.objects.create(
+            student=student,
+            searched_locations=place,
+            total_searches=F("total_searches") + 1,
+        )
+    else:
+        Preference.objects.filter(student=student, searched_locations=place).update(
+            total_searches=F("total_searches") + 1
+        )
 
 
 async def search_route(request):

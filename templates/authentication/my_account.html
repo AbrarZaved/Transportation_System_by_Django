@@ -46,7 +46,7 @@
             </div>
             <div class="quick-actions">
               <a href="{% url 'index' %}" class="action-btn"><i class="fas fa-search"></i> Search Buses</a>
-              <a href="#bookings" class="action-btn"><i class="fas fa-history"></i> View History</a>
+              <a href="#" class="action-btn" id="historyButton"><i class="fas fa-history"></i> View History</a>
             </div>
           </div>
 
@@ -57,7 +57,7 @@
                 <i class="fas fa-bus"></i>
               </div>
               <div class="stat-info">
-                <h3>12</h3>
+                <h3>{{total_searches}}</h3>
                 <p>Total Searches</p>
               </div>
             </div>
@@ -125,9 +125,113 @@
         </div>
       </div>
     </div>
+    <div id="historyModal" class="modal-overlay">
+      <div class="modal-content">
+        <span class="close-button" onclick="closeHistoryModal(event)">&times;</span>
+        <h2>Search History</h2>
+        <ul id="historyList" class="history-list">
+          <!-- JS will populate this -->
+        </ul>
+      </div>
+    </div>
   </section>
+  <style>
+    .modal-overlay {
+      display: none; /* Will be toggled to flex */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(2px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      transition: opacity 0.3s ease;
+    }
+    
+    .modal-content {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px 28px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+      animation: fadeInScale 0.3s ease;
+      position: relative;
+    }
+    
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    .close-button {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      font-size: 24px;
+      color: #555;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+    
+    .close-button:hover {
+      color: #f44336;
+    }
+    
+    h2 {
+      margin-top: 0;
+      font-size: 22px;
+      color: #333;
+    }
+    
+    .history-list {
+      margin-top: 16px;
+      list-style: none;
+      padding: 0;
+    }
+    
+    .history-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      transition: background 0.2s ease;
+    }
+    
+    .history-list li:hover {
+      background: #ebebeb;
+    }
+    
+    .history-list button {
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s ease;
+    }
+    
+    .history-list button:hover {
+      background: #d32f2f;
+    }
+  </style>
+  <script src="{% static 'js/account.js' %}"></script>
   <script>
-    localStorage.setItem("student_id", "{{ student.student_id }}");
+    localStorage.setItem('student_id', '{{ student.student_id }}')
   </script>
 {% endblock %}
 {% include 'kits/footer.html' %}

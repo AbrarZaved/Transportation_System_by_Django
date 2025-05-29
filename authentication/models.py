@@ -76,3 +76,5 @@ class Student(models.Model):
 class Preference(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     searched_locations = models.CharField(max_length=100, blank=True, null=True)
+    total_searches = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)

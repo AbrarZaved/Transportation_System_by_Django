@@ -26,7 +26,7 @@ class StudentAdmin(admin.ModelAdmin):
 
 @admin.register(Preference)
 class PreferenceAdmin(admin.ModelAdmin):
-    list_display = ["student", "searched_locations"]
+    list_display = ["student", "searched_locations", "total_searches"]
     search_fields = ["student__student_id", "student__name"]
 
     def get_queryset(self, request):
