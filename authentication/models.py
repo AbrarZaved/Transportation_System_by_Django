@@ -1,6 +1,9 @@
 from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.staticfiles.finders import searched_locations
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
+
+from transport_manager.models import Transportation_schedules
 
 
 class SuperVisorManager(BaseUserManager):
@@ -68,3 +71,8 @@ class Student(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Preference(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    searched_locations = models.CharField(max_length=100, blank=True, null=True)

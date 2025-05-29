@@ -7,6 +7,9 @@ import {
 } from "./utils.js";
 
 document.addEventListener("DOMContentLoaded", function () {
+  // Optionally, store it in localStorage if needed:
+  const studentId = localStorage.getItem("student_id");
+
   console.log("loaded");
   window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -23,13 +26,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log("Selected Trip Type:", tripType);
     console.log("Entered Place:", place);
+    console.log(studentId)
 
     try {
       const startTime = performance.now();
 
       const response = await csrfFetch(`${location.origin}/search_route`, {
         method: "POST",
-        body: JSON.stringify({ tripType, place }),
+        body: JSON.stringify({ tripType, place, studentId }),
       });
 
       const endTime = performance.now();

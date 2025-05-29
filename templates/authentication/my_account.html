@@ -1,9 +1,9 @@
-{% extends "kits/main.html" %}
+{% extends 'kits/main.html' %}
 {% load static %}
 {% load custom_filters %}
 {% block title %}
-<title>My Account - BAHON</title>
-{% endblock title %}
+  <title>My Account - BAHON</title>
+{% endblock %}
 {% block content %}
   <!-- Account Dashboard -->
   <section class="account-dashboard">
@@ -13,31 +13,39 @@
         <div class="dashboard-sidebar">
           <div class="user-info">
             <div class="user-avatar">
-              <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg" alt="User Avatar">
+              <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg" alt="User Avatar" />
             </div>
             <div class="user-details">
-              <h3>{{student.name}}</h3>
-              <p>{{student.student_id}}</p>
+              <h3>{{ student.name }}</h3>
+              <p id="student_id">{{ student.student_id }}</p>
             </div>
           </div>
           <ul class="dashboard-menu">
-            <li><a href="#profile"><i class="fas fa-user"></i> Profile</a></li>
-            <li><a href="#notifications"><i class="fas fa-bell"></i> Notifications</a></li>
-            <li><a href="#preferences"><i class="fas fa-cog"></i> Preferences</a></li>
-            <li class="logout"><a href="{% url "sign_out" %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            <li>
+              <a href="#profile"><i class="fas fa-user"></i> Profile</a>
+            </li>
+            <li>
+              <a href="#notifications"><i class="fas fa-bell"></i> Notifications</a>
+            </li>
+            <li>
+              <a href="#preferences"><i class="fas fa-cog"></i> Preferences</a>
+            </li>
+            <li class="logout">
+              <a href="{% url 'sign_out' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </li>
           </ul>
-        </div> 
+        </div>
 
         <!-- Dashboard Content -->
         <div class="dashboard-content">
           <!-- Welcome Section -->
           <div class="welcome-section">
             <div class="welcome-text">
-              <h2>Welcome, {{student.name|first_name}}</h2>
+              <h2>Welcome, {{ student.name|first_name }}</h2>
               <p>Here's a summary of your activity and upcoming trips.</p>
             </div>
             <div class="quick-actions">
-              <a href="{% url "index" %}" class="action-btn"><i class="fas fa-search"></i> Search Buses</a>
+              <a href="{% url 'index' %}" class="action-btn"><i class="fas fa-search"></i> Search Buses</a>
               <a href="#bookings" class="action-btn"><i class="fas fa-history"></i> View History</a>
             </div>
           </div>
@@ -82,7 +90,7 @@
             </div>
           </div>
 
-            <!-- Profile Preview -->
+          <!-- Profile Preview -->
           <div class="profile-preview">
             <div class="section-header">
               <h3>Profile Information</h3>
@@ -90,19 +98,19 @@
             <div class="profile-info-grid">
               <div class="info-group">
                 <span class="info-label">Full Name</span>
-                <span class="info-value">{{student.name}}</span>
+                <span class="info-value">{{ student.name }}</span>
               </div>
               <div class="info-group">
                 <span class="info-label">Student ID</span>
-                <span class="info-value">{{student.student_id}}</span>
+                <span class="info-value">{{ student.student_id }}</span>
               </div>
               <div class="info-group">
                 <span class="info-label">Department</span>
-                <span class="info-value">{{student.dept_name}}</span>
+                <span class="info-value">{{ student.dept_name }}</span>
               </div>
               <div class="info-group">
                 <span class="info-label">Semester Enrolled</span>
-                <span class="info-value">{{student.semester_enrolled}}</span>
+                <span class="info-value">{{ student.semester_enrolled }}</span>
               </div>
               {% comment %} <div class="info-group">
                 <span class="info-label">Address</span>
@@ -118,9 +126,8 @@
       </div>
     </div>
   </section>
-
-{% endblock content %}
-{% include "kits/footer.html" %}
-
-</body>
-</html>
+  <script>
+    localStorage.setItem("student_id", "{{ student.student_id }}");
+  </script>
+{% endblock %}
+{% include 'kits/footer.html' %}

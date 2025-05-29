@@ -3,12 +3,16 @@ from asgiref.sync import sync_to_async
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from authentication.models import Preference, Student
 from transit_hub.models import Route
 from django.http import JsonResponse
 import json
 from transit_hub.serializer import RouteSerializer, RouteStoppageSerializer
 from transport_manager.models import Transportation_schedules
 from .models import RouteStoppage as RouteStoppageModel
+import sys, os
+from django.shortcuts import render
+import requests
 
 
 def index(request):
@@ -17,6 +21,7 @@ def index(request):
 
 @sync_to_async
 def get_schedules(trip_type, place):
+
     schedules = Transportation_schedules.objects.select_related(
         "bus", "driver", "route"
     ).filter(from_dsc=(trip_type == "From DSC"), route__route_name__icontains=place)
@@ -62,17 +67,32 @@ def get_schedules(trip_type, place):
     return data
 
 
+@sync_to_async(thread_sensitive=False)
+def save_preference_by_session(student_id, place):
+    student = Student.objects.filter(student_id=student_id).first()
+    if student:
+        Preference.objects.create(student=student, searched_locations=place)
+
+
 async def search_route(request):
     if request.method == "POST":
-        start_time=time.time()
+        start_time = time.time()
         body = json.loads(request.body)
         trip_type = body.get("tripType")
         place = body.get("place")
-
+        student_id = body.get("studentId")
         data = await get_schedules(trip_type, place)
-        end_time=time.time()
-        print((end_time-start_time) *1000)
+
+        try:
+            if data and student_id:
+                await save_preference_by_session(student_id, place)
+        except Exception as e:
+            print(e)
+        end_time = time.time()
+        print((end_time - start_time) * 1000)
         return JsonResponse({"routes": data})
+
+    return JsonResponse({"message": "Invalid request method"}, status=405)
 
 
 class RouteStoppage(APIView):
@@ -108,8 +128,10 @@ class RouteDetails(APIView):
             {"Routes": RouteSerializer(Route.objects.all(), many=True).data}
         )
 
+
 def about_us(request):
     return render(request, "transit_hub/about.html")
+
 
 def contact_us(request):
     return render(request, "transit_hub/contact.html")
