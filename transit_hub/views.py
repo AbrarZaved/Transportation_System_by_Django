@@ -23,7 +23,7 @@ def index(request):
     if user:
         preferences = Preference.objects.filter(student__student_id=user).order_by(
             "-total_searches"
-        )
+        )[:3]
         return render(request, "transit_hub/index.html", {"preferences": preferences})
     return render(request, "transit_hub/index.html")
 
