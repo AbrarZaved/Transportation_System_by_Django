@@ -20,7 +20,10 @@ import requests
 def index(request):
     user = request.session.get("student_id")
     print("User ID:", user)
-    return render(request, "transit_hub/index.html")
+    preferences = Preference.objects.filter(student__student_id=user).order_by(
+        "-total_searches"
+    )
+    return render(request, "transit_hub/index.html", {"preferences": preferences})
 
 
 @sync_to_async

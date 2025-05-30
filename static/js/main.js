@@ -1,8 +1,6 @@
 import { csrfFetch } from "./api.js";
 import {
   buildBusCards,
-  setupModalHandlers,
-  formatTime,
   renderNoRoutesFound,
 } from "./utils.js";
 
@@ -56,8 +54,6 @@ document.addEventListener("DOMContentLoaded", function () {
       results.innerHTML = htmlContent;
       results.style.display = "block"; // <-- Move this before scroll
       results.scrollIntoView({ behavior: "smooth" });
-      setupModalHandlers(routeData);
-      results.style.display = "block";
     } catch (error) {
       console.error("Error:", error);
       results.innerHTML = `

@@ -64,7 +64,7 @@ def sign_in(request):
         print("Session keys:", request.session.keys())
         request.session.set_expiry(3600)  # 1 hour
 
-        return render(request, "authentication/my_account.html", {"student": student})
+        return redirect("my_account")
 
     return JsonResponse({"message": "Invalid request method"}, status=405)
 

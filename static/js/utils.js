@@ -101,29 +101,6 @@ export function buildBusCards(routeData) {
   return html;
 }
 
-export function setupModalHandlers(routeData) {
-  window.showBusModal = function (index) {
-    const item = routeData[index];
-    document.getElementById("modalBusName").innerText = item.bus.name;
-    document.getElementById("modalBusImage").src = item.bus.bus_image;
-    document.getElementById("modalDriverName").innerText = item.driver.name;
-    document.getElementById("modalDriverPhone").innerText =
-      item.driver.phone_number || "Not Available";
-    document.getElementById("busModal").style.display = "block";
-  };
-
-  document.querySelector(".close-btn").onclick = () => {
-    document.getElementById("busModal").style.display = "none";
-  };
-
-  window.onclick = (event) => {
-    const modal = document.getElementById("busModal");
-    if (event.target === modal) {
-      modal.style.display = "none";
-    }
-  };
-}
-
 export function renderNoRoutesFound() {
   const modalId = "noRoutesModal";
   let modal = document.getElementById(modalId);
