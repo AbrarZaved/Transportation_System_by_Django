@@ -1440,6 +1440,7 @@ footer {
   font-weight: 500;
   color: var(--dark-gray);
 }
+/* View History Modal Styles */
 .modal-overlay {
   display: none; /* Will be toggled to flex */
   position: fixed;
