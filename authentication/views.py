@@ -2,11 +2,9 @@ import json
 from django.db import models
 from django.views.decorators.csrf import csrf_exempt
 import requests
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import sys, os
-
-from rest_framework import status
 from authentication.models import Preference, Student
 
 
