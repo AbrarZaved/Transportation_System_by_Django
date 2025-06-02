@@ -19,7 +19,6 @@ import requests
 
 def index(request):
     user = request.session.get("student_id")
-    print("User ID:", user)
     if user:
         preferences = Preference.objects.filter(student__student_id=user).order_by(
             "-total_searches"
@@ -89,7 +88,7 @@ def save_preference_by_session(student_id, place):
         Preference.objects.create(
             student=student,
             searched_locations=place,
-            total_searches=F("total_searches") + 1,
+            total_searches=1,
         )
     else:
         Preference.objects.filter(student=student, searched_locations=place).update(

@@ -3,6 +3,9 @@ import { buildBusCards, renderNoRoutesFound } from "./utils.js";
 
 async function fetchRoutes(place, tripType, studentId) {
   try {
+    const loading_spinner = document.getElementById("loading-screen");
+    loading_spinner.style.display = "block";
+
     const startTime = performance.now();
 
     const response = await csrfFetch(`${location.origin}/search_route`, {
@@ -21,6 +24,7 @@ async function fetchRoutes(place, tripType, studentId) {
     const routeData = response.routes;
 
     if (!routeData || routeData.length === 0) {
+      loading_spinner.style.display = "none";
       results.style.display = "block";
       results.innerHTML = renderNoRoutesFound();
       return;
@@ -28,6 +32,7 @@ async function fetchRoutes(place, tripType, studentId) {
 
     const htmlContent = buildBusCards(routeData);
     results.innerHTML = htmlContent;
+    loading_spinner.style.display = "none";
     results.style.display = "block";
     results.scrollIntoView({ behavior: "smooth" });
   } catch (error) {

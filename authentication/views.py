@@ -5,6 +5,8 @@ import requests
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import sys, os
+
+from rest_framework import status
 from authentication.models import Preference, Student
 
 
@@ -15,9 +17,11 @@ def my_account(request):
         return redirect("index")
 
     student = get_object_or_404(Student, student_id=student_id)
-    total_searches = Preference.objects.filter(student=student).aggregate(
-        total_searches=models.Sum("total_searches")
-    ).get("total_searches", 0)
+    total_searches = (
+        Preference.objects.filter(student=student)
+        .aggregate(total_searches=models.Sum("total_searches"))
+        .get("total_searches", 0)
+    )
     return render(
         request,
         "authentication/my_account.html",
@@ -27,13 +31,8 @@ def my_account(request):
 
 def sign_in(request):
     if request.method == "POST":
-        student_id = request.POST.get("student_id", "").strip()
-
-        if not student_id:
-            return JsonResponse({"message": "Student ID is required"}, status=400)
-
+        student_id = json.loads(request.body).get("student_id", "").strip()
         student = Student.objects.filter(student_id=student_id).first()
-
         if not student:
             try:
                 response = requests.get(
@@ -61,10 +60,9 @@ def sign_in(request):
         request.session["student_id"] = student.student_id
         request.session["is_student_authenticated"] = True
         request.session.modified = True
-        print("Session keys:", request.session.keys())
         request.session.set_expiry(3600)  # 1 hour
 
-        return redirect("my_account")
+        return JsonResponse({"success": True}, status=200)
 
     return JsonResponse({"message": "Invalid request method"}, status=405)
 
