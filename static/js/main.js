@@ -51,6 +51,35 @@ async function fetchRoutes(place, tripType, studentId) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+  const cards = document.querySelectorAll(".route-card");
+
+  cards.forEach((card) => {
+    const details = card.querySelector(".bus-details");
+    if (details) {
+      card.addEventListener("click", () => {
+        const isExpanded = details.classList.contains("expanded");
+
+        if (isExpanded) {
+          // COLLAPSING
+          details.style.height = details.scrollHeight + "px"; // from auto to fixed px
+          details.offsetHeight; // force reflow
+          details.style.height = "0px";
+          details.classList.remove("expanded");
+        } else {
+          // EXPANDING
+          details.style.height = details.scrollHeight + "px";
+          details.classList.add("expanded");
+        }
+      });
+
+      // Cleanup on transition end
+      details.addEventListener("transitionend", () => {
+        if (details.classList.contains("expanded")) {
+          details.style.height = "auto"; // allow natural resizing
+        }
+      });
+    }
+  });
   const studentId = localStorage.getItem("student_id");
 
   console.log("loaded");

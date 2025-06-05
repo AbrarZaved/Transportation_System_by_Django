@@ -9,7 +9,7 @@
   <section class="bg-white py-16">
     <div id="loading-screen" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50 hidden">
       <div class="flex flex-col items-center justify-center min-h-screen">
-        <img src="{% static 'img/bus_3.gif' %}" alt="Loading..." class="w-32 h-32 mb-4 mx-auto">
+        <img src="{% static 'img/bus_3.gif' %}" alt="Loading..." class="w-32 h-32 mb-4 mx-auto" />
       </div>
     </div>
     <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
@@ -19,13 +19,13 @@
         <p class="text-gray-600 mb-6">Search your destination or browse popular routes</p>
         <div class="mb-6">
           {% if request.session.is_student_authenticated %}
-          <h4 class="text-sm font-semibold text-gray-600 mb-2">Recently Searched</h4>
-          <div class="flex flex-wrap md:flex-nowrap md:space-x-2 overflow-x-auto space-x-2 scrollbar-hide">
-            <!-- Sample tags - replace with dynamic values if needed -->
-             {% for preference in preferences %}
-            <span name="recent_searches" class="bg-white border border-pink-200 text-pink-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-pink-50 transition">{{preference.searched_locations}}</span>
-            {% endfor %}
-          </div>
+            <h4 class="text-sm font-semibold text-gray-600 mb-2">Recently Searched</h4>
+            <div class="flex flex-wrap md:flex-nowrap md:space-x-2 overflow-x-auto space-x-2 scrollbar-hide">
+              <!-- Sample tags - replace with dynamic values if needed -->
+              {% for preference in preferences %}
+                <span name="recent_searches" class="bg-white border border-pink-200 text-pink-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-pink-50 transition">{{ preference.searched_locations }}</span>
+              {% endfor %}
+            </div>
           {% endif %}
         </div>
         <form id="searchForm" class="space-y-4">
@@ -71,47 +71,44 @@
           <button type="submit" id="search" class="w-full bg-pink-500 hover:bg-pink-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pink-600 text-white font-semibold py-3 rounded-md transition">Search</button>
         </form>
       </div>
-
       <!-- 🚍 Popular Routes -->
       <div>
         <h3 class="text-2xl font-bold text-gray-800 mb-6">Popular Routes</h3>
-        <div class="space-y-4">
-          <!-- Route Card -->
-          <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 hover:shadow-md transition cursor-pointer hover:scale-[1.02]">
-            <div class="flex justify-between items-center">
-              <div>
-                <h4 class="text-lg font-semibold text-gray-700">DSC → Mirpur 10</h4>
-                <p class="text-sm text-gray-500">Next Departure: 08:30 AM · 1h 20m</p>
+        <div class="space-y-4" id="route-list">
+          {% for place, buses in popular_routes.items %}
+            <div class="route-card bg-white border border-gray-200 rounded-xl shadow-sm p-5 hover:shadow-md transition cursor-pointer hover:scale-[1.02]">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h4 class="text-lg font-semibold text-gray-700">DSC -> {{ place|title }}</h4>
+                  {% if buses %}
+                    <p class="text-sm text-gray-500">
+                      Next Departure: {{ buses.0.1 }} · <!-- Optionally add time diff -->
+                    </p>
+                  {% else %}
+                    <p class="text-sm text-gray-500">No scheduled buses</p>
+                  {% endif %}
+                </div>
+                <div>
+                  {% if buses %}
+                    <span class="inline-flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">Available</span>
+                  {% else %}
+                    <span class="inline-flex items-center bg-red-100 text-red-800 text-sm font-medium px-3 py-1 rounded-full" id="unavailable">Unavailable</span>
+                  {% endif %}
+                </div>
               </div>
-              <div>
-                <span class="inline-flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">Available</span>
-              </div>
+              {% if buses %}
+                <div class="bus-details mt-4 border-t border-gray-100 pt-3 overflow-hidden transition-all duration-500 ease-in-out" style="height: 0;">
+                  <ul class="mt-2 space-y-2 text-sm text-gray-600">
+                    {% for bus_name, departure in buses %}
+                      <li>
+                        <span class="font-medium text-gray-700">{{ bus_name }}</span> — {{ departure }}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
             </div>
-          </div>
-
-          <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 hover:shadow-md transition cursor-pointer hover:scale-[1.02]">
-            <div class="flex justify-between items-center">
-              <div>
-                <h4 class="text-lg font-semibold text-gray-700">DSC → Uttara</h4>
-                <p class="text-sm text-gray-500">Next Departure: 09:00 AM · 45m</p>
-              </div>
-              <div>
-                <span class="inline-flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">Available</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 hover:shadow-md transition cursor-pointer hover:scale-[1.02]">
-            <div class="flex justify-between items-center">
-              <div>
-                <h4 class="text-lg font-semibold text-gray-700">DSC → Motijheel</h4>
-                <p class="text-sm text-gray-500">Next Departure: 07:45 AM · 1h 10m</p>
-              </div>
-              <div>
-                <span class="inline-flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">Available</span>
-              </div>
-            </div>
-          </div>
+          {% endfor %}
         </div>
       </div>
     </div>

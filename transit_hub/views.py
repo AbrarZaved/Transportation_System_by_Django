@@ -1,9 +1,9 @@
 import time
 from asgiref.sync import sync_to_async
+from django.core.cache import cache
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from authentication.models import Preference, Student
 from transit_hub.models import Route
 from django.http import JsonResponse
@@ -11,20 +11,60 @@ import json
 from transit_hub.serializer import RouteSerializer, RouteStoppageSerializer
 from transport_manager.models import Transportation_schedules
 from .models import RouteStoppage as RouteStoppageModel
-from django.db.models import F
+from django.db.models import F, Q
 import sys, os
 from django.shortcuts import render
 import requests
+from django.utils import timezone
+from django.utils.timezone import localtime
+from datetime import datetime
+
+
+def format_time(dt):
+    local_dt = localtime(dt)
+    return local_dt.strftime("%I:%M %p")  # e.g., 08:30 AM
 
 
 def index(request):
     user = request.session.get("student_id")
+    preferences = []
+
+    data = cache.get("popular_routes")
+    if data is None:
+        places = ["dhanmondi", "mirpur", "uttara"]
+        data = {}
+        for place in places:
+            schedules = (
+                Transportation_schedules.objects.filter(
+                    from_dsc=True, route__route_name__icontains=place
+                )
+                .values_list("bus__bus_name", "departure_time")
+                .distinct()
+            )
+            formatted = [
+                (bus, format_time(departure))
+                for bus, departure in schedules
+                if departure > timezone.now()
+            ]
+            data[place] = formatted
+
+        cache.set("popular_routes", data, timeout=60)
+
     if user:
-        preferences = Preference.objects.filter(student__student_id=user).order_by(
-            "-total_searches"
-        )[:3]
-        return render(request, "transit_hub/index.html", {"preferences": preferences})
-    return render(request, "transit_hub/index.html")
+        preferences = list(
+            Preference.objects.filter(student__student_id=user).order_by(
+                "-total_searches"
+            )[:3]
+        )
+
+    return render(
+        request,
+        "transit_hub/index.html",
+        {
+            "preferences": preferences,
+            "popular_routes": data,
+        },
+    )
 
 
 @sync_to_async
@@ -33,7 +73,6 @@ def get_schedules(trip_type, place):
     schedules = Transportation_schedules.objects.select_related(
         "bus", "driver", "route"
     ).filter(from_dsc=(trip_type == "From DSC"), route__route_name__icontains=place)
-
     route_ids = schedules.values_list("route__id", flat=True).distinct()
     route_details = RouteStoppageModel.objects.filter(route_id__in=route_ids)
 

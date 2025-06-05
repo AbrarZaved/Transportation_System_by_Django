@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Open modal from both buttons
   ["sign_in_desktop", "sign_in_mobile"].forEach((id) => {
     const btn = document.getElementById(id);
+    if (btn.textContent == "Sign In") {
+      localStorage.removeItem("student_id");
+    }
     btn?.addEventListener("click", openModal);
   });
 
