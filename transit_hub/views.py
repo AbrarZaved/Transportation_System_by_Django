@@ -1,5 +1,6 @@
 import time
 from asgiref.sync import sync_to_async
+from django.conf.locale import de
 from django.core.cache import cache
 from django.shortcuts import render
 from rest_framework.response import Response
@@ -36,20 +37,18 @@ def index(request):
         for place in places:
             schedules = (
                 Transportation_schedules.objects.filter(
-                    from_dsc=True, route__route_name__icontains=place
+                    from_dsc=True,
+                    route__route_name__icontains=place,
+                    departure_time__gte=timezone.now(),
                 )
                 .values_list("bus__bus_name", "departure_time")
                 .distinct()
             )
-            formatted = [
-                (bus, format_time(departure))
-                for bus, departure in schedules
-                if departure > timezone.now()
-            ]
+            formatted = [(bus, format_time(departure)) for bus, departure in schedules]
             data[place] = formatted
 
         cache.set("popular_routes", data, timeout=60)
-
+    print(data)
     if user:
         preferences = list(
             Preference.objects.filter(student__student_id=user).order_by(
