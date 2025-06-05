@@ -1,6 +1,5 @@
 import time
 from asgiref.sync import sync_to_async
-from django.conf.locale import de
 from django.core.cache import cache
 from django.shortcuts import render
 from rest_framework.response import Response
@@ -18,7 +17,6 @@ from django.shortcuts import render
 import requests
 from django.utils import timezone
 from django.utils.timezone import localtime
-from datetime import datetime
 
 
 def format_time(dt):
