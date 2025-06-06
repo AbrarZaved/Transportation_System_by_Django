@@ -1,5 +1,6 @@
 import time
 from asgiref.sync import sync_to_async
+from django.conf.locale import da
 from django.core.cache import cache
 from django.shortcuts import render
 from rest_framework.response import Response
@@ -20,13 +21,14 @@ from django.utils.timezone import localtime
 
 
 def format_time(dt):
-    local_dt = localtime(dt)
-    return local_dt.strftime("%I:%M %p")  # e.g., 08:30 AM
+    return dt.strftime("%I:%M %p")  # e.g., 08:30 AM
 
 
 def index(request):
     user = request.session.get("student_id")
     preferences = []
+    current_time = localtime().time()
+    current_day = localtime().strftime("%A").lower()
 
     data = cache.get("popular_routes")
     if data is None:
@@ -37,7 +39,8 @@ def index(request):
                 Transportation_schedules.objects.filter(
                     from_dsc=True,
                     route__route_name__icontains=place,
-                    departure_time__gte=timezone.now(),
+                    departure_time__gte=current_time,
+                    days__contains=current_day,
                 )
                 .values_list("bus__bus_name", "departure_time")
                 .distinct()
@@ -87,7 +90,7 @@ def get_schedules(trip_type, place):
                 "route": RouteSerializer(route_obj).data,
                 "route_name": route_obj.route_name,
                 "audience": schedule.get_audience_display(),
-                "departure_time": schedule.departure_time,
+                "departure_time": schedule.departure_time.strftime("%I:%M %p"),
                 "stoppage_names": [
                     stoppage.stoppage.stoppage_name
                     for stoppage in stoppages_by_route.get(route_id, [])

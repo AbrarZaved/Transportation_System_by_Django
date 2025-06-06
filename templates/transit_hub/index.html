@@ -101,7 +101,10 @@
                   <ul class="mt-2 space-y-2 text-sm text-gray-600">
                     {% for bus_name, departure in buses %}
                       <li>
-                        <span class="font-medium text-gray-700">{{ bus_name }}</span> — {{ departure }}
+                        <div class="flex justify-between text-sm text-gray-600">
+                          <span>🚌 {{ bus_name }}</span>
+                          <span>{{ departure }}</span>
+                        </div>
                       </li>
                     {% endfor %}
                   </ul>

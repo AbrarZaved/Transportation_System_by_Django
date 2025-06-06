@@ -15,12 +15,6 @@ export function getCookie(name) {
 }
 // utils.js
 
-export function formatTime(timeString) {
-  const date = new Date(timeString);
-  const options = { hour: "numeric", minute: "numeric", hour12: true };
-  return date.toLocaleString("en-US", options);
-}
-
 export function buildBusCards(routeData) {
   let html = `
   <div class="px-4 py-6 font-sans max-w-7xl mx-auto">
@@ -33,13 +27,11 @@ export function buildBusCards(routeData) {
   `;
 
   routeData.forEach((value, index) => {
-    const formattedDeparture = formatTime(value.departure_time);
-
     // Determine bus image URL with fallback
     const busImage = value.bus.bus_image
       ? value.bus.bus_image.startsWith("http")
         ? value.bus.bus_image
-        : `http://127.0.0.1:8000${value.bus.bus_image}`
+        : `${location.origin}/${value.bus.bus_image}`
       : "/static/img/default-bus.png"; // Change path to your default image
 
     html += `
@@ -67,7 +59,7 @@ export function buildBusCards(routeData) {
         <!-- Right: Departure Time -->
         <div class="mt-3 md:mt-0 md:w-1/4 text-center">
           <span class="inline-block bg-green-600 text-white text-sm md:text-base font-semibold py-2 px-4 rounded-lg shadow">
-            ${formattedDeparture}
+            ${value.departure_time}
           </span>
         </div>
       </div>
@@ -83,7 +75,9 @@ export function buildBusCards(routeData) {
         }</p>
         <p><span class="font-semibold">Audience:</span> ${value.audience}</p>
         <p><span class="font-semibold">Driver:</span> ${value.driver.name}</p>
-        <p><span class="font-semibold">Phone:</span> ${value.driver.phone_number}</p>
+        <p><span class="font-semibold">Phone:</span> ${
+          value.driver.phone_number
+        }</p>
         <p><span class="font-semibold">Stoppages:</span> ${value.stoppage_names.join(
           ", "
         )}</p>
