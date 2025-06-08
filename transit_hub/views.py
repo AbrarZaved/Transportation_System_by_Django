@@ -72,7 +72,12 @@ def get_schedules(trip_type, place):
 
     schedules = Transportation_schedules.objects.select_related(
         "bus", "driver", "route"
-    ).filter(from_dsc=(trip_type == "From DSC"), route__route_name__icontains=place)
+    ).filter(
+        from_dsc=(trip_type == "From DSC"),
+        route__route_name__icontains=place,
+        departure_time__gte=localtime().time(),
+        days__contains=localtime().strftime("%A").lower(),
+    )
     route_ids = schedules.values_list("route__id", flat=True).distinct()
     route_details = RouteStoppageModel.objects.filter(route_id__in=route_ids)
 
