@@ -2,9 +2,10 @@ import { csrfFetch } from "./api.js";
 import { buildBusCards, renderNoRoutesFound } from "./utils.js";
 
 async function fetchRoutes(place, tripType, studentId) {
+  const loading_spinner = document.getElementById("loading-screen");
+
   try {
-    const loading_spinner = document.getElementById("loading-screen");
-    loading_spinner.style.display = "block";
+    if (loading_spinner) loading_spinner.style.display = "block";
 
     const startTime = performance.now();
 
@@ -24,7 +25,7 @@ async function fetchRoutes(place, tripType, studentId) {
     const routeData = response.routes;
 
     if (!routeData || routeData.length === 0) {
-      loading_spinner.style.display = "none";
+      if (loading_spinner) loading_spinner.style.display = "none";
       results.style.display = "block";
       results.innerHTML = renderNoRoutesFound();
       return;
@@ -32,11 +33,9 @@ async function fetchRoutes(place, tripType, studentId) {
 
     const htmlContent = buildBusCards(routeData);
     results.innerHTML = htmlContent;
-    loading_spinner.style.display = "none";
-    results.style.display = "block";
-    results.scrollIntoView({ behavior: "smooth" });
   } catch (error) {
     console.error("Error:", error);
+
     results.innerHTML = `
       <div style="padding: 24px; background: #ffeaea; border: 1px solid #ffb3b3; border-radius: 8px; color: #b30000; text-align: center; font-size: 1.1em;">
         <svg xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -46,7 +45,10 @@ async function fetchRoutes(place, tripType, studentId) {
         <span>Failed to load routes. Please try again later.</span>
       </div>
     `;
+  } finally {
+    if (loading_spinner) loading_spinner.style.display = "none";
     results.style.display = "block";
+    results.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
 
