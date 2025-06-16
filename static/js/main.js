@@ -48,7 +48,9 @@ async function fetchRoutes(place, tripType, studentId) {
   } finally {
     if (loading_spinner) loading_spinner.style.display = "none";
     results.style.display = "block";
-    results.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (routeData && routeData.length > 0) {
+      results.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }
 }
 

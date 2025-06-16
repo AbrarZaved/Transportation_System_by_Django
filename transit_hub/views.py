@@ -49,7 +49,6 @@ def index(request):
             data[place] = formatted
 
         cache.set("popular_routes", data, timeout=60)
-    print(data)
     if user:
         preferences = list(
             Preference.objects.filter(student__student_id=user).order_by(
