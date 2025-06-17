@@ -3,7 +3,7 @@ import { buildBusCards, renderNoRoutesFound } from "./utils.js";
 
 async function fetchRoutes(place, tripType, studentId) {
   const loading_spinner = document.getElementById("loading-screen");
-
+  let routeData = null;
   try {
     if (loading_spinner) loading_spinner.style.display = "block";
 
@@ -22,7 +22,7 @@ async function fetchRoutes(place, tripType, studentId) {
 
     results.innerHTML = "";
 
-    const routeData = response.routes;
+    routeData = response.routes;
 
     if (!routeData || routeData.length === 0) {
       if (loading_spinner) loading_spinner.style.display = "none";

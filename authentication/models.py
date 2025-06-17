@@ -1,9 +1,8 @@
 from django.contrib.auth.base_user import BaseUserManager
-from django.contrib.staticfiles.finders import searched_locations
+from django.contrib.auth.hashers import check_password, make_password
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
-
-from transport_manager.models import Transportation_schedules
 
 
 class SuperVisorManager(BaseUserManager):
@@ -67,7 +66,16 @@ class Student(models.Model):
     name = models.CharField(max_length=50)
     student_id = models.CharField(max_length=20, unique=True)
     dept_name = models.CharField(max_length=50)
-    semester_enrolled = models.CharField(max_length=50)
+    batch_code = models.CharField(max_length=5, default="221")
+    phone_number = models.CharField(max_length=50, unique=True)
+    email = models.EmailField(max_length=90, unique=True)
+    password = models.CharField(max_length=128)  # hashed password
+
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
 
     def __str__(self):
         return self.name

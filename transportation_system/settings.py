@@ -43,7 +43,10 @@ SESSION_COOKIE_SECURE = True
 
 AUTH_USER_MODEL = "authentication.Supervisor"
 # Application definition
-
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",  # for Supervisor
+    "authentication.backends.StudentAuthBackend",  # for Student
+]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

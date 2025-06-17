@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 import sys, os
 from authentication.models import Preference, Student
 
+def auth(request):
+    return render(request, "authentication/authentication.html")
 
 # Create your views here.
 def my_account(request):
