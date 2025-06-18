@@ -1,5 +1,7 @@
 import json
+from django.core.validators import validate_email
 from django.db import models
+from django.forms import ValidationError
 from django.views.decorators.csrf import csrf_exempt
 import requests
 from django.http import JsonResponse
@@ -7,8 +9,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 import sys, os
 from authentication.models import Preference, Student
 
+
 def auth(request):
     return render(request, "authentication/authentication.html")
+
 
 # Create your views here.
 def my_account(request):
@@ -29,42 +33,88 @@ def my_account(request):
     )
 
 
-def sign_in(request):
-    if request.method == "POST":
-        student_id = json.loads(request.body).get("student_id", "").strip()
+def student_auth(request):
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"success": False, "message": "Invalid JSON format."}, status=400
+        )
+
+    mode = data.get("mode", "").strip()
+    student_id = data.get("student_id", "").strip()
+    password = data.get("password", "").strip()
+
+    if not student_id or not password:
+        return JsonResponse(
+            {"success": False, "message": "Student ID and password are required."},
+            status=400,
+        )
+
+    if mode == "signin":
         student = Student.objects.filter(student_id=student_id).first()
         if not student:
-            try:
-                response = requests.get(
-                    f"http://peoplepulse.diu.edu.bd:8189/result/studentInfo?studentId={student_id}",
-                    timeout=5,
-                )
-                profile = response.json()
-                if not profile or profile.get("studentId") in [None, "", "null"]:
-                    return JsonResponse(
-                        {"message": "Student ID doesn't exist"}, status=404
-                    )
+            return JsonResponse(
+                {"success": False, "message": "Student ID does not exist."}, status=404
+            )
 
-                student = Student.objects.create(
-                    student_id=profile["studentId"],
-                    name=profile.get("studentName", ""),
-                    dept_name=profile.get("departmentName", ""),
-                    semester_enrolled=profile.get("semesterName", ""),
-                )
-
-            except requests.RequestException as e:
-                return JsonResponse(
-                    {"message": "External server error. Try again later."}, status=503
-                )
+        if not student.check_password(password):
+            return JsonResponse(
+                {"success": False, "message": "Invalid password."}, status=401
+            )
 
         request.session["student_id"] = student.student_id
         request.session["is_student_authenticated"] = True
-        request.session.modified = True
-        request.session.set_expiry(3600)  # 1 hour
+        request.session.set_expiry(3600)  # session expires in 1 hour
 
-        return JsonResponse({"success": True}, status=200)
+        return JsonResponse(
+            {"success": True, "message": "Signed in successfully."}, status=200
+        )
 
-    return JsonResponse({"message": "Invalid request method"}, status=405)
+    elif mode == "signup":
+        if Student.objects.filter(student_id=student_id).exists():
+            return JsonResponse(
+                {"success": False, "message": "Student ID already exists."}, status=400
+            )
+
+        name = data.get("name", "").strip()
+        email = data.get("email", "").strip()
+        phone_number = data.get("phone_number", "").strip()
+
+        if not all([name, email, phone_number]):
+            return JsonResponse(
+                {"success": False, "message": "All fields are required."}, status=400
+            )
+
+        # Optional: Email validation
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse(
+                {"success": False, "message": "Invalid email address."}, status=400
+            )
+
+        # Optional: Add phone number format validation here if needed
+
+        student = Student(
+            student_id=student_id,
+            name=name,
+            email=email,
+            phone_number=phone_number,
+        )
+        student.set_password(password)
+        student.save()
+
+        request.session["student_id"] = student.student_id
+        request.session["is_student_authenticated"] = True
+        request.session.set_expiry(3600)
+
+        return JsonResponse(
+            {"success": True, "message": "Signed up and logged in."}, status=201
+        )
+
+    else:
+        return JsonResponse({"success": False, "message": "Invalid mode."}, status=400)
 
 
 def sign_out(request):
