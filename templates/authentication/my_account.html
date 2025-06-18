@@ -57,7 +57,7 @@
                 <i class="fas fa-bus"></i>
               </div>
               <div class="stat-info">
-                <h3>{{total_searches}}</h3>
+                <h3>{{ total_searches }}</h3>
                 <p>Total Searches</p>
               </div>
             </div>
@@ -94,6 +94,7 @@
           <div class="profile-preview">
             <div class="section-header">
               <h3>Profile Information</h3>
+              <a href="#" style="color:#E91E63" id="edit">Edit</a>
             </div>
             <div class="profile-info-grid">
               <div class="info-group">
@@ -134,10 +135,47 @@
         </ul>
       </div>
     </div>
+    <div id="editProfile" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
+      <div id="editModalContent" class="bg-white w-full max-w-md p-6 rounded-xl shadow-lg transform scale-90 opacity-0 transition-all duration-300">
+        <form action="{% url "edit_profile" %}" method="POST">
+          {% csrf_token %}
+          <div class="section-header flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Profile Information</h3>
+            <button type="submit" class="bg-[#E91E63] hover:bg-pink-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 shadow-md">Save</button>
+          </div>
+          <br />
+          <div class="profile-info-grid">
+            <div class="info-group">
+              <span class="info-label">Full Name</span>
+              <input type="text" value="{{ student.name }}" required name="full_name" class="w-full p-2 border rounded-lg" />
+            </div>
+            <input type="hidden" name="student_id" value="{{ student.student_id }}" />
+            <div class="info-group">
+              <span class="info-label">Student ID</span>
+              <input type="text" value="{{ student.student_id }}" disabled class="w-full p-2 border rounded-lg" />
+            </div>
+            <div class="info-group">
+              <span class="info-label">Email</span>
+              <input type="text" value="{{ student.email }}" disabled name="email" class="w-full p-2 border rounded-lg" />
+            </div>
+            <div class="info-group">
+              <span class="info-label">Phone Number</span>
+              <input type="text" value="{{ student.phone_number }}" required name="phone_number" class="w-full p-2 border rounded-lg" />
+            </div>
+            <div class="info-group">
+              <span class="info-label">Department</span>
+              <input type="text" value="{{ student.dept_name }}" required name="dept_name" class="w-full p-2 border rounded-lg" />
+            </div>
+            <div class="info-group">
+              <span class="info-label">Batch Code</span>
+              <input type="text" value="{{ student.batch_code }}" required name="batch_code" class="w-full p-2 border rounded-lg" />
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   </section>
-  <style>
-    
-  </style>
+
   <script src="{% static 'js/account.js' %}"></script>
   <script>
     localStorage.setItem('student_id', '{{ student.student_id }}')

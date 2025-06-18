@@ -1,4 +1,37 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("editProfile");
+  const modalContent = document.getElementById("editModalContent");
+  const edit = document.getElementById("edit");
+  edit.addEventListener("click", () => {
+    openModal();
+  });
+  function openModal() {
+    modal.classList.remove("hidden");
+    setTimeout(() => {
+      modalContent.classList.remove("scale-90", "opacity-0");
+      modalContent.classList.add("scale-100", "opacity-100");
+    }, 10);
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal() {
+    modalContent.classList.remove("scale-100", "opacity-100");
+    modalContent.classList.add("scale-90", "opacity-0");
+    setTimeout(() => {
+      modal.classList.add("hidden");
+      document.body.style.overflow = "";
+    }, 300);
+  }
+
+  modal.addEventListener("click", (e) => {
+    if (!modalContent.contains(e.target)) closeModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+      closeModal();
+    }
+  });
   const historyButton = document.getElementById("historyButton");
   historyButton.addEventListener("click", openHistoryModal);
   function openHistoryModal() {

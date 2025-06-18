@@ -1,21 +1,22 @@
 import json
+from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from django.core.validators import validate_email
 from django.db import models
 from django.forms import ValidationError
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 import requests
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import sys, os
 from authentication.models import Preference, Student
-
-
-def auth(request):
-    return render(request, "authentication/authentication.html")
-
+from .backends import StudentAuthBackend
 
 # Create your views here.
 def my_account(request):
+    print(request.user)
     student_id = request.session.get("student_id")
     if not student_id:
         return redirect("index")
@@ -29,7 +30,7 @@ def my_account(request):
     return render(
         request,
         "authentication/my_account.html",
-        {"student": student, "total_searches": total_searches},
+        {"student": student, "total_searches": total_searches if total_searches else 0},
     )
 
 
@@ -62,14 +63,18 @@ def student_auth(request):
             return JsonResponse(
                 {"success": False, "message": "Invalid password."}, status=401
             )
-
-        request.session["student_id"] = student.student_id
-        request.session["is_student_authenticated"] = True
-        request.session.set_expiry(3600)  # session expires in 1 hour
-
-        return JsonResponse(
-            {"success": True, "message": "Signed in successfully."}, status=200
-        )
+        backend = StudentAuthBackend()
+        user = backend.authenticate(request, student_id=student_id, password=password)
+       
+        print(user)
+        if user:
+            user.backend = "authentication.backends.StudentAuthBackend"
+            login(request, user)
+            request.session["student_id"] = user.student_id
+            request.session["student_name"] = user.name # session expires in 1 hour
+            return JsonResponse(
+                {"success": True, "message": "Signed in successfully."}, status=200
+            )
 
     elif mode == "signup":
         if Student.objects.filter(student_id=student_id).exists():
@@ -108,7 +113,7 @@ def student_auth(request):
         request.session["student_id"] = student.student_id
         request.session["is_student_authenticated"] = True
         request.session.set_expiry(3600)
-
+        login(request, student)
         return JsonResponse(
             {"success": True, "message": "Signed up and logged in."}, status=201
         )
@@ -149,3 +154,23 @@ def delete_history(request, id):
         Preference.objects.filter(id=id).delete()
         return JsonResponse({"status": "deleted"})
     return JsonResponse({"error": "Invalid method"}, status=405)
+
+
+def edit_profile(request):
+    if request.method == "POST":
+        student_id = request.POST.get("student_id")
+        full_name = request.POST.get("full_name", "").strip()
+        phone_number = request.POST.get("phone_number", "").strip()
+        dept_name = request.POST.get("dept_name", "").strip()
+        batch_code = request.POST.get("batch_code", "").strip()
+
+        student = get_object_or_404(Student, student_id=student_id)
+
+        student.name = full_name
+        student.phone_number = phone_number
+        student.dept_name = dept_name
+        student.batch_code = batch_code
+        student.save()
+
+        messages.success(request, "Your profile has been updated successfully.")
+        return redirect("my_account")

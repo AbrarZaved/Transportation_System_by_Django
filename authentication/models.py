@@ -66,7 +66,7 @@ class Student(models.Model):
     name = models.CharField(max_length=50)
     student_id = models.CharField(max_length=20, unique=True)
     dept_name = models.CharField(max_length=50)
-    batch_code = models.CharField(max_length=5, default="221")
+    batch_code = models.CharField(max_length=5)
     phone_number = models.CharField(max_length=50, unique=True)
     email = models.EmailField(max_length=90, unique=True)
     password = models.CharField(max_length=128)  # hashed password
