@@ -1,11 +1,37 @@
 document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("editProfile");
   const modalContent = document.getElementById("editModalContent");
-  const edit = document.getElementById("edit");
-  edit.addEventListener("click", () => {
-    openModal();
+  const editButton = document.getElementById("edit");
+  const historyButton = document.getElementById("historyButton");
+  const historyModal = document.getElementById("historyModal");
+  const historyList = document.getElementById("historyList");
+
+  if (editButton) {
+    editButton.addEventListener("click", openEditModal);
+  }
+
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (!modalContent.contains(e.target)) closeEditModal();
+    });
+  }
+
+  if (historyButton) {
+    historyButton.addEventListener("click", openHistoryModal);
+  }
+
+  if (historyModal) {
+    historyModal.addEventListener("click", handleHistoryModalClick);
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (!modal.classList.contains("hidden")) closeEditModal();
+      if (historyModal.style.display === "flex") closeHistoryModal();
+    }
   });
-  function openModal() {
+
+  function openEditModal() {
     modal.classList.remove("hidden");
     setTimeout(() => {
       modalContent.classList.remove("scale-90", "opacity-0");
@@ -14,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.style.overflow = "hidden";
   }
 
-  function closeModal() {
+  function closeEditModal() {
     modalContent.classList.remove("scale-100", "opacity-100");
     modalContent.classList.add("scale-90", "opacity-0");
     setTimeout(() => {
@@ -23,95 +49,103 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 300);
   }
 
-  modal.addEventListener("click", (e) => {
-    if (!modalContent.contains(e.target)) closeModal();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
-      closeModal();
-    }
-  });
-  const historyButton = document.getElementById("historyButton");
-  historyButton.addEventListener("click", openHistoryModal);
   function openHistoryModal() {
-    document.getElementById("historyModal").style.display = "flex";
+    historyModal.style.display = "flex";
     fetchSearchHistory();
   }
-  const historyModal = document.getElementById("historyModal");
-  historyModal.addEventListener("click", closeHistoryModal);
-  function closeHistoryModal(event) {
+
+  function closeHistoryModal() {
+    historyModal.style.display = "none";
+  }
+
+  function handleHistoryModalClick(event) {
     if (
       event.target.classList.contains("modal-overlay") ||
       event.target.classList.contains("close-button")
     ) {
-      document.getElementById("historyModal").style.display = "none";
+      closeHistoryModal();
     }
   }
 
   async function fetchSearchHistory() {
     const studentId = localStorage.getItem("student_id");
-    const res = await fetch(`get_history`, {
-      method: "POST",
-      body: JSON.stringify({ studentId }),
-    });
-    const data = await res.json();
-    console.log(data);
+    if (!studentId) return;
 
-    const list = document.getElementById("historyList");
-    list.innerHTML = "";
+    try {
+      const res = await fetch(`get_history`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: JSON.stringify({ studentId }),
+      });
 
-    if (data.history.length === 0) {
-      list.innerHTML = `<li>No history found.</li>`;
+      const data = await res.json();
+      renderHistory(data.history || []);
+    } catch (error) {
+      console.error("Error fetching history:", error);
+      historyList.innerHTML = `<li class="text-red-500">Failed to load history.</li>`;
+    }
+  }
+
+  function renderHistory(history) {
+    historyList.innerHTML = "";
+
+    if (history.length === 0) {
+      historyList.innerHTML = `<li>No history found.</li>`;
       return;
     }
 
-    data.history.forEach((item) => {
+    history.forEach((item) => {
       const li = document.createElement("li");
       li.innerHTML = `
         <span>${item.place}</span>
-        <button name="place_id" id="${item.id}">Delete</button>
+        <button name="place_id" class="delete-history-btn" data-id="${item.id}">
+          Delete
+        </button>
       `;
-      list.appendChild(li);
+      historyList.appendChild(li);
     });
-    var placeId = document.querySelectorAll('button[name="place_id"]');
-    placeId.forEach((button) => {
-      button.addEventListener("click", async (e) => {
+
+    document.querySelectorAll(".delete-history-btn").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
         e.preventDefault();
-        const id = button.id;
-        console.log(id);
-        await deleteHistory(id, button);
+        const id = btn.dataset.id;
+        if (id) await deleteHistory(id, btn);
       });
     });
   }
 
-  async function deleteHistory(id, btn) {
-    const res = await fetch(`delete_history/${id}/`, {
-      method: "DELETE",
-      headers: {
-        "X-CSRFToken": getCookie("csrftoken"),
-      },
-    });
+  async function deleteHistory(id, button) {
+    try {
+      const res = await fetch(`delete_history/${id}/`, {
+        method: "DELETE",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+      });
 
-    if (res.ok) {
-      btn.closest("li").remove();
-    } else {
-      alert("Failed to delete item.");
+      if (res.ok) {
+        const li = button.closest("li");
+        if (li) li.remove();
+      } else {
+        alert("Failed to delete item.");
+      }
+    } catch (error) {
+      console.error("Error deleting history:", error);
+      alert("An error occurred while deleting the item.");
     }
   }
 
   function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let cookie of cookies) {
-        cookie = cookie.trim();
-        if (cookie.startsWith(name + "=")) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
+    const cookies = document.cookie.split(";");
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+      if (cookie.startsWith(name + "=")) {
+        return decodeURIComponent(cookie.slice(name.length + 1));
       }
     }
-    return cookieValue;
+    return null;
   }
 });
