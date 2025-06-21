@@ -12,11 +12,11 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 import sys, os
 from authentication.models import Preference, Student
-from .backends import StudentAuthBackend
+
+
 
 # Create your views here.
 def my_account(request):
-    print(request.user)
     student_id = request.session.get("student_id")
     if not student_id:
         return redirect("index")
@@ -63,18 +63,12 @@ def student_auth(request):
             return JsonResponse(
                 {"success": False, "message": "Invalid password."}, status=401
             )
-        backend = StudentAuthBackend()
-        user = backend.authenticate(request, student_id=student_id, password=password)
-       
-        print(user)
-        if user:
-            user.backend = "authentication.backends.StudentAuthBackend"
-            login(request, user)
-            request.session["student_id"] = user.student_id
-            request.session["student_name"] = user.name # session expires in 1 hour
-            return JsonResponse(
-                {"success": True, "message": "Signed in successfully."}, status=200
-            )
+
+        request.session["student_id"] = student_id
+        request.session["is_student_authenticated"] = True
+        return JsonResponse(
+            {"success": True, "message": "Signed in successfully."}, status=200
+        )
 
     elif mode == "signup":
         if Student.objects.filter(student_id=student_id).exists():
@@ -113,7 +107,6 @@ def student_auth(request):
         request.session["student_id"] = student.student_id
         request.session["is_student_authenticated"] = True
         request.session.set_expiry(3600)
-        login(request, student)
         return JsonResponse(
             {"success": True, "message": "Signed up and logged in."}, status=201
         )
