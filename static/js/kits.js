@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (mode === "signup" && (!name || !email || !phone_number)) {
-      showError("All registration fields are required.");
+      showError("All registration fields are required.", mode);
       return;
     }
 
@@ -159,20 +159,22 @@ document.addEventListener("DOMContentLoaded", function () {
           localStorage.setItem("student_id", student_id);
           window.location.href = "/my_account";
         } else {
-          showError(data.message || "An error occurred.");
+          showError(data.message || "An error occurred.", mode);
           return;
         }
       })
       .catch((err) => {
         console.error(err);
-        showError("Something went wrong. Try again.");
+        showError("Something went wrong. Try again.", mode);
       });
   });
 
-  function showError(message) {
+  function showError(message, mode) {
     errorDisplay.textContent = message;
     errorDisplay.classList.remove("hidden");
-    submitBtn.textContent = "Submit";
+    if (mode === "signup") submitBtn.textContent = "Sign Up";
+    else submitBtn.textContent = "Login";
+
     submitBtn.disabled = false;
   }
 });
