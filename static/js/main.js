@@ -17,10 +17,15 @@ async function handleRecentSearch(studentId) {
 }
 
 async function fetchRoutes(place, tripType, studentId) {
-  var recentSearches = Array.from(
-    document.getElementById("recent-searches").children
-  ).map((child) => child.textContent.trim());
-  console.log(recentSearches);
+  let recentSearches = [];
+  const recentSearchContainer = document.getElementById("recent-searches");
+
+  if (recentSearchContainer) {
+    recentSearches = Array.from(recentSearchContainer.children).map((child) =>
+      child.textContent.trim()
+    );
+  }
+
   const loading_spinner = document.getElementById("loading-screen");
   let routeData = null;
   try {
@@ -49,10 +54,12 @@ async function fetchRoutes(place, tripType, studentId) {
       results.innerHTML = renderNoRoutesFound();
       return;
     }
-    if (!recentSearches.includes(place)) {
+    if (!recentSearches.includes(place) && recentSearchContainer) {
       document.getElementById(
         "recent-searches"
-      ).innerHTML += `<span name="recent_searches" class="bg-white border border-pink-200 text-pink-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-pink-50 transition">${place.charAt(0).toUpperCase() + place.slice(1)}</span>`;
+      ).innerHTML += `<span name="recent_searches" class="bg-white border border-pink-200 text-pink-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-pink-50 transition">${
+        place.charAt(0).toUpperCase() + place.slice(1)
+      }</span>`;
       await handleRecentSearch(studentId);
     }
 
@@ -131,8 +138,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
 
   // Handle recent search clicks
-
-  await handleRecentSearch(studentId);
+  if (studentId) await handleRecentSearch(studentId);
   // Handle search button click
   document.getElementById("search").addEventListener("click", async (e) => {
     e.preventDefault();
