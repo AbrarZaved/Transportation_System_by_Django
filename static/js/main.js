@@ -1,7 +1,26 @@
 import { csrfFetch } from "./api.js";
 import { buildBusCards, renderNoRoutesFound } from "./utils.js";
+async function handleRecentSearch(studentId) {
+  document.querySelectorAll('[name="recent_searches"]').forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      setTimeout(() => {
+        const tripType = document.querySelector(
+          'input[name="trip-type"]:checked'
+        ).value;
+        const place = el.textContent.trim();
+        document.getElementById("place").value = place;
+        fetchRoutes(place, tripType, studentId);
+      });
+    });
+  });
+}
 
 async function fetchRoutes(place, tripType, studentId) {
+  var recentSearches = Array.from(
+    document.getElementById("recent-searches").children
+  ).map((child) => child.textContent.trim());
+  console.log(recentSearches);
   const loading_spinner = document.getElementById("loading-screen");
   let routeData = null;
   try {
@@ -30,6 +49,12 @@ async function fetchRoutes(place, tripType, studentId) {
       results.innerHTML = renderNoRoutesFound();
       return;
     }
+    if (!recentSearches.includes(place)) {
+      document.getElementById(
+        "recent-searches"
+      ).innerHTML += `<span name="recent_searches" class="bg-white border border-pink-200 text-pink-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-pink-50 transition">${place.charAt(0).toUpperCase() + place.slice(1)}</span>`;
+      await handleRecentSearch(studentId);
+    }
 
     const htmlContent = buildBusCards(routeData);
     results.innerHTML = htmlContent;
@@ -54,7 +79,7 @@ async function fetchRoutes(place, tripType, studentId) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const cards = document.querySelectorAll(".route-card");
 
   cards.forEach((card) => {
@@ -106,20 +131,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Handle recent search clicks
-  document.querySelectorAll('[name="recent_searches"]').forEach((el) => {
-    el.addEventListener("click", (e) => {
-      e.preventDefault();
-      setTimeout(() => {
-        const tripType = document.querySelector(
-          'input[name="trip-type"]:checked'
-        ).value;
-        const place = el.textContent.trim();
-        document.getElementById("place").value = place;
-        fetchRoutes(place, tripType, studentId);
-      });
-    });
-  });
 
+  await handleRecentSearch(studentId);
   // Handle search button click
   document.getElementById("search").addEventListener("click", async (e) => {
     e.preventDefault();

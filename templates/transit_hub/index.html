@@ -19,11 +19,13 @@
         <p class="text-gray-600 mb-6">Search your destination or browse popular routes</p>
         <div class="mb-6">
           {% if request.session.is_student_authenticated %}
-            <h4 class="text-sm font-semibold text-gray-600 mb-2">Recently Searched</h4>
-            <div class="flex flex-wrap md:flex-nowrap md:space-x-2 overflow-x-auto space-x-2 scrollbar-hide">
+            {% if preferences %}
+              <h4 class="text-sm font-semibold text-gray-600 mb-2">Recently Searched</h4>
+            {% endif %}
+            <div class="flex flex-wrap md:flex-nowrap md:space-x-2 overflow-x-auto space-x-2 scrollbar-hide" id="recent-searches">
               <!-- Sample tags - replace with dynamic values if needed -->
               {% for preference in preferences %}
-                <span name="recent_searches" class="bg-white border border-pink-200 text-pink-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-pink-50 transition">{{ preference.searched_locations }}</span>
+                <span name="recent_searches" class="bg-white border border-pink-200 text-pink-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-pink-50 transition">{{ preference.searched_locations|title }}</span>
               {% endfor %}
             </div>
           {% endif %}

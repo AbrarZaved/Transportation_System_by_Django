@@ -86,3 +86,8 @@ class Preference(models.Model):
     searched_locations = models.CharField(max_length=100, blank=True, null=True)
     total_searches = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.searched_locations:
+            self.searched_locations = self.searched_locations.capitalize()  # Make the first letter upper case
+        super().save(*args, **kwargs)
