@@ -43,13 +43,21 @@ jobs:
 
     - name: Run migrations
       env:
-        DB_NAME: TRANSPORATION
-        DB_USER: root
-        DB_PASSWORD: the.in5hulk
-        DB_HOST: 127.0.0.1
+        DATABASE_NAME: TRANSPORTATION
+        DATABASE_USER: root
+        DATABASE_PASSWORD: the.in5hulk
+        DATABASE_HOST: 127.0.0.1
       run: |
         python manage.py makemigrations
         python manage.py migrate
+
+    - name: Run tests
+      env:
+        DATABASE_NAME: TRANSPORTATION
+        DATABASE_USER: root
+        DATABASE_PASSWORD: the.in5hulk
+        DATABASE_HOST: 127.0.0.1
+      run: python manage.py test
 
     - name: Run tests
       run: python manage.py test
