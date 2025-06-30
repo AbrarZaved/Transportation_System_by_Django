@@ -1,0 +1,55 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [backend, main]
+  pull_request:
+    branches: [backend, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: diu_transport
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Wait for MySQL to be ready
+      run: sleep 30
+
+    - name: Run migrations
+      env:
+        DB_NAME: TRANSPORATION
+        DB_USER: root
+        DB_PASSWORD: the.in5hulk
+        DB_HOST: 127.0.0.1
+      run: |
+        python manage.py makemigrations
+        python manage.py migrate
+
+    - name: Run tests
+      run: python manage.py test
