@@ -1,0 +1,144 @@
+{% extends 'kits/main.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}
+  <title>My Account - BAHON</title>
+{% endblock %}
+
+{% block content %}
+<section class="bg-gray-100 py-14">
+  <div class="max-w-5xl mx-auto px-4">
+
+    <!-- Hero Section -->
+    <div class="bg-white rounded-2xl shadow-lg p-8 mb-10 relative overflow-hidden">
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div class="flex items-center gap-4">
+          <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg"
+               alt="Avatar"
+               class="w-16 h-16 rounded-full shadow-md border-2 border-pink-500 object-cover" />
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900">
+              Hello, {{ student.name|first_name }}
+            </h2>
+            <p class="text-gray-500 text-sm">
+              Student ID: {{ student.student_id }}
+            </p>
+          </div>
+        </div>
+        <a href="{% url 'sign_out' %}" class="text-red-500 font-medium hover:underline text-sm">
+          Logout
+        </a>
+      </div>
+
+      <!-- Stat Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-2 mt-12 gap-6">
+        <div class="flex flex-col items-center text-center">
+          <div class="text-pink-600 text-2xl mb-1">
+            <i class="fas fa-bus"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800">{{ total_searches }}</h3>
+          <p class="text-sm text-gray-500">Total Searches</p>
+        </div>
+        <div class="flex flex-col items-center text-center">
+          <div class="text-pink-600 text-2xl mb-1">
+            <i class="fas fa-calendar"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800">2</h3>
+          <p class="text-sm text-gray-500">Upcoming Trips</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="bg-white rounded-2xl shadow-md p-8 mb-10">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-semibold text-gray-800">Profile Details</h3>
+        <button id="edit" class="text-pink-600 hover:underline font-medium text-sm">Edit</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 text-gray-700">
+        <div>
+          <strong>Full Name:</strong> {{ student.name }}
+        </div>
+        <div>
+          <strong>Phone Number:</strong> {{ student.phone_number }}
+        </div>
+        <div>
+          <strong>Email:</strong> {{ student.email }}
+        </div>
+        <div>
+          <strong>Department:</strong> {{ student.dept_name }}
+        </div>
+        <div>
+          <strong>Batch Code:</strong> {{ student.batch_code }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Action Buttons -->
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="{% url 'index' %}" class="flex items-center gap-2 px-6 py-3 bg-pink-600 text-white rounded-lg shadow hover:bg-pink-700 transition">
+        <i class="fas fa-search"></i> Search Buses
+      </a>
+      <button id="historyButton" class="flex items-center gap-2 px-6 py-3 bg-gray-800 text-white rounded-lg shadow hover:bg-black transition">
+        <i class="fas fa-history"></i> View History
+      </button>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="modal-overlay">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Search History</h2>
+        <ul id="historyList" class="history-list">
+          <p>Loading...</p>
+          <!-- JS will populate this -->
+        </ul>
+      </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfile" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
+      <div id="editModalContent" class="bg-white w-full max-w-md p-6 rounded-xl shadow-lg transform scale-90 opacity-0 transition-all duration-300">
+        <form action="{% url 'edit_profile' %}" method="POST">
+          {% csrf_token %}
+          <div class="section-header flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Profile Information</h3>
+            <button type="submit" class="bg-[#E91E63] hover:bg-pink-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 shadow-md">
+              Update
+            </button>
+          </div>
+          <br />
+          <div class="profile-info-grid">
+            <div class="info-group">
+              <span class="info-label">Full Name</span>
+              <input type="text" value="{{ student.name }}" required name="full_name" class="w-full p-2 border rounded-lg" />
+            </div>
+            <input type="hidden" name="student_id" value="{{ student.student_id }}" />
+            <div class="info-group">
+              <span class="info-label">Phone Number</span>
+              <input type="text" value="{{ student.phone_number }}" required name="phone_number" class="w-full p-2 border rounded-lg" />
+            </div>
+            <div class="info-group">
+              <span class="info-label">Department</span>
+              <input type="text" value="{{ student.dept_name }}" required name="dept_name" class="w-full p-2 border rounded-lg" />
+            </div>
+            <div class="info-group">
+              <span class="info-label">Batch Code</span>
+              <input type="text" value="{{ student.batch_code }}" required name="batch_code" class="w-full p-2 border rounded-lg" />
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Ensure all opened divs are closed before closing section -->
+  </div>
+</section>
+
+<script src="{% static 'js/account.js' %}"></script>
+<script>
+  localStorage.setItem('student_id', '{{ student.student_id }}')
+</script>
+{% endblock %}
+
+{% include 'kits/footer.html' %}

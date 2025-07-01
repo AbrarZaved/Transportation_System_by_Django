@@ -1,4 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.hashers import check_password, make_password
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 
@@ -58,3 +60,34 @@ class Supervisor(AbstractBaseUser):
         return True
 
     objects = SuperVisorManager()
+
+
+class Student(models.Model):
+    name = models.CharField(max_length=50)
+    student_id = models.CharField(max_length=20, unique=True)
+    dept_name = models.CharField(max_length=50)
+    batch_code = models.CharField(max_length=5)
+    phone_number = models.CharField(max_length=50, unique=True)
+    email = models.EmailField(max_length=90, unique=True)
+    password = models.CharField(max_length=128)  # hashed password
+
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
+
+    def __str__(self):
+        return self.name
+
+
+class Preference(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    searched_locations = models.CharField(max_length=100, blank=True, null=True)
+    total_searches = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.searched_locations:
+            self.searched_locations = self.searched_locations.capitalize()  # Make the first letter upper case
+        super().save(*args, **kwargs)

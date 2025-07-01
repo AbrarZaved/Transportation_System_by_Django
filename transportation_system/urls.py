@@ -5,8 +5,8 @@ from django.conf.urls.static import static
 from transit_hub import views
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("auth/", include("authentication.urls")),
-    path("transit/", include("transit_hub.urls")),
+    path("", include("authentication.urls")),
+    path("", include("transit_hub.urls")),
     path("transport/", include("transport_manager.urls")),
 ]
 if settings.DEBUG:

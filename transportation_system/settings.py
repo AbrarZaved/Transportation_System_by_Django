@@ -29,7 +29,17 @@ SECRET_KEY = 'django-insecure-3ar)kf*)l#gwny&%@%u*eg0hjer01drhn^*7u_*fqx5wpunmw4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*",".devtunnels.ms"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.loca.lt",
+    "https://*.ngrok.io",
+    "https://*.trycloudflare.com",
+]
+
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = "None"  # Enables cookie across sites for HTTPS
+SESSION_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SECURE = True
 
 AUTH_USER_MODEL = "authentication.Supervisor"
 # Application definition

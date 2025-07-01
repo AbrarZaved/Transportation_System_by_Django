@@ -1,0 +1,206 @@
+{% extends 'kits/main.html' %}
+{% load static %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="contact-hero">
+    <div class="container">
+      <div class="contact-hero-content">
+        <h1>Contact Us</h1>
+        <p>We're here to help with any questions or concerns</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Information -->
+  <section class="contact-info-section">
+    <div class="container">
+      <div class="info-cards">
+        <div class="info-card">
+          <div class="icon">
+            <i class="fas fa-map-marker-alt"></i>
+          </div>
+          <h3>Visit Us</h3>
+          <p>123 Main Street, Dhaka 1000, Bangladesh</p>
+          <p>Open: Monday-Friday, 9am-6pm</p>
+        </div>
+        <div class="info-card">
+          <div class="icon">
+            <i class="fas fa-phone-alt"></i>
+          </div>
+          <h3>Call Us</h3>
+          <p>+880 1700 000000 (Customer Support)</p>
+          <p>+880 1800 000000 (Business Inquiries)</p>
+        </div>
+        <div class="info-card">
+          <div class="icon">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <h3>Email Us</h3>
+          <p>support@bahon.com (Support)</p>
+          <p>info@bahon.com (General Inquiries)</p>
+        </div>
+        <div class="info-card">
+          <div class="icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <h3>Live Chat</h3>
+          <p>Available 24/7 on our website</p>
+          <button class="chat-btn">Start Chat</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Form -->
+  <section class="contact-form-section">
+    <div class="container">
+      <div class="contact-container">
+        <div class="form-container">
+          <h2>Send Us a Message</h2>
+          <p>Fill out the form below and our team will get back to you as soon as possible.</p>
+          <form class="contact-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" placeholder="Your full name" />
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Your email address" />
+              </div>
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" placeholder="Your phone number" />
+              </div>
+              <div class="form-group">
+                <label for="subject">Subject</label>
+                <select id="subject">
+                  <option value="">Select a subject</option>
+                  <option value="booking">Booking Issue</option>
+                  <option value="refund">Refund Request</option>
+                  <option value="feedback">Feedback</option>
+                  <option value="partnership">Business Partnership</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label for="message">Message</label>
+              <textarea id="message" rows="6" placeholder="Your message"></textarea>
+            </div>
+            <div class="form-group checkbox">
+              <label class="checkbox-container">
+                <input type="checkbox" />
+                <span class="checkmark"></span>
+                I agree to the <a href="privacy-policy.html">Privacy Policy</a> and consent to being contacted by BAHON.
+              </label>
+            </div>
+            <button type="submit" class="submit-btn">Send Message</button>
+          </form>
+        </div>
+        <div class="map-container">
+          <h2>Find Us</h2>
+          <div class="map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d233667.8223908687!2d90.27923710000001!3d23.780887450000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8b087026b81%3A0x8fa563bbdd5904c2!2sDhaka!5e0!3m2!1sen!2sbd!4v1682777207308!5m2!1sen!2sbd" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Frequently Asked Questions</h2>
+        <p>Quick answers to common questions</p>
+      </div>
+      <div class="faq-container">
+        <div class="faq-item">
+          <div class="faq-question">
+            <h3>How do I book a bus ticket?</h3>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            <p>Booking a bus ticket on BAHON is simple. Just search for your desired route, select your travel date, choose your preferred bus and seats, provide passenger details, and complete the payment. You'll receive your e-ticket via email and SMS.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">
+            <h3>Can I cancel my ticket?</h3>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            <p>Yes, you can cancel your ticket through your account or by contacting our support team. Cancellation fees may apply depending on how close to the departure time you cancel. Please refer to our refund policy for more details.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">
+            <h3>How do I get my ticket after booking?</h3>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            <p>After successful booking, your e-ticket will be sent to your registered email address and phone number via SMS. You can also view and download your ticket from your account on our website or mobile app.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">
+            <h3>What payment methods do you accept?</h3>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            <p>We accept various payment methods including credit/debit cards (Visa, Mastercard), mobile banking (bKash, Nagad), and internet banking. All transactions are secure and encrypted.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">
+            <h3>Can I book a ticket for someone else?</h3>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            <p>Yes, you can book tickets for family, friends, or anyone else. Just make sure to enter their correct details during the booking process as these will be verified during boarding.</p>
+          </div>
+        </div>
+      </div>
+      <div class="more-questions">
+        <p>
+          Still have questions? Check our <a href="faq.html">complete FAQ page</a> or contact us directly.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Social Media -->
+  <section class="social-media-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Connect With Us</h2>
+        <p>Follow us on social media for updates, offers, and travel tips</p>
+      </div>
+      <div class="social-icons-large">
+        <a href="#" class="social-icon facebook">
+          <i class="fab fa-facebook-f"></i>
+          <span>Facebook</span>
+        </a>
+        <a href="#" class="social-icon twitter">
+          <i class="fab fa-twitter"></i>
+          <span>Twitter</span>
+        </a>
+        <a href="#" class="social-icon instagram">
+          <i class="fab fa-instagram"></i>
+          <span>Instagram</span>
+        </a>
+        <a href="#" class="social-icon linkedin">
+          <i class="fab fa-linkedin-in"></i>
+          <span>LinkedIn</span>
+        </a>
+        <a href="#" class="social-icon youtube">
+          <i class="fab fa-youtube"></i>
+          <span>YouTube</span>
+        </a>
+      </div>
+    </div>
+  </section>
+  {% include 'kits/footer.html' %}
+{% endblock %}

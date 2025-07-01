@@ -6,7 +6,7 @@ from transit_hub.models import Route, RouteStoppage
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
-        fields = "__all__"
+        fields = ["id","route_name", "route_number"]
 
 
 class RouteStoppageSerializer(serializers.ModelSerializer):
@@ -14,4 +14,4 @@ class RouteStoppageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RouteStoppage
-        fields = ["id", "created_at", "route", "stoppage", "stoppage_name"]
+        fields = ["id", "route", "stoppage", "stoppage_name"]
