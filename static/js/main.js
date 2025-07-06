@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
   console.log(location.origin)
-  console.log("loaded");
+  console.log(location.origin);
   window.scrollTo({ top: 0, behavior: "smooth" });
 
   const results = document.getElementById("results");

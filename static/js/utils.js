@@ -31,7 +31,7 @@ export function buildBusCards(routeData) {
     const busImage = value.bus.bus_image
       ? value.bus.bus_image.startsWith("http")
         ? value.bus.bus_image
-        : `${location.origin}/${value.bus.bus_image}`
+        : new URL(value.bus.bus_image, location.origin).href
       : "/static/img/default-bus.png"; // Change path to your default image
 
     html += `
