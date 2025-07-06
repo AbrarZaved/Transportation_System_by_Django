@@ -15,13 +15,13 @@ services:
       - key: DB_USER
         value: root
       - key: DB_PASSWORD
-        # value omitted — set securely in Render Dashboard environment variables
+        value: dummy
       - key: DB_HOST
         value: shortline.proxy.rlwy.net
       - key: DB_PORT
         value: "27158"
       - key: SECRET_KEY
-        # value omitted — set securely in Render Dashboard environment variables
+        value: dummy
       - key: DEBUG
         value: 'False'
     autoDeploy: true
