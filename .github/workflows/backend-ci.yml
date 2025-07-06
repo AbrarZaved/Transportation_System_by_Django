@@ -30,12 +30,12 @@ jobs:
           --health-timeout=5s
           --health-retries=3
 
-    env:  # 👇 This applies to all steps below
-      DATABASE_NAME: ${{ secrets.DB_NAME }}
-      DATABASE_USER: ${{ secrets.DB_USER }}
-      DATABASE_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DATABASE_HOST: ${{ secrets.DB_HOST }}
-      DATABASE_PORT: ${{ secrets.DB_PORT }}
+    env:
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
 
     steps:
     - name: Checkout code
