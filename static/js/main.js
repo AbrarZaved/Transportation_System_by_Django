@@ -1,6 +1,6 @@
 import { csrfFetch } from "./api.js";
 import { buildBusCards, renderNoRoutesFound } from "./utils.js";
-console.log(loacation.origin);
+
 async function handleRecentSearch(studentId) {
   document.querySelectorAll('[name="recent_searches"]').forEach((el) => {
     el.addEventListener("click", (e) => {
@@ -119,6 +119,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
   const studentId = localStorage.getItem("student_id");
 
+
+  console.log(location.origin)
   console.log("loaded");
   window.scrollTo({ top: 0, behavior: "smooth" });
 
