@@ -119,9 +119,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
   const studentId = localStorage.getItem("student_id");
 
-
-  console.log(location.origin)
-  console.log(location.origin);
   window.scrollTo({ top: 0, behavior: "smooth" });
 
   const results = document.getElementById("results");
