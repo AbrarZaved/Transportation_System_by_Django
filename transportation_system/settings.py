@@ -35,8 +35,9 @@ CSRF_TRUSTED_ORIGINS = [
     "https://*.loca.lt",
     "https://*.ngrok.io",
     "https://*.trycloudflare.com",
+    "https://bahon.onrender.com",
 ]
-
+CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = "None"  # Enables cookie across sites for HTTPS
 SESSION_COOKIE_SAMESITE = "None"
