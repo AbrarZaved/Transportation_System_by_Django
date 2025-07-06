@@ -4,4 +4,5 @@ script.py
 myenv
 __pycache__/
 *.pyc
-backups/
+backups/*sql
+backup.sql
