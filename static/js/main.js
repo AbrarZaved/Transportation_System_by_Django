@@ -1,5 +1,6 @@
 import { csrfFetch } from "./api.js";
 import { buildBusCards, renderNoRoutesFound } from "./utils.js";
+console.log(loacation.origin);
 async function handleRecentSearch(studentId) {
   document.querySelectorAll('[name="recent_searches"]').forEach((el) => {
     el.addEventListener("click", (e) => {
