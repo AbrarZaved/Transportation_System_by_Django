@@ -25,4 +25,3 @@ services:
       - key: DEBUG
         value: 'False'
     autoDeploy: true
-    healthCheckPath: /health/
