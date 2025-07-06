@@ -34,7 +34,7 @@ async function fetchRoutes(place, tripType, studentId) {
 
     const startTime = performance.now();
 
-    const response = await csrfFetch(`${location.origin}/search_route`, {
+    const response = await csrfFetch(`${location.origin}/search_route/`, {
       method: "POST",
       body: JSON.stringify({ tripType, place, studentId }),
     });
