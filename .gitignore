@@ -6,3 +6,5 @@ __pycache__/
 *.pyc
 backups/*sql
 backup.sql
+staticfiles/
+sync_db.ps1
