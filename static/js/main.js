@@ -88,6 +88,19 @@ async function fetchRoutes(place, tripType, studentId) {
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
+  const scrollBtn = document.getElementById("scrollToTopBtn");
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 600) {
+      scrollBtn.classList.remove("opacity-0", "pointer-events-none");
+      scrollBtn.classList.add("opacity-100");
+    } else {
+      scrollBtn.classList.add("opacity-0", "pointer-events-none");
+      scrollBtn.classList.remove("opacity-100");
+    }
+  });
+  scrollBtn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
   const cards = document.querySelectorAll(".route-card");
 
   cards.forEach((card) => {

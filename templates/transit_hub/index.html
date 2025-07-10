@@ -124,6 +124,13 @@
     <!-- Dynamic results will be injected here -->
   </section>
 
+  <!-- Scroll to Top Button -->
+  <button id="scrollToTopBtn" title="Top" class="fixed bottom-6 right-6 z-40 bg-pink-500 hover:bg-pink-600 text-white rounded-full p-2 shadow opacity-0 pointer-events-none">
+    <svg class="w-5 h-5" viewBox="0 0 20 20" fill="none">
+      <path d="M10 15V5M10 5l-5 5M10 5l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
   {% include 'kits/footer.html' %}
   <script type="module" src="{% static 'js/main.js' %}"></script>
 {% endblock %}

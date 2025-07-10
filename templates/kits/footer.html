@@ -13,11 +13,9 @@
 
     <!-- Central Navigation -->
     <div class="flex flex-wrap justify-center gap-6 text-sm font-medium tracking-wide">
-      <a href="index.html" class="hover:text-white transition">Home</a>
-      <a href="bus-search.html" class="hover:text-white transition">Search</a>
-      <a href="view-ticket.html" class="hover:text-white transition">Tickets</a>
-      <a href="about.html" class="hover:text-white transition">About</a>
-      <a href="contact.html" class="hover:text-white transition">Contact</a>
+      <a href="{% url "index" %}" class="hover:text-white transition">Home</a>
+      <a href="{% url "about_us" %}" class="hover:text-white transition">About</a>
+      <a href="{% url "contact_us" %}" class="hover:text-white transition">Contact</a>
     </div>
 
     <!-- Social + App CTA -->
