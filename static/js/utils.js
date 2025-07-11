@@ -14,7 +14,21 @@ export function getCookie(name) {
   return cookieValue;
 }
 // utils.js
+export async function filterRoutesByTime(routes, selectedTime) {
+  if (selectedTime === "all") {
+    return routes; // No filtering needed
+  }
+  if (!routes || routes.length === 0) {
+    return false; // No routes to filter
+  }
+  const filteredRoutes = routes.filter((route) => {
+    const departureTime = new Date(`1970-01-01T${route.departure_time}:00`);
+    const selectedDepartureTime = new Date(`1970-01-01T${selectedTime}:00`);
+    return departureTime.getHours() === selectedDepartureTime.getHours();
+  });
 
+  return filteredRoutes;
+}
 export function buildBusCards(routeData) {
   let html = `
   <div class="px-4 py-6 font-sans max-w-7xl mx-auto">
@@ -95,7 +109,7 @@ export function buildBusCards(routeData) {
   return html;
 }
 
-export function renderNoRoutesFound() {
+export function renderNoRoutesFound(text) {
   const modalId = "noRoutesModal";
   let modal = document.getElementById(modalId);
 
@@ -156,7 +170,7 @@ export function renderNoRoutesFound() {
 
 
         <h2 style="margin: 0 0 12px 0; font-size: 1.75rem; font-weight: 700; color: #e55353;">
-          No Routes Found
+          ${text || "No Routes Found"}
         </h2>
 
         <p style="margin: 0 0 24px 0; font-size: 1.1rem; color: #555;">
