@@ -52,9 +52,17 @@ async function fetchRoutes(place, tripType, studentId, timeFilter = "all") {
     }
 
     if (!recentSearches.includes(place) && recentSearchContainer) {
-      recentSearchContainer.innerHTML += `<span name="recent_searches" class="bg-white border border-pink-200 text-pink-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-pink-50 transition">${
-        place.charAt(0).toUpperCase() + place.slice(1)
-      }</span>`;
+      recentSearches.unshift(place);
+      if (recentSearches.length > 3) {
+        recentSearches.pop();
+      }
+      recentSearchContainer.innerHTML = "";
+      recentSearches.forEach((search) => {
+        recentSearchContainer.innerHTML += `<span name="recent_searches" class="bg-white border border-pink-200 text-pink-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-pink-50 transition">${
+          search.charAt(0).toUpperCase() + search.slice(1)
+        }</span>`;
+      });
+
       await handleRecentSearch(studentId);
     }
 
@@ -176,13 +184,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   if (studentId) await handleRecentSearch(studentId);
-
+  document.getElementById("place").addEventListener("input", function () {
+    document.getElementById("place-error").textContent = "";
+  });
   document.getElementById("search").addEventListener("click", async (e) => {
     e.preventDefault();
     const place = document.getElementById("place").value.trim();
     const tripType = document.querySelector(
       'input[name="trip-type"]:checked'
     ).value;
+    if (!place || place.length < 4) {
+      document.getElementById("place-error").textContent =
+        "Please enter a valid place.";
+      return;
+    } else {
+      document.getElementById("place-error").textContent = "";
+    }
 
     await fetchRoutes(place, tripType, studentId, filterTime);
   });
