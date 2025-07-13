@@ -51,9 +51,9 @@ def index(request):
         cache.set("popular_routes", data, timeout=60)
     if user:
         preferences = list(
-            Preference.objects.filter(student__student_id=user).order_by(
-                "-total_searches"
-            )[:3]
+            Preference.objects.filter(student__student_id=user).order_by("-created_at")[
+                :3
+            ]
         )
 
     return render(
@@ -67,7 +67,7 @@ def index(request):
 
 
 @sync_to_async
-def get_schedules(trip_type, place):
+def get_schedules(trip_type, place,student_id=None):
 
     schedules = Transportation_schedules.objects.select_related(
         "bus", "driver", "route"
@@ -94,7 +94,7 @@ def get_schedules(trip_type, place):
                 "route": RouteSerializer(route_obj).data,
                 "route_name": route_obj.route_name,
                 "audience": schedule.get_audience_display(),
-                "departure_time": schedule.departure_time.strftime("%I:%M %p"),
+                "departure_time": schedule.departure_time.strftime("%I:%M %p") if student_id else "Available",
                 "stoppage_names": [
                     stoppage.stoppage.stoppage_name
                     for stoppage in stoppages_by_route.get(route_id, [])
@@ -146,7 +146,7 @@ async def search_route(request):
         trip_type = body.get("tripType")
         place = body.get("place")
         student_id = body.get("studentId")
-        data = await get_schedules(trip_type, place)
+        data = await get_schedules(trip_type, place, student_id)
 
         try:
             if data and student_id:
