@@ -193,7 +193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else {
       showToast("Welcome back!");
     }
-    //sessionStorage.setItem("welcome_shown", "true");
+    sessionStorage.setItem("welcome_shown", "true");
   }
 
   setupScrollToTop();
