@@ -29,7 +29,9 @@
             </div>
           </div>
         {% else %}
-          <div class="mb-6 px-4 py-3 bg-yellow-50 border border-yellow-200 text-yellow-700 text-sm rounded-md"><button id="login-button" class="font-medium text-blue-700 hover:underline">Login</button> to filter by departure time</div>
+          <div class="mb-6 px-4 py-3 bg-yellow-50 border border-yellow-200 text-yellow-700 text-sm rounded-md">
+            <button id="login-button" class="font-medium text-blue-700 hover:underline">Login</button> to filter by departure time
+          </div>
         {% endif %}
         <div class="mb-6">
           {% if request.session.is_student_authenticated %}
@@ -147,6 +149,28 @@
       <path d="M10 15V5M10 5l-5 5M10 5l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   </button>
+  <div id="toast-notification" class="fixed top-20 right-5 z-50 transform translate-x-full opacity-0 transition-all duration-500 ease-in-out">
+  <div class="bg-white border border-blue-300 text-gray-800 px-6 py-4 rounded-xl shadow-2xl flex items-start space-x-4 w-80">
+    
+    <!-- Avatar-style Icon -->
+    <div class="flex-shrink-0">
+      <div class="bg-blue-500 rounded-full p-2">
+        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M5.121 17.804A7.975 7.975 0 0112 16c1.657 0 3.182.507 4.438 1.366M15 10h.01M9 10h.01M12 14a4 4 0 01-4-4h8a4 4 0 01-4 4z" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Text -->
+    <div class="flex-1">
+      <p class="text-base font-bold">Hello there! 👋</p>
+      <p class="text-sm text-gray-600" id="welcome-toast">Welcome back!</p>
+    </div>
+  </div>
+</div>
+
 
   {% include 'kits/footer.html' %}
   <script type="module" src="{% static 'js/main.js' %}"></script>

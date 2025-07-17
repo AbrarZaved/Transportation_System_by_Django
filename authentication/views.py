@@ -67,7 +67,7 @@ def student_auth(request):
         request.session["student_id"] = student_id
         request.session["is_student_authenticated"] = True
         return JsonResponse(
-            {"success": True, "message": "Signed in successfully."}, status=200
+            {"success": True, "message": "Signed in successfully.", "student_name": student.name}, status=200
         )
 
     elif mode == "signup":

@@ -2,84 +2,113 @@
 {% load static %}
 
 {% block content %}
-
-<!-- Hero Section -->
-<section class="relative bg-cover bg-center h-screen text-white flex items-center justify-center" style="background-image: url('https://images.pexels.com/photos/3617459/pexels-photo-3617459.jpeg');">
-  <div class="bg-black bg-opacity-60 absolute inset-0"></div>
-  <div class="relative z-10 text-center px-4">
-    <h1 class="text-5xl font-extrabold leading-tight drop-shadow">BAHON</h1>
-    <p class="text-lg mt-4 font-light">Reimagining Transportation for Daffodil International University</p>
-    <a href="{% url 'contact_us' %}" class="mt-8 inline-block bg-white text-indigo-700 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition">Join the Movement</a>
-  </div>
-</section>
-
-<!-- Our Story -->
-<section class="py-20 bg-white">
-  <div class="container grid md:grid-cols-2 gap-12 items-center">
-    <div class="order-2 md:order-1">
-      <h2 class="text-3xl font-bold mb-4 text-indigo-800">How It All Began</h2>
-      <p class="text-gray-700 leading-relaxed mb-4">
-        Frustrated by the daily chaos of DIU's transportation? So were we. BAHON emerged from our own student struggles with late buses, poor communication, and no centralized platform.
-      </p>
-      <p class="text-gray-700 leading-relaxed">
-        Today, BAHON offers real-time updates, supervisor tools, and a passwordless student interface — a smart system built for students, by students.
-      </p>
+  <!-- Hero Section -->
+  <section class="relative bg-cover bg-center h-screen text-white flex items-center justify-center" style="background-image: url('{% static 'img/about_us.jpeg' %}');">
+    <div class="bg-black bg-opacity-60 absolute inset-0"></div>
+    <div class="relative z-10 text-center px-4">
+      <h1 class="text-5xl font-extrabold leading-tight drop-shadow">BAHON</h1>
+      <p class="text-lg mt-4 font-light">Reimagining Transportation for Daffodil International University</p>
+      <a href="{% url 'contact_us' %}" class="mt-8 inline-block bg-white text-indigo-700 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition">Join the Movement</a>
     </div>
-    <div class="order-1 md:order-2">
-      <img src="https://images.pexels.com/photos/2174656/pexels-photo-2174656.jpeg" alt="Our Story" class="rounded-xl shadow-xl">
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- Mission & Vision -->
-<section class="bg-gradient-to-br from-blue-50 to-white py-20">
-  <div class="container text-center">
-    <h2 class="text-3xl font-bold text-indigo-800 mb-10">Our Mission & Vision</h2>
-    <div class="grid md:grid-cols-2 gap-8">
-      <div class="bg-white p-8 rounded-xl shadow hover:shadow-lg transition">
-        <div class="text-5xl text-blue-700 mb-4"><i class="fas fa-rocket"></i></div>
-        <h3 class="text-xl font-semibold mb-2">Mission</h3>
-        <p class="text-gray-600">To build a seamless, secure, and digital-first transportation platform tailored for the DIU community.</p>
+  <!-- Our Story -->
+  <section class="py-20 bg-white">
+    <div class="container grid md:grid-cols-2 gap-12 items-center">
+      <div class="order-2 md:order-1">
+        <h2 class="text-3xl font-bold mb-4 text-indigo-800">How It All Began</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">Frustrated by the daily chaos of DIU's transportation? So were we. BAHON emerged from our own student struggles with late buses, poor communication, and no centralized platform.</p>
+        <p class="text-gray-700 leading-relaxed">Today, BAHON offers real-time updates, supervisor tools, and a passwordless student interface — a smart system built for students, by students.</p>
       </div>
-      <div class="bg-white p-8 rounded-xl shadow hover:shadow-lg transition">
-        <div class="text-5xl text-blue-700 mb-4"><i class="fas fa-globe-asia"></i></div>
-        <h3 class="text-xl font-semibold mb-2">Vision</h3>
-        <p class="text-gray-600">To become the gold standard for university transit systems across Bangladesh and South Asia.</p>
+      <div class="order-1 md:order-2">
+        <img src="{% static 'img/bike.jpeg' %}" alt="Our Story" class="rounded-xl shadow-xl" />
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Meet the Developers -->
-<section class="py-20 bg-gray-50">
-  <div class="container text-center">
-    <h2 class="text-3xl font-bold text-indigo-800 mb-6">Meet the Minds Behind BAHON</h2>
-    <p class="text-gray-600 mb-12">A passionate duo on a mission to change campus commuting</p>
-
-    <div class="grid sm:grid-cols-2 gap-10 max-w-5xl mx-auto">
-      <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition text-center">
-        <img src="{% static 'img/abrar.jpg' %}" class="w-32 h-32 mx-auto rounded-full object-cover mb-4">
-        <h3 class="text-xl font-semibold text-indigo-800">Abrar Javed Sorafi</h3>
-        <p class="text-gray-500 mb-2">Team Lead & Backend Engineer</p>
-        <div class="flex justify-center gap-4 mt-3 text-blue-600 text-xl">
-          <a href="https://github.com/AbrarZaved"><i class="fab fa-github"></i></a>
-          <a href="https://www.linkedin.com/in/abrar-javed-sorafi-a7082b26b/"><i class="fab fa-linkedin-in"></i></a>
+  <!-- Mission & Vision -->
+  <section class="bg-gradient-to-br from-blue-50 to-white py-20">
+    <div class="container text-center">
+      <h2 class="text-3xl font-bold text-indigo-800 mb-10">Our Mission & Vision</h2>
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="bg-white p-8 rounded-xl shadow hover:shadow-lg transition">
+          <div class="text-5xl text-blue-700 mb-4">
+            <i class="fas fa-rocket"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">Mission</h3>
+          <p class="text-gray-600">To build a seamless, secure, and digital-first transportation platform tailored for the DIU community.</p>
         </div>
-      </div>
-
-      <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition text-center">
-        <img src="{% static 'img/deba.jpg' %}" class="w-32 h-32 mx-auto rounded-full object-cover mb-4">
-        <h3 class="text-xl font-semibold text-indigo-800">Debasish Mondal</h3>
-        <p class="text-gray-500 mb-2">Frontend Developer</p>
-        <div class="flex justify-center gap-4 mt-3 text-blue-600 text-xl">
-          <a href="https://github.com/Debasish1512"><i class="fab fa-github"></i></a>
-          <a href="#"><i class="fab fa-linkedin-in"></i></a>
+        <div class="bg-white p-8 rounded-xl shadow hover:shadow-lg transition">
+          <div class="text-5xl text-blue-700 mb-4">
+            <i class="fas fa-globe-asia"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">Vision</h3>
+          <p class="text-gray-600">To become the gold standard for university transit systems across Bangladesh and South Asia.</p>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
+  <!-- Meet the Developers -->
+  <section class="py-20 bg-gray-50">
+    <div class="container text-center">
+      <h2 class="text-3xl font-bold text-indigo-800 mb-6">Meet the Minds Behind BAHON</h2>
+      <p class="text-gray-600 mb-12">A passionate duo on a mission to change campus commuting</p>
 
-{% include 'kits/footer.html' %}
+      <div class="grid sm:grid-cols-2 gap-10 max-w-5xl mx-auto">
+        <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition text-center">
+          <img src="{% static 'img/abrar.jpg' %}" class="w-32 h-32 mx-auto rounded-full object-cover mb-4" />
+          <h3 class="text-xl font-semibold text-indigo-800">Abrar Javed Sorafi</h3>
+          <p class="text-gray-500 mb-2">Team Lead & Backend Engineer</p>
+          <div class="flex justify-center gap-4 mt-3 text-blue-600 text-xl">
+            <a href="https://github.com/AbrarZaved"><i class="fab fa-github"></i></a>
+            <a href="https://www.linkedin.com/in/abrar-javed-sorafi-a7082b26b/"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+
+        <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition text-center">
+          <img src="{% static 'img/deba.jpg' %}" class="w-32 h-32 mx-auto rounded-full object-cover mb-4" />
+          <h3 class="text-xl font-semibold text-indigo-800">Debasish Mondal</h3>
+          <p class="text-gray-500 mb-2">Frontend Developer</p>
+          <div class="flex justify-center gap-4 mt-3 text-blue-600 text-xl">
+            <a href="https://github.com/Debasish1512"><i class="fab fa-github"></i></a>
+            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toastNotification = document.getElementById('toast-notification')
+      const showToastButton = document.getElementById('show-toast-button')
+    
+      // Function to show the toast
+      function showToast() {
+        // Reset state in case it was previously hidden
+        toastNotification.classList.add('translate-x-full', 'opacity-0')
+        toastNotification.classList.remove('hidden') // Ensure it's not display: none
+    
+        // Allow a slight delay for the browser to register the initial state
+        // before applying the transition to the visible state.
+        setTimeout(() => {
+          toastNotification.classList.remove('translate-x-full', 'opacity-0')
+        }, 50) // Small delay, like 50ms
+    
+        // Set a timeout to hide the toast after 3 seconds (adjust as needed)
+        setTimeout(() => {
+          toastNotification.classList.add('translate-x-full', 'opacity-0')
+          // Add 'hidden' after the transition completes to truly remove it from layout
+          toastNotification.addEventListener('transitionend', function handler() {
+            toastNotification.classList.add('hidden')
+            toastNotification.removeEventListener('transitionend', handler) // Clean up the listener
+          })
+        }, 3000) // 3000 milliseconds = 3 seconds
+      }
+    
+      // Attach the showToast function to the button click
+      showToastButton.addEventListener('click', showToast)
+    })
+  </script>
+  {% include 'kits/footer.html' %}
 {% endblock %}

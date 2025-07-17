@@ -1,4 +1,10 @@
 import { getCookie } from "/static/js/utils.js";
+function clearStudentSession() {
+  ["student_id", "student_name"].forEach(
+    localStorage.removeItem.bind(localStorage)
+  );
+  ["welcome_shown"].forEach(sessionStorage.removeItem.bind(sessionStorage));
+}
 
 document.addEventListener("DOMContentLoaded", function () {
   const hamburger = document.getElementById("hamburgerBtn");
@@ -22,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
   ["sign_in_desktop", "sign_in_mobile", "login-button"].forEach((id) => {
     const btn = document.getElementById(id);
     if (btn?.textContent === "Sign In") {
-      localStorage.removeItem("student_id");
+      clearStudentSession();
     }
     btn?.addEventListener("click", () => {
       if (hamburger && mobileMenu.classList.contains("open")) {
@@ -157,7 +163,8 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((data) => {
         if (data.success) {
           localStorage.setItem("student_id", student_id);
-          window.location.href = "/my_account";
+          localStorage.setItem("student_name", data.student_name || "");
+          window.location.reload();
         } else {
           showError(data.message || "An error occurred.", mode);
           return;
