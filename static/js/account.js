@@ -1,4 +1,27 @@
+async function showToast(toast, message) {
+  const welcomeToast = document.getElementById("update-toast");
+  const toastMessage = document.getElementById("update-message");
+  const toastNotification = document.getElementById("update-profile");
+  toastNotification.classList.add("translate-x-full", "opacity-0");
+  toastNotification.classList.remove("hidden");
+  welcomeToast.textContent = toast;
+  toastMessage.textContent = message;
+  setTimeout(() => {
+    toastNotification.classList.remove("translate-x-full", "opacity-0");
+  }, 50);
+  setTimeout(() => {
+    toastNotification.classList.add("translate-x-full", "opacity-0");
+    toastNotification.addEventListener("transitionend", function handler() {
+      toastNotification.classList.add("hidden");
+      toastNotification.removeEventListener("transitionend", handler);
+    });
+  }, 3000);
+}
 document.addEventListener("DOMContentLoaded", () => {
+  const msg = document.getElementById("update-success");
+  if (msg) {
+    showToast("Profile updated", msg.dataset.message);
+  }
   const modal = document.getElementById("editProfile");
   const modalContent = document.getElementById("editModalContent");
   const editButton = document.getElementById("edit");
@@ -6,6 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const historyModal = document.getElementById("historyModal");
   const historyList = document.getElementById("historyList");
 
+  let batchCode = document.getElementById("batch").dataset.profile;
+  let deptName = document.getElementById("dept").dataset.profile;
+  if (!batchCode || !deptName) {
+    showToast(
+      "Please complete your profile",
+      "Your information is required to proceed"
+    );
+  }
   if (editButton) {
     editButton.addEventListener("click", openEditModal);
   }

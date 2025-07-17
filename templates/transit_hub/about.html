@@ -78,37 +78,5 @@
       </div>
     </div>
   </section>
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const toastNotification = document.getElementById('toast-notification')
-      const showToastButton = document.getElementById('show-toast-button')
-    
-      // Function to show the toast
-      function showToast() {
-        // Reset state in case it was previously hidden
-        toastNotification.classList.add('translate-x-full', 'opacity-0')
-        toastNotification.classList.remove('hidden') // Ensure it's not display: none
-    
-        // Allow a slight delay for the browser to register the initial state
-        // before applying the transition to the visible state.
-        setTimeout(() => {
-          toastNotification.classList.remove('translate-x-full', 'opacity-0')
-        }, 50) // Small delay, like 50ms
-    
-        // Set a timeout to hide the toast after 3 seconds (adjust as needed)
-        setTimeout(() => {
-          toastNotification.classList.add('translate-x-full', 'opacity-0')
-          // Add 'hidden' after the transition completes to truly remove it from layout
-          toastNotification.addEventListener('transitionend', function handler() {
-            toastNotification.classList.add('hidden')
-            toastNotification.removeEventListener('transitionend', handler) // Clean up the listener
-          })
-        }, 3000) // 3000 milliseconds = 3 seconds
-      }
-    
-      // Attach the showToast function to the button click
-      showToastButton.addEventListener('click', showToast)
-    })
-  </script>
   {% include 'kits/footer.html' %}
 {% endblock %}

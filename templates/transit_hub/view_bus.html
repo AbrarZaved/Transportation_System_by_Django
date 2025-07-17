@@ -1,0 +1,73 @@
+{% extends 'kits/main.html' %}
+{% load static %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="bg-white py-10 px-4 text-center border-b">
+    <h1 class="text-3xl md:text-4xl font-bold text-indigo-600">Search for Your Bus</h1>
+    <p class="text-sm md:text-base text-gray-500 mt-2">Find buses by name or route</p>
+  </section>
+
+  <!-- Search Input -->
+  <section class="max-w-xl mx-auto mt-8 px-4">
+    <div class="flex items-center bg-white shadow-md rounded-xl overflow-hidden border focus-within:ring-2 focus-within:ring-indigo-400 transition">
+      <span class="pl-4 text-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+        </svg>
+      </span>
+      <input type="text" id="busSearch" placeholder="Search bus name or route..." oninput="filterBuses()" class="w-full p-3 border-none outline-none text-sm md:text-base" />
+    </div>
+  </section>
+
+  <!-- Bus Results Grid -->
+  <section class="container mx-auto px-4 py-10">
+    <div id="busResults" class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for bus in buses %}
+        <div class="bus-card bg-white shadow-md rounded-2xl overflow-hidden transition-transform hover:scale-[1.02] duration-200" bus-name="{{ bus.0 }} {{ bus.1 }}">
+          <!-- Card Header -->
+          <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-5 py-3">
+            <h3 class="text-xl font-semibold">{{ bus.0 }}</h3>
+            <p class="text-sm opacity-90">Route: {{ bus.1 }}</p>
+          </div>
+
+          <!-- Card Body -->
+          <div class="px-5 py-4 text-sm text-gray-700 space-y-1">
+            <p>
+              <span class="font-medium">Driver:</span> {{ bus.2 }} {{ bus.3 }}
+            </p>
+            <p>
+              <span class="font-medium">Phone number:</span> {{ bus.4 }}
+            </p>
+          </div>
+
+          <!-- Track Bus Button -->
+          <!-- Stylish Track Button -->
+          <div class="px-5 pb-5 pt-2">
+            <a href="#" class="group flex items-center justify-center w-full gap-2 bg-white bg-opacity-10 backdrop-blur-md border border-indigo-400 text-indigo-600 hover:text-white hover:bg-indigo-600 transition-all duration-300 font-medium py-2.5 rounded-full shadow-md hover:shadow-lg" onclick="event.preventDefault();alert('Tracking feature coming soon!');">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover:scale-110 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm0 10c3.866 0 7-3.134 7-7 0-1.657-.672-3.157-1.757-4.243L12 3 6.757 9.757A6.978 6.978 0 005 14c0 3.866 3.134 7 7 7z" />
+              </svg>
+              <span class="text-sm font-semibold tracking-wide">Track Bus</span>
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Search Filter JS -->
+  <script>
+    function filterBuses() {
+      const query = document.getElementById('busSearch').value.toLowerCase()
+      const cards = document.querySelectorAll('.bus-card')
+    
+      cards.forEach((card) => {
+        const keywords = card.getAttribute('bus-name').toLowerCase()
+        card.style.display = keywords.includes(query) ? 'block' : 'none'
+      })
+    }
+  </script>
+
+  {% include 'kits/footer.html' %}
+{% endblock %}
