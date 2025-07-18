@@ -3,6 +3,7 @@ import {
   buildBusCards,
   renderNoRoutesFound,
   filterRoutesByTime,
+  showToast,
 } from "./utils.js";
 
 let filterRoute = null;
@@ -163,23 +164,7 @@ function setupRouteCardToggles() {
     });
   });
 }
-async function showToast(message) {
-  const welcomeToast = document.getElementById("welcome-toast");
-  const toastNotification = document.getElementById("toast-notification");
-  toastNotification.classList.add("translate-x-full", "opacity-0");
-  toastNotification.classList.remove("hidden");
-  welcomeToast.textContent = message || "Welcome back!";
-  setTimeout(() => {
-    toastNotification.classList.remove("translate-x-full", "opacity-0");
-  }, 50);
-  setTimeout(() => {
-    toastNotification.classList.add("translate-x-full", "opacity-0");
-    toastNotification.addEventListener("transitionend", function handler() {
-      toastNotification.classList.add("hidden");
-      toastNotification.removeEventListener("transitionend", handler);
-    });
-  }, 3000);
-}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const studentId = localStorage.getItem("student_id");
   const results = document.getElementById("results");
@@ -189,7 +174,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (studentId && !hasWelcomed) {
     const studentName = localStorage.getItem("student_name") || "";
     if (studentName) {
-      showToast(`Welcome back, ${studentName}!`);
+      showToast(`Welcome back,`, ` ${studentName}!`);
     } else {
       showToast("Welcome back!");
     }

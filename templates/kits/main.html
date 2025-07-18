@@ -21,6 +21,29 @@
   </head>
 
   <body>
+    <section>
+      <div id="toast-notification" class="fixed top-20 right-5 z-50 transform translate-x-full opacity-0 transition-all   duration-500 ease-in-out">
+        <div class="bg-white border border-blue-300 text-gray-800 px-6 py-4 rounded-xl shadow-2xl flex items-start space-x-4 w-80">
+          
+          <!-- Avatar-style Icon -->
+          <div class="flex-shrink-0">
+            <div class="bg-blue-500 rounded-full p-2">
+              <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M5.121 17.804A7.975 7.975 0 0112 16c1.657 0 3.182.507 4.438 1.366M15 10h.01M9 10h.01M12 14a4 4 0 01-4-4h8a4 4 0 01-4 4z" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Text -->
+          <div class="flex-1">
+            <p class="text-base font-bold" id="toast-title">Hello there! 👋</p>
+            <p class="text-sm text-gray-600" id="toast-message">Welcome back!</p>
+          </div>
+        </div>
+    </section>
+    
     <!-- Header -->
     <header class="bg-white shadow-md">
       <div class="container mx-auto px-4 flex items-center justify-between h-16">
@@ -33,19 +56,27 @@
             <li>
               <a href="{% url 'index' %}"
                 class="{% if request.resolver_match.url_name == 'index' %}
+                  
                   text-pink-500 active
+
                 {% else %}
+                  
                   hover:text-pink-500
+
                 {% endif %} transition">
                 Home
               </a>
             </li>
             <li>
-              <a href="{% url "view_bus" %}"
+              <a href="{% url 'view_bus' %}"
                 class="{% if request.resolver_match.url_name == 'view_bus' %}
+                  
                   text-pink-500 active
+
                 {% else %}
+                  
                   hover:text-pink-500
+
                 {% endif %} transition">
                 View Bus
               </a>
@@ -53,9 +84,13 @@
             <li>
               <a href="{% url 'about_us' %}"
                 class="{% if request.resolver_match.url_name == 'about_us' %}
+                  
                   text-pink-500 active
+
                 {% else %}
+                  
                   hover:text-pink-500
+
                 {% endif %} transition">
                 About Us
               </a>
@@ -63,9 +98,13 @@
             <li>
               <a href="{% url 'contact_us' %}"
                 class="{% if request.resolver_match.url_name == 'contact_us' %}
+                  
                   text-pink-500 active
+
                 {% else %}
+                  
                   hover:text-pink-500
+
                 {% endif %} transition">
                 Contact Us
               </a>
@@ -74,9 +113,13 @@
               <li>
                 <a href="{% url 'my_account' %}"
                   class="{% if request.resolver_match.url_name == 'my_account' %}
+                    
                     text-pink-500 active
+
                   {% else %}
+                    
                     hover:text-pink-500
+
                   {% endif %} transition">
                   My Account
                 </a>
@@ -131,7 +174,9 @@
         }
       </style>
     </header>
+    
     <!-- Modal Dialog -->
+
     <div id="customModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
       <div id="modalContent" class="bg-white w-full max-w-md p-6 rounded-xl shadow-lg transform scale-90 opacity-0 transition-all duration-300">
         <div class="flex justify-around mb-6">
@@ -174,6 +219,7 @@
         </form>
       </div>
     </div>
+    
 
     {% block content %}
 

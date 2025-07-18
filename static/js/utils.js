@@ -13,7 +13,25 @@ export function getCookie(name) {
   }
   return cookieValue;
 }
-// utils.js
+export async function showToast(title, message) {
+  const toastTitle = document.getElementById("toast-title");
+  const toastMessage = document.getElementById("toast-message");
+  const toastNotification = document.getElementById("toast-notification");
+  toastNotification.classList.add("translate-x-full", "opacity-0");
+  toastNotification.classList.remove("hidden");
+  toastTitle.textContent = title;
+  toastMessage.textContent = message;
+  setTimeout(() => {
+    toastNotification.classList.remove("translate-x-full", "opacity-0");
+  }, 50);
+  setTimeout(() => {
+    toastNotification.classList.add("translate-x-full", "opacity-0");
+    toastNotification.addEventListener("transitionend", function handler() {
+      toastNotification.classList.add("hidden");
+      toastNotification.removeEventListener("transitionend", handler);
+    });
+  }, 3000);
+}
 export async function filterRoutesByTime(routes, selectedTime) {
   if (selectedTime === "all") {
     return routes; // No filtering needed
@@ -34,18 +52,60 @@ function toggleBusDetails(index) {
   const allDetails = document.querySelectorAll('[id^="bus-details-"]');
   allDetails.forEach((el, i) => {
     if (i === index) {
-      const isCollapsed = el.classList.contains('max-h-0');
+      const isCollapsed = el.classList.contains("max-h-0");
       if (isCollapsed) {
-        el.classList.remove('max-h-0', 'opacity-0', 'invisible', 'pt-0', 'pb-0', 'overflow-hidden');
-        el.classList.add('max-h-96', 'opacity-100', 'visible', 'pt-4', 'pb-4', 'overflow-visible');
+        el.classList.remove(
+          "max-h-0",
+          "opacity-0",
+          "invisible",
+          "pt-0",
+          "pb-0",
+          "overflow-hidden"
+        );
+        el.classList.add(
+          "max-h-96",
+          "opacity-100",
+          "visible",
+          "pt-4",
+          "pb-4",
+          "overflow-visible"
+        );
       } else {
-        el.classList.add('max-h-0', 'opacity-0', 'invisible', 'pt-0', 'pb-0', 'overflow-hidden');
-        el.classList.remove('max-h-96', 'opacity-100', 'visible', 'pt-4', 'pb-4', 'overflow-visible');
+        el.classList.add(
+          "max-h-0",
+          "opacity-0",
+          "invisible",
+          "pt-0",
+          "pb-0",
+          "overflow-hidden"
+        );
+        el.classList.remove(
+          "max-h-96",
+          "opacity-100",
+          "visible",
+          "pt-4",
+          "pb-4",
+          "overflow-visible"
+        );
       }
     } else {
       // Collapse others
-      el.classList.add('max-h-0', 'opacity-0', 'invisible', 'pt-0', 'pb-0', 'overflow-hidden');
-      el.classList.remove('max-h-96', 'opacity-100', 'visible', 'pt-4', 'pb-4', 'overflow-visible');
+      el.classList.add(
+        "max-h-0",
+        "opacity-0",
+        "invisible",
+        "pt-0",
+        "pb-0",
+        "overflow-hidden"
+      );
+      el.classList.remove(
+        "max-h-96",
+        "opacity-100",
+        "visible",
+        "pt-4",
+        "pb-4",
+        "overflow-visible"
+      );
     }
   });
 }
@@ -167,7 +227,6 @@ export function buildBusCards(routeData) {
 
   return html;
 }
-
 
 export function renderNoRoutesFound(text) {
   const modalId = "noRoutesModal";

@@ -1,22 +1,4 @@
-async function showToast(toast, message) {
-  const welcomeToast = document.getElementById("update-toast");
-  const toastMessage = document.getElementById("update-message");
-  const toastNotification = document.getElementById("update-profile");
-  toastNotification.classList.add("translate-x-full", "opacity-0");
-  toastNotification.classList.remove("hidden");
-  welcomeToast.textContent = toast;
-  toastMessage.textContent = message;
-  setTimeout(() => {
-    toastNotification.classList.remove("translate-x-full", "opacity-0");
-  }, 50);
-  setTimeout(() => {
-    toastNotification.classList.add("translate-x-full", "opacity-0");
-    toastNotification.addEventListener("transitionend", function handler() {
-      toastNotification.classList.add("hidden");
-      toastNotification.removeEventListener("transitionend", handler);
-    });
-  }, 3000);
-}
+import { showToast } from "./utils.js";
 document.addEventListener("DOMContentLoaded", () => {
   const msg = document.getElementById("update-success");
   if (msg) {
