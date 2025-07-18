@@ -1,6 +1,6 @@
 import { getCookie } from "/static/js/utils.js";
 function clearStudentSession() {
-  ["student_id", "student_name"].forEach(
+  ["student_id", "student_name", "greeting"].forEach(
     localStorage.removeItem.bind(localStorage)
   );
   ["welcome_shown"].forEach(sessionStorage.removeItem.bind(sessionStorage));
@@ -164,6 +164,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (data.success) {
           localStorage.setItem("student_id", student_id);
           localStorage.setItem("student_name", data.student_name || "");
+          localStorage.setItem("greeting", data.greeting);
           window.location.reload();
         } else {
           showError(data.message || "An error occurred.", mode);

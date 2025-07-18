@@ -70,6 +70,7 @@ def student_auth(request):
                 "success": True,
                 "message": "Signed in successfully.",
                 "student_name": student.name,
+                "greeting": True,
             },
             status=200,
         )
@@ -112,7 +113,13 @@ def student_auth(request):
         request.session["is_student_authenticated"] = True
         request.session.set_expiry(3600)
         return JsonResponse(
-            {"success": True, "message": "Signed up and logged in."}, status=201
+            {
+                "success": True,
+                "message": "Signed up and logged in.",
+                "student_name": name,
+                "greeting": False,
+            },
+            status=201,
         )
 
     else:
@@ -121,6 +128,7 @@ def student_auth(request):
 
 def sign_out(request):
     request.session.flush()
+    messages.success(request, "Logged out!")
     return redirect("index")
 
 

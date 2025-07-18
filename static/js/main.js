@@ -166,12 +166,18 @@ function setupRouteCardToggles() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const messages = document.getElementById("messages");
+  if (messages) {
+    showToast(messages.dataset.message, "You are successfully logged out!");
+  }
   const studentId = localStorage.getItem("student_id");
   const results = document.getElementById("results");
-  const hasWelcomed = sessionStorage.getItem("welcome_shown");
+  const hasWelcomed = sessionStorage.getItem("welcome_shown") || "false";
+  const greeting = localStorage.getItem("greeting");
+  console.log(greeting, hasWelcomed);
   results.style.display = "none";
 
-  if (studentId && !hasWelcomed) {
+  if (studentId && hasWelcomed === "false" && greeting === "true") {
     const studentName = localStorage.getItem("student_name") || "";
     if (studentName) {
       showToast(`Welcome back,`, ` ${studentName}!`);
@@ -179,6 +185,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       showToast("Welcome back!");
     }
     sessionStorage.setItem("welcome_shown", "true");
+    localStorage.setItem("greeting", "true");
+  } else if (studentId && greeting === "false") {
+    const studentName = localStorage.getItem("student_name") || "";
+    showToast(`Greetings,`, ` ${studentName}!`);
+    localStorage.setItem("greeting", "true");
   }
 
   setupScrollToTop();

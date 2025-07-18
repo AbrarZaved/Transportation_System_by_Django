@@ -140,6 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (res.ok) {
+        showToast("History deleted", "The item has been removed successfully");
         const li = button.closest("li");
         if (li) li.remove();
       } else {

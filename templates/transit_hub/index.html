@@ -152,7 +152,11 @@
   <!-- Toast Notification -->
   
 </div>
-
+  {% if messages %}
+    {% for message in messages %}
+      <div id="messages" data-message="{{ message }}"></div>
+    {% endfor %}
+  {% endif %}
 
   {% include 'kits/footer.html' %}
   <script type="module" src="{% static 'js/main.js' %}"></script>
