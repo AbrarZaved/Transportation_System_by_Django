@@ -174,7 +174,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const results = document.getElementById("results");
   const hasWelcomed = sessionStorage.getItem("welcome_shown") || "false";
   const greeting = localStorage.getItem("greeting");
-  console.log(greeting, hasWelcomed);
   results.style.display = "none";
 
   if (studentId && hasWelcomed === "false" && greeting === "true") {
