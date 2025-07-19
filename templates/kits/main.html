@@ -82,6 +82,20 @@
               </a>
             </li>
             <li>
+              <a href="{% url 'subscription' %}"
+                class="{% if request.resolver_match.url_name == 'subscription' %}
+
+                  text-pink-500 active
+
+                {% else %}
+                  
+                  hover:text-pink-500
+
+                {% endif %} transition">
+                Subscription
+              </a>
+            </li>
+            <li>
               <a href="{% url 'about_us' %}"
                 class="{% if request.resolver_match.url_name == 'about_us' %}
                   
@@ -148,6 +162,9 @@
           </li>
           <li>
             <a href="{% url 'view_bus' %}" class="block hover:text-pink-500 transition">View Bus</a>
+          </li>
+          <li>
+            <a href="{% url 'subscription' %}" class="block hover:text-pink-500 transition">Subscription</a>
           </li>
           <li>
             <a href="{% url 'about_us' %}" class="block hover:text-pink-500 transition">About Us</a>

@@ -107,7 +107,7 @@
                         Next Departure: {{ buses.0.1 }} · <!-- Optionally add time diff -->
                       </p>
                     {% else %}
-                      <p class="text-sm text-gray-500">Log in to see next departure</p>
+                      <p class="text-sm text-gray-500">Log in to see detailed information</p>
                     {% endif %}
                   {% else %}
                     <p class="text-sm text-gray-500">No scheduled buses</p>
@@ -124,18 +124,27 @@
               {% if buses %}
                 <div class="bus-details mt-4 border-t border-gray-100 pt-3 overflow-hidden transition-all duration-500 ease-in-out" style="height: 0;">
                   <ul class="mt-2 space-y-2 text-sm text-gray-600">
-                    {% for bus_name, departure in buses %}
-                      <li>
-                        <div class="flex justify-between text-sm text-gray-600">
-                          <span>🚌 {{ bus_name }}</span>
-                          {% if request.session.is_student_authenticated %}
-                            <span>{{ departure }}</span>
-                          {% else %}
-                            <span>Log in to see departure time</span>
-                          {% endif %}
-                        </div>
-                      </li>
-                    {% endfor %}
+                  <ul>
+                    {% if buses %}
+                      {% for bus_name, departure in buses %}
+                        <li>
+                          <div class="flex justify-between text-sm text-gray-600">
+                            <span>🚌 {{ bus_name }}</span>
+                            {% if request.session.is_student_authenticated %}
+                              <span>{{ departure }}</span>
+                            {% endif %}
+                          </div>
+                        </li>
+                      {% endfor %}
+
+                      {% if not request.session.is_student_authenticated %}
+                        <li class="text-sm text-gray-500 italic mt-2">Log in to see departure time</li>
+                      {% endif %}
+                    {% else %}
+                      <li>No buses available.</li>
+                    {% endif %}
+                  </ul>
+
                   </ul>
                 </div>
               {% endif %}
