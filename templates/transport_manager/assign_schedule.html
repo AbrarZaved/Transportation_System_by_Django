@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+{% extends 'admin_kits/base.html' %}
+{% load static %}
+{% block style %}
+  <style>
+    .scrollable-container::-webkit-scrollbar {
+      height: 8px;
+    }
+    .scrollable-container::-webkit-scrollbar-track {
+      background: #e0e7ff;
+      border-radius: 10px;
+    }
+    .scrollable-container::-webkit-scrollbar-thumb {
+      background: #a5b4fc;
+      border-radius: 10px;
+    }
+    .scrollable-container::-webkit-scrollbar-thumb:hover {
+      background: #818cf8;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <body class="bg-gray-100 min-h-screen p-4 sm:p-6 lg:p-10">
+    <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-lg p-6 sm:p-8 lg:p-10">
+      <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 text-indigo-700">Assign Bus Schedule</h2>
+
+      <!-- From / To DSC -->
+       <form method="POST" action="#">
+      <div class="flex justify-center gap-4 mb-8" id="direction-selector">
+        <label class="flex items-center bg-indigo-50 hover:bg-indigo-100 px-6 py-3 rounded-full shadow-md cursor-pointer text-lg">
+          <input type="radio" name="direction" value="from_dsc" class="w-6 h-6 mr-3 accent-indigo-600" />
+          <span class="text-indigo-800 font-medium">From DSC</span>
+        </label>
+        <label class="flex items-center bg-indigo-50 hover:bg-indigo-100 px-6 py-3 rounded-full shadow-md cursor-pointer text-lg">
+          <input type="radio" name="direction" value="to_dsc" class="w-6 h-6 mr-3 accent-indigo-600" />
+          <span class="text-indigo-800 font-medium">To DSC</span>
+        </label>
+      </div>
+
+      
+        {% csrf_token %}
+
+        <div class="flex flex-col lg:flex-row lg:space-x-6 overflow-x-auto pb-4 scrollable-container">
+          <!-- Time Section -->
+          <div class="w-full lg:w-64 flex-shrink-0 mb-6 lg:mb-0">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">Select Time</h3>
+            <input type="text" oninput="filterItems(this, 'time-list')" placeholder="Search Time" class="mb-3 w-full px-3 py-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-300" />
+            <div id="time-list" class="space-y-2 max-h-64 overflow-y-auto">
+              {% for time in times %}
+                <label class="flex items-center p-3 bg-gray-50 rounded border hover:bg-indigo-50 cursor-pointer text-base">
+                  <input type="radio" name="time" value="{{ time }}" required class="mr-3" />
+                  <span class="text-gray-700 font-medium">{{ time }}</span>
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Scrollable Right Section -->
+          <div class="flex flex-col sm:flex-row lg:flex-row sm:space-x-4 lg:space-x-6 w-full lg:min-w-[calc(100%-18rem)] overflow-x-auto pb-4">
+            <!-- Bus Section -->
+            <div class="w-full sm:w-64 flex-shrink-0 mb-6 sm:mb-0">
+              <h3 class="text-lg font-semibold text-gray-800 mb-3">Select Buses</h3>
+              <input type="text" oninput="filterItems(this, 'bus-list')" placeholder="Search Bus" class="mb-3 w-full px-3 py-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-300" />
+              <div id="bus-list" class="space-y-2 max-h-64 overflow-y-auto">
+                {% for bus in buses %}
+                  <label class="flex items-center p-3 bg-gray-50 rounded border hover:bg-indigo-50 cursor-pointer text-base">
+                    <input type="radio" name="buses" value="{{ bus.bus_tag }}" class="mr-3" />
+                    <span class="text-gray-700 font-medium">{{ bus.bus_name }}</span>
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Route Section -->
+            <div class="w-full sm:w-64 flex-shrink-0 mb-6 sm:mb-0">
+              <h3 class="text-lg font-semibold text-gray-800 mb-3">Select Route</h3>
+              <input type="text" oninput="filterItems(this, 'route-list')" placeholder="Search Route" class="mb-3 w-full px-3 py-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-300" />
+              <div id="route-list" class="space-y-2 max-h-64 overflow-y-auto">
+
+              </div>
+            </div>
+
+            <!-- Driver Section -->
+            <div class="w-full sm:w-64 flex-shrink-0">
+              <h3 class="text-lg font-semibold text-gray-800 mb-3">Select Driver</h3>
+              <input type="text" oninput="filterItems(this, 'driver-list')" placeholder="Search Driver" class="mb-3 w-full px-3 py-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-300" />
+              <div id="driver-list" class="space-y-2 max-h-64 overflow-y-auto">
+                {% for driver in drivers %}
+                  <label class="flex items-center p-3 bg-gray-50 rounded border hover:bg-indigo-50 cursor-pointer text-base">
+                    <input type="radio" name="driver" value="{{ driver.id }}" required class="mr-3" />
+                    <span class="text-gray-700 font-medium">{{ driver.name }}</span>
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="text-center mt-10">
+          <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-lg px-8 py-3 rounded shadow-md">Save Assignment</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Simple Client-Side Filtering -->
+  </body>
+  <script src="{% static 'js/assign_schedule.js' %}" type="module"></script>
+  <script>
+    function filterItems(inputEl, containerId) {
+      const filter = inputEl.value.toLowerCase()
+      const items = document.querySelectorAll(`#${containerId} label`)
+      items.forEach((label) => {
+        const text = label.innerText.toLowerCase()
+        label.style.display = text.includes(filter) ? 'flex' : 'none'
+      })
+    }
+  </script>
+{% endblock %}

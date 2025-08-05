@@ -1,67 +1,56 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard - DIU Transportation</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 min-h-screen">
+{% extends 'admin_kits/base.html' %}
 
-    <!-- Navbar -->
-    <nav class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center shadow-md">
-        <div class="text-xl font-semibold">DIU Transportation - Admin</div>
-        <div>
-            <span class="mr-4">Hi, {{ request.user.first_name }} {{ request.user.last_name }}</span>
-            <a href="{% url 'logout' %}" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm font-medium">Logout</a>
-        </div>
-    </nav>
+{% block title %}Dashboard - DIU Admin{% endblock %}
 
-    <!-- Content -->
-    <main class="p-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">Dashboard</h2>
-            {% if messages %}
-                <div class="mb-6" id="message-container">
-                    {% for message in messages %}
-                        <div class="px-4 py-3 rounded-lg text-sm font-medium 
-                                    {% if message.tags == 'success' %}bg-green-100 text-green-800
-                                    {% elif message.tags == 'error' %}bg-red-100 text-red-800
-                                    {% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800
-                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+{% block content %}
+<h1 class="text-3xl font-extrabold mb-8 text-slate-800">Welcome, Admin!</h1>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Card: Add New Schedule -->
-            <a href="#" class="block bg-white shadow-lg rounded-2xl p-6 hover:shadow-xl transition">
-                <h3 class="text-lg font-semibold text-gray-700 mb-2">📅 Create New Schedule</h3>
-                <p class="text-gray-500 text-sm">Assign buses to routes for today or future dates.</p>
-            </a>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+  <a href="{% url 'assign_schedule' %}" class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-blue-100">
+    <div class="flex items-center justify-center w-12 h-12 bg-blue-500 text-white rounded-full mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    </div>
+    <h3 class="text-xl font-bold text-slate-800 mb-2">Create New Schedule</h3>
+    <p class="text-sm text-slate-600">Effortlessly assign buses to routes for today or future dates with detailed planning.</p>
+  </a>
 
-            <!-- Card: Today's Schedule -->
-            <a href="#" class="block bg-white shadow-lg rounded-2xl p-6 hover:shadow-xl transition">
-                <h3 class="text-lg font-semibold text-gray-700 mb-2">🚌 Today's Schedule</h3>
-                <p class="text-gray-500 text-sm">View all buses assigned for today.</p>
-            </a>
+  <a href="{% url "today_schedules" %}" class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-green-100">
+    <div class="flex items-center justify-center w-12 h-12 bg-green-500 text-white rounded-full mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      </div>
+    <h3 class="text-xl font-bold text-slate-800 mb-2">Today's Schedule</h3>
+    <p class="text-sm text-slate-600">Get an overview of all bus schedules active for the current day. Monitor their status.</p>
+  </a>
 
-            <!-- Card: Manage Buses & Routes -->
-            <a href="#" class="block bg-white shadow-lg rounded-2xl p-6 hover:shadow-xl transition">
-                <h3 class="text-lg font-semibold text-gray-700 mb-2">🛠️ Manage Buses & Routes</h3>
-                <p class="text-gray-500 text-sm">Add or edit bus and route information.</p>
-            </a>
-        </div>
-    </main>
-    <script>
-        // Auto-hide messages after 5 seconds
-        setTimeout(() => {
-            const messageContainer = document.getElementById('message-container');
-            if (messageContainer) {
-                messageContainer.style.display = 'none';
-            }
-        }, 3000);
-    </script>
-</body>
-</html>
+  <a href="{% url "manage_drivers_buses" %}" class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-purple-100">
+    <div class="flex items-center justify-center w-12 h-12 bg-purple-500 text-white rounded-full mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    </div>
+    <h3 class="text-xl font-bold text-slate-800 mb-2">Manage Drivers & Buses</h3>
+    <p class="text-sm text-slate-600">Centralized control for adding, editing, and deleting bus and route information.</p>
+  </a>
+
+  <a href="#" class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-orange-100">
+    <div class="flex items-center justify-center w-12 h-12 bg-orange-500 text-white rounded-full mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5V6a1 1 0 011-1h16a1 1 0 011 1v4.5M12 16v-4m0 0l-3 3m3-3l3 3" />
+      </svg>
+      </svg>
+    </div>
+    <h3 class="text-xl font-bold text-slate-800 mb-2">Route Management</h3>
+    <p class="text-sm text-slate-600">Add, view, and manage route details and assign them to specific drivers.</p>
+  </a>
+</div>
+
+<hr class="my-10 border-gray-200" />
+
+</div>
+
+{% endblock %}

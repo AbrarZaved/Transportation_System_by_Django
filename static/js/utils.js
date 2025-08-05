@@ -32,17 +32,32 @@ export async function showToast(title, message) {
     });
   }, 3000);
 }
+function convertTo24Hour(timeStr) {
+  const [time, modifier] = timeStr.split(" ");
+  let [hours, minutes] = time.split(":").map(Number);
+
+  if (modifier === "PM" && hours !== 12) {
+    hours += 12;
+  }
+  if (modifier === "AM" && hours === 12) {
+    hours = 0;  k  
+  }
+
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    2,
+    "0"
+  )}`;
+}
+
 export async function filterRoutesByTime(routes, selectedTime) {
-  if (selectedTime === "all") {
-    return routes; // No filtering needed
-  }
-  if (!routes || routes.length === 0) {
-    return false; // No routes to filter
-  }
+  if (selectedTime === "all") return routes;
+  if (!routes || routes.length === 0) return false;
+
+  const selected24HrTime = convertTo24Hour(selectedTime);
+
   const filteredRoutes = routes.filter((route) => {
-    const departureTime = new Date(`1970-01-01T${route.departure_time}:00`);
-    const selectedDepartureTime = new Date(`1970-01-01T${selectedTime}:00`);
-    return departureTime.getHours() === selectedDepartureTime.getHours();
+    const route24HrTime = convertTo24Hour(route.departure_time);
+    return route24HrTime.startsWith(selected24HrTime.split(":")[0]);
   });
 
   return filteredRoutes;
@@ -203,10 +218,6 @@ export function buildBusCards(routeData) {
         <p>
           <span class="font-semibold text-purple-700">Driver:</span>
           <span class="text-gray-800">${value.driver.name}</span>
-        </p>
-        <p>
-          <span class="font-semibold text-indigo-700">Phone:</span>
-          <span class="text-gray-800">${value.driver.phone_number}</span>
         </p>
         <p>
           <span class="font-semibold text-pink-700">Stoppages:</span>

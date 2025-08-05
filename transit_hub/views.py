@@ -112,8 +112,7 @@ def get_schedules(trip_type, place, student_id=None):
                 },
                 "driver": {
                     "id": schedule.driver.id,
-                    "name": f"{schedule.driver.first_name} {schedule.driver.last_name}",
-                    "phone_number": schedule.driver.phone_number,
+                    "name": schedule.driver.name,
                 },
             }
         )
@@ -210,10 +209,11 @@ def view_bus(request):
         Transportation_schedules.objects.select_related("bus", "route", "driver")
         .values_list(
             "bus__bus_name",
+            "bus__bus_capacity",
+            "bus__bus_tag",
             "route__route_name",
-            "driver__first_name",
-            "driver__last_name",
-            "driver__phone_number",
+            "driver__name",
+            
         )
         .distinct()
     )

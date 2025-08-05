@@ -1,0 +1,42 @@
+{% extends 'admin_kits/base.html' %}
+{% load static %}
+{% load custom_filter %}
+{% block title %}Today's Schedules - DIU Admin{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-gray-100 min-h-screen">
+    <div class="max-w-7xl mx-auto">
+        <!-- Page Header -->
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">🚍 Today's Bus Schedules</h1>
+            <p class="text-gray-500 mt-1">Overview of all routes, buses, and drivers assigned for today</p>
+        </div>
+
+        <!-- Schedule Cards Container -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for schedule in schedules %}
+            <div class="bg-white shadow-md rounded-2xl p-5 hover:shadow-lg transition">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xl font-semibold text-indigo-600">Route: {{ schedule.route.route_name }}</h2>
+                    <span class="text-sm text-gray-500">{{ schedule.departure_time }}</span>
+                </div>
+                <div class="mt-2 text-gray-700">
+                    <p><strong>Direction:</strong> {{ schedule.from_dsc|direction }}</p>
+                    <p><strong>Bus:</strong> {{ schedule.bus.bus_tag }} - {{ schedule.bus.bus_name }}</p>
+                    <p><strong>Driver:</strong> {{ schedule.driver.name }}</p>
+                </div>
+                <div class="mt-4">
+                    <span class="inline-block bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                        On Schedule
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-10">
+                <h2 class="text-2xl text-gray-500">No schedules assigned for today.</h2>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

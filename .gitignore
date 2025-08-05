@@ -8,3 +8,7 @@ backups/*sql
 backup.sql
 staticfiles/
 sync_db.ps1
+dump.rdb
+Dockerfile
+dump_db.py
+railway_backup.sql

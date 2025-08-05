@@ -1,3 +1,4 @@
+from os import name
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -6,8 +7,7 @@ from django.dispatch import receiver
 
 
 class Driver(models.Model):
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
+    name = models.CharField(max_length=100, blank=True, null=True)
     phone_number = models.CharField(max_length=15)
     license_number = models.CharField(max_length=30)
     license_expiry = models.DateField()
@@ -19,9 +19,10 @@ class Driver(models.Model):
     driver_status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    bus_assigned = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.first_name + " " + self.last_name
+        return str(self.name)
 
     class Meta:
         unique_together = ["phone_number", "license_number"]
@@ -29,6 +30,7 @@ class Driver(models.Model):
 
 class Bus(models.Model):
     bus_name = models.CharField(max_length=100)
+    bus_tag = models.CharField(max_length=30, unique=True, null=True, blank=True)
     bus_number = models.CharField(max_length=30)
     bus_model = models.CharField(max_length=30)
     bus_capacity = models.IntegerField()
@@ -36,9 +38,10 @@ class Bus(models.Model):
     bus_status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    route_assigned = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.bus_name + " " + str(self.bus_number)
+        return self.bus_name
 
     class Meta:
         verbose_name_plural = "Buses"
@@ -65,7 +68,7 @@ class Route(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.route_name + " " + str(self.route_number)
+        return self.route_name
 
     class Meta:
         unique_together = ["route_name", "route_number"]

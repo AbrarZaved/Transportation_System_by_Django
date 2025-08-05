@@ -1,0 +1,128 @@
+<div id="busModal" class="modal hidden fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center animate-fade-in">
+    <div class="bg-white w-11/12 max-w-sm p-5 rounded-lg shadow-xl transform scale-90 opacity-0 animate-slide-up" id="busModalContent">
+        <div class="flex justify-between items-center mb-3">
+            <h3 class="text-lg font-bold text-gray-800">Add New Bus</h3>
+            <button onclick="toggleModal('busModal')" class="text-gray-500 hover:text-red-600 text-xl font-bold">&times;</button>
+        </div>
+        <form method="POST" action="{% url 'manage_drivers_buses' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3"> {# Main grid container #}
+
+                {# Row 1: Bus Name and Bus Tag #}
+                <div class="col-span-1">
+                    <label for="{{ bus_form.bus_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Bus Name</label>
+                    {{ bus_form.bus_name }}
+                </div>
+                <div class="col-span-1">
+                    <label for="{{ bus_form.bus_tag.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Bus Tag</label>
+                    {{ bus_form.bus_tag }}
+                </div>
+
+                {# Row 2: Bus Number and Bus Model #}
+                <div class="col-span-1">
+                    <label for="{{ bus_form.bus_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Bus Number</label>
+                    {{ bus_form.bus_number }}
+                </div>
+                <div class="col-span-1">
+                    <label for="{{ bus_form.bus_model.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Bus Model</label>
+                    {{ bus_form.bus_model }}
+                </div>
+
+                {# Row 3: Bus Capacity #}
+                <div class="col-span-full"> {# Capacity takes full width #}
+                    <label for="{{ bus_form.bus_capacity.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Capacity (Seats)</label>
+                    {{ bus_form.bus_capacity }}
+                </div>
+
+                {# Row 4: Bus Photo #}
+                <div class="col-span-full"> {# Photo takes full width #}
+                    <label for="{{ bus_form.bus_photo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Bus Image</label>
+                    {{ bus_form.bus_photo }}
+                </div>
+
+                {# Row 5: Bus Status (checkbox) #}
+                <div class="col-span-full flex items-center mt-2">
+                    {{ bus_form.bus_status }}
+                    <label for="{{ bus_form.bus_status.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700">Bus Active</label>
+                </div>
+
+            </div> {# End of grid container #}
+
+            <div class="flex justify-end mt-4">
+                <button type="submit" name="add_bus" class="px-3 py-1.5 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 text-sm transition-colors">Add Bus</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Inside driverModal -->
+<div id="driverModal" class="modal hidden fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center animate-fade-in">
+    <div class="bg-white w-11/12 max-w-sm p-5 rounded-lg shadow-xl transform scale-90 opacity-0 animate-slide-up" id="driverModalContent">
+        <div class="flex justify-between items-center mb-3">
+            <h3 class="text-lg font-bold text-gray-800">Add New Driver</h3>
+            <button onclick="toggleModal('driverModal')" class="text-gray-500 hover:text-red-600 text-xl font-bold">&times;</button>
+        </div>
+        <form method="POST" action="{% url 'manage_drivers_buses' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3"> {# Main grid container #}
+
+                {# Row 1: Name and Phone Number #}
+                <div class="col-span-1">
+                    <label for="{{ driver_form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Driver Name</label>
+                    {{ driver_form.name }}
+                </div>
+                <div class="col-span-1">
+                    <label for="{{ driver_form.phone_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    {{ driver_form.phone_number }}
+                </div>
+
+                {# Row 2: License Number and License Class #}
+                <div class="col-span-1">
+                    <label for="{{ driver_form.license_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">License Number</label>
+                    {{ driver_form.license_number }}
+                </div>
+                <div class="col-span-1">
+                    <label for="{{ driver_form.license_class.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">License Class</label>
+                    {{ driver_form.license_class }}
+                </div>
+
+                {# Row 3: License Issued and License Expiry Dates #}
+                <div class="col-span-1">
+                    <label for="{{ driver_form.license_issued.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">License Issued Date</label>
+                    {{ driver_form.license_issued }}
+                </div>
+                <div class="col-span-1">
+                    <label for="{{ driver_form.license_expiry.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">License Expiry Date</label>
+                    {{ driver_form.license_expiry }}
+                </div>
+
+                {# Row 4: License Country (can be full width if it's the only one left in a row) #}
+                <div class="col-span-full"> {# Uses full width on all screen sizes #}
+                    <label for="{{ driver_form.license_country.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">License Country</label>
+                    {{ driver_form.license_country }}
+                </div>
+
+                {# Row 5: License Photo and Driver Photo (side-by-side) #}
+                <div class="col-span-1">
+                    <label for="{{ driver_form.license_photo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">License Photo</label>
+                    {{ driver_form.license_photo }}
+                </div>
+                <div class="col-span-1">
+                    <label for="{{ driver_form.driver_photo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Driver Photo</label>
+                    {{ driver_form.driver_photo }}
+                </div>
+
+                {# Row 6: Driver Status (checkbox, typically best on its own or at the end) #}
+                <div class="col-span-full flex items-center mt-2"> {# `col-span-full` ensures it takes full width #}
+                    {{ driver_form.driver_status }}
+                    <label for="{{ driver_form.driver_status.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700">Driver Active</label>
+                </div>
+
+            </div> {# End of grid container #}
+
+            <div class="flex justify-end mt-4"> {# Margin-top added to separate button from the last grid row #}
+                <button type="submit" name="add_driver" class="px-3 py-1.5 bg-green-600 text-white rounded-md font-medium hover:bg-green-700 text-sm transition-colors">Add Driver</button>
+            </div>
+        </form>
+    </div>
+</div>

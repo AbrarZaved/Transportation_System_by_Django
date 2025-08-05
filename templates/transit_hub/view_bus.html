@@ -24,20 +24,20 @@
   <section class="container mx-auto px-4 py-10">
     <div id="busResults" class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {% for bus in buses %}
-        <div class="bus-card bg-white shadow-md rounded-2xl overflow-hidden transition-transform hover:scale-[1.02] duration-200" bus-name="{{ bus.0 }} {{ bus.1 }}">
+        <div class="bus-card bg-white shadow-md rounded-2xl overflow-hidden transition-transform hover:scale-[1.02] duration-200" bus-name="{{ bus.0 }} {{ bus.3 }} {{ bus.2 }}">
           <!-- Card Header -->
           <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-5 py-3">
-            <h3 class="text-xl font-semibold">{{ bus.0 }}</h3>
-            <p class="text-sm opacity-90">Route: {{ bus.1 }}</p>
+            <h3 class="text-xl font-semibold">{{ bus.0 }} ({{ bus.2 }})</h3>
+            <p class="text-sm opacity-90">Route: {{ bus.3 }}</p>
           </div>
 
           <!-- Card Body -->
           <div class="px-5 py-4 text-sm text-gray-700 space-y-1">
             <p>
-              <span class="font-medium">Driver:</span> {{ bus.2 }} {{ bus.3 }}
+              <span class="font-medium">Driver:</span> {{ bus.4 }}
             </p>
             <p>
-              <span class="font-medium">Phone number:</span> {{ bus.4 }}
+              <span class="font-medium">Bus Capacity:</span> {{ bus.1 }}
             </p>
           </div>
 

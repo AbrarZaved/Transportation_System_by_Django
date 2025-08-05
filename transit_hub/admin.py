@@ -8,8 +8,7 @@ from transit_hub.models import Bus, Driver, Route, RouteStoppage, Stoppage
 @admin.register(Driver)
 class DriverAdmin(admin.ModelAdmin):
     list_display = [
-        "first_name",
-        "last_name",
+        "name",
         "phone_number",
         "license_number",
         "license_expiry",
@@ -22,8 +21,7 @@ class DriverAdmin(admin.ModelAdmin):
     ]
     list_filter = ["driver_status", "created_at", "updated_at"]
     search_fields = [
-        "first_name",
-        "last_name",
+        "name",
         "phone_number",
         "license_number",
         "license_class",
@@ -52,7 +50,10 @@ class RouteStoppageInline(admin.TabularInline):
     model = RouteStoppage
     extra = 1  # ✅ Show one extra row for adding new stoppages
     fields = ["stoppage"]  # ✅ Select stoppage and define order
+
+
 admin.site.register(RouteStoppage)
+
 
 @admin.register(Route)
 class RouteAdmin(admin.ModelAdmin):
@@ -69,8 +70,9 @@ class RouteAdmin(admin.ModelAdmin):
     list_filter = ["route_status", "from_dsc", "to_dsc", "created_at", "updated_at"]
     inlines = [RouteStoppageInline]  # ✅ Inline stoppages inside Route
 
-    def get_queryset(self,*args, **kwargs):
-        return super().get_queryset(*args, **kwargs).order_by('created_at')
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(*args, **kwargs).order_by("created_at")
+
 
 @admin.register(Stoppage)
 class StoppageAdmin(admin.ModelAdmin):
