@@ -123,6 +123,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const password = document.getElementById("password").value.trim();
     const name = document.getElementById("name")?.value?.trim();
     const email = document.getElementById("email")?.value?.trim();
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@diu\.edu\.bd$/;
+    if (email && !emailRegex.test(email)) {
+      return showError("Please enter a valid DIU email address.", "signup");
+    }
+
     const phone_number = document.getElementById("phone_number")?.value?.trim();
     const mode = authMode.value;
     const csrftoken = getCookie("csrftoken");
