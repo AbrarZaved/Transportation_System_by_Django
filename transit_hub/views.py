@@ -11,11 +11,8 @@ import json
 from transit_hub.serializer import RouteSerializer, RouteStoppageSerializer
 from transport_manager.models import Transportation_schedules
 from .models import RouteStoppage as RouteStoppageModel
-from django.db.models import F, Q
-import sys, os
+from django.db.models import F
 from django.shortcuts import render
-import requests
-from django.utils import timezone
 from django.utils.timezone import localtime
 
 

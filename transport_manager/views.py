@@ -1,16 +1,15 @@
 import json
 import os
-import sys
-import time
-from asgiref.sync import sync_to_async
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 import requests
+from rest_framework.views import csrf_exempt
 from transit_hub.forms import BusForm, DriverForm
-from transit_hub.models import Bus, Driver, Route
+from transit_hub.models import Bus, Driver, Route, Stoppage
+from transit_hub.models import RouteStoppage
 from transport_manager.models import Transportation_schedules
 import environ
 from datetime import datetime
@@ -198,3 +197,22 @@ def manage_drivers_buses(request):
         "bus_form": bus_form,  # Pass the bus form to the template
     }
     return render(request, "transport_manager/manage_drivers_buses.html", context)
+
+
+def route_management(request):
+    routes = Route.objects.all()
+    stoppages = Stoppage.objects.all()
+    context = {
+        "routes": routes,
+        "stoppages": stoppages,
+        "stoppages_json": json.dumps(
+            list(stoppages.values("id", "stoppage_name"))
+        ),
+    }
+    return render(request, "transport_manager/route_management.html", context)
+
+@csrf_exempt
+def route_stoppages(request):
+    route_id=json.loads(request.body).get("route_id")
+    stoppages = RouteStoppage.objects.filter(route_id=route_id)
+    return JsonResponse({"stoppages": list(stoppages.values("id", "stoppage__stoppage_name"))})

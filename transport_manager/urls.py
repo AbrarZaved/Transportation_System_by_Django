@@ -11,4 +11,6 @@ urlpatterns = [
     path("assign_schedule/", views.assign_schedule, name="assign_schedule"),
     path("manage_drivers_buses/", views.manage_drivers_buses, name="manage_drivers_buses"),
     path("logout/", views.admin_logout, name="logout"),
+    path("route_management", views.route_management, name="route_management"),
+    path("route_stoppages", views.route_stoppages, name="route_stoppages"),
 ]
