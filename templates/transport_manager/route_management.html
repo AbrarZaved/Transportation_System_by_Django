@@ -1,229 +1,337 @@
 {% extends 'admin_kits/base.html' %}
 {% load static %}
 
-{% block title %}Dashboard - DIU Admin{% endblock %}
+{% block title %}
+  Dashboard - DIU Admin
+{% endblock %}
 
 {% block content %}
-<div class="p-6 bg-gray-50 min-h-screen">
+  <div class="p-6 bg-gray-50 min-h-screen">
     <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-2">
-            <span class="text-4xl">🚌</span> Route Management
-        </h1>
-        <button id="addRouteBtn" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-semibold rounded-xl shadow-md hover:shadow-xl transition transform hover:-translate-y-1">
-            <svg class="w-5 h-5 mr-2 inline-block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-            </svg>
-            Add Route
-        </button>
+      <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-2"><span class="text-4xl">🚌</span> Route Management</h1>
+      <button id="addRouteBtn" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-semibold rounded-xl shadow-md hover:shadow-xl transition transform hover:-translate-y-1">
+        <svg class="w-5 h-5 mr-2 inline-block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>Add Route
+      </button>
     </div>
 
     <!-- Search -->
     <div class="mb-6">
-        <input type="text" id="routeSearch" placeholder="Search by route name or number..." class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none shadow-sm">
+      <form method="GET" action="{% url 'route_management' %}" class="flex gap-4">
+        <input type="text" name="search" id="routeSearch" value="{{ search_query }}" placeholder="Search by route name or number..." class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none shadow-sm" />
+        <button type="submit" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+        {% if search_query %}
+          <a href="{% url 'route_management' %}" class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl shadow-md transition">Clear</a>
+        {% endif %}
+      </form>
     </div>
 
     <!-- Route Table -->
     <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-sm" id="routeTable">
-                <thead class="bg-indigo-50 text-indigo-800 uppercase text-xs font-semibold tracking-wider">
-                    <tr>
-                        <th class="py-4 px-6 text-left">#</th>
-                        <th class="py-4 px-6 text-left">Route Name</th>
-                        <th class="py-4 px-6 text-left">Route Number</th>
-                        <th class="py-4 px-6 text-left">Status</th>
-                        <th class="py-4 px-6 text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    {% for route in routes %}
-                    <tr class="hover:bg-gray-100 transition">
-                        <td class="py-4 px-6 text-gray-600 font-medium">{{ forloop.counter }}</td>
-                        <td class="py-4 px-6 font-semibold text-gray-900">{{ route.route_name }}</td>
-                        <td class="py-4 px-6 text-gray-800">{{ route.route_number }}</td>
-                        <td class="py-4 px-6">
-                            {% if route.route_status %}
-                            <span class="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 font-medium text-xs">Active</span>
-                            {% else %}
-                            <span class="inline-block px-3 py-1 rounded-full bg-red-100 text-red-800 font-medium text-xs">Inactive</span>
-                            {% endif %}
-                        </td>
-                        <td class="py-4 px-6 text-center">
-                            <button
-                                class="view-btn text-indigo-600 hover:text-indigo-900 font-medium rounded-full px-4 py-2 transition"
-                                data-route-name="{{ route.route_name }}"
-                                data-route-number="{{ route.route_number }}"
-                                data-route-status="{{ route.route_status }}"
-                                data-route-direction="{{ route.from_dsc }}"
-                                data-route-id="{{ route.id }}"
-                            >
-                                View
-                            </button>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="py-12 text-center text-gray-500">
-                            <p class="mb-2 text-lg font-semibold">No routes found.</p>
-                            <p>Add a new route to populate the dashboard.</p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm" id="routeTable">
+          <thead class="bg-indigo-50 text-indigo-800 uppercase text-xs font-semibold tracking-wider">
+            <tr>
+              <th class="py-4 px-6 text-left">#</th>
+              <th class="py-4 px-6 text-left">Route Name</th>
+              <th class="py-4 px-6 text-left">Route Number</th>
+              <th class="py-4 px-6 text-left">Status</th>
+              <th class="py-4 px-6 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {% for route in routes %}
+              <tr class="hover:bg-gray-100 transition">
+                <td class="py-4 px-6 text-gray-600 font-medium">{{ routes.start_index|add:forloop.counter0 }}</td>
+                <td class="py-4 px-6 font-semibold text-gray-900">{{ route.route_name }}</td>
+                <td class="py-4 px-6 text-gray-800">{{ route.route_number }}</td>
+                <td class="py-4 px-6">
+                  {% if route.route_status %}
+                    <span class="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 font-medium text-xs">Active</span>
+                  {% else %}
+                    <span class="inline-block px-3 py-1 rounded-full bg-red-100 text-red-800 font-medium text-xs">Inactive</span>
+                  {% endif %}
+                </td>
+                <td class="py-4 px-6 text-center">
+                  <button class="view-btn text-indigo-600 hover:text-indigo-900 font-medium rounded-full px-4 py-2 transition" data-route-name="{{ route.route_name }}" data-route-number="{{ route.route_number }}" data-route-status="{{ route.route_status }}" data-route-direction="{{ route.from_dsc }}" data-route-id="{{ route.id }}">View</button>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="py-12 text-center text-gray-500">
+                  <p class="mb-2 text-lg font-semibold">No routes found.</p>
+                  <p>Add a new route to populate the dashboard.</p>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-</div>
 
-<!-- Add Modal -->
-<div id="addRouteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+    <!-- Pagination -->
+    {% if routes.has_other_pages %}
+      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-b-2xl shadow-lg">
+        <div class="flex-1 flex justify-between sm:hidden">
+          {% if routes.has_previous %}
+            <a href="?page={{ routes.previous_page_number }}{% if search_query %}
+                
+                &search={{ search_query }}
+              {% endif %}"
+              class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              Previous
+            </a>
+          {% endif %}
+          {% if routes.has_next %}
+            <a href="?page={{ routes.next_page_number }}{% if search_query %}
+                
+                &search={{ search_query }}
+              {% endif %}"
+              class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              Next
+            </a>
+          {% endif %}
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700">
+              Showing <span class="font-medium">{{ routes.start_index }}</span> to <span class="font-medium">{{ routes.end_index }}</span> of <span class="font-medium">{{ routes.paginator.count }}</span> routes{% if search_query %}
+                <span class="text-indigo-600">(filtered by "{{ search_query }}")</span>
+              {% endif %}
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              {% if routes.has_previous %}
+                <a href="?page=1{% if search_query %}
+                    
+                    &search={{ search_query }}
+                  {% endif %}"
+                  class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <span class="sr-only">First</span>
+                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                  </svg>
+                </a>
+                <a href="?page={{ routes.previous_page_number }}{% if search_query %}
+                    
+                    &search={{ search_query }}
+                  {% endif %}"
+                  class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <span class="sr-only">Previous</span>
+                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </a>
+              {% endif %}
+
+              {% for page_num in routes.paginator.page_range %}
+                {% if page_num == routes.number %}
+                  <span class="relative inline-flex items-center px-4 py-2 border border-indigo-500 bg-indigo-50 text-sm font-medium text-indigo-600">{{ page_num }}</span>
+                {% elif page_num > routes.number|add:'-3' and page_num < routes.number|add:'3' %}
+                  <a href="?page={{ page_num }}{% if search_query %}
+                      
+                      &search={{ search_query }}
+                    {% endif %}"
+                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    {{ page_num }}
+                  </a>
+                {% elif page_num == 1 %}
+                  <a href="?page=1{% if search_query %}
+                      
+                      &search={{ search_query }}
+                    {% endif %}"
+                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    1
+                  </a>
+                  {% if routes.number > 4 %}
+                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                  {% endif %}
+                {% elif page_num == routes.paginator.num_pages %}
+                  {% if routes.number < routes.paginator.num_pages|add:'-3' %}
+                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                  {% endif %}
+                  <a href="?page={{ routes.paginator.num_pages }}{% if search_query %}
+                      
+                      &search={{ search_query }}
+                    {% endif %}"
+                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    {{ routes.paginator.num_pages }}
+                  </a>
+                {% endif %}
+              {% endfor %}
+
+              {% if routes.has_next %}
+                <a href="?page={{ routes.next_page_number }}{% if search_query %}
+                    
+                    &search={{ search_query }}
+                  {% endif %}"
+                  class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <span class="sr-only">Next</span>
+                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </a>
+                <a href="?page={{ routes.paginator.num_pages }}{% if search_query %}
+                    
+                    &search={{ search_query }}
+                  {% endif %}"
+                  class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <span class="sr-only">Last</span>
+                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L14.586 10l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0zm-6 0a1 1 0 010-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </a>
+              {% endif %}
+            </nav>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Add Modal -->
+  <div id="addRouteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
     <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-4xl mx-4 scale-95 transition">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Add New Route</h2>
-            <button id="closeAddRouteModal" class="text-gray-400 hover:text-gray-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Add New Route</h2>
+        <button id="closeAddRouteModal" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Add New Route Form -->
+      <form id="routeForm" method="POST" action="{% url 'add_route' %}" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Route Name -->
+        <div>
+          <label for="routeName" class="block text-gray-700 font-semibold mb-1">Route name:</label>
+          <input type="text" id="routeName" name="route_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:outline-none shadow-sm" />
         </div>
 
-        <!-- Add New Route Form -->
-        <form id="routeForm" method="POST" class="space-y-6">
-            {% csrf_token %}
+        <!-- Route Number -->
+        <div>
+          <label for="routeNumber" class="block text-gray-700 font-semibold mb-1">Route number:</label>
+          <input type="text" id="routeNumber" name="route_number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:outline-none shadow-sm" />
+        </div>
 
-            <!-- Route Name -->
-            <div>
-                <label for="routeName" class="block text-gray-700 font-semibold mb-1">Route name:</label>
-                <input type="text" id="routeName" name="route_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:outline-none shadow-sm">
-            </div>
+        <!-- Checkboxes -->
+        <div class="space-y-2">
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" name="route_status" class="form-checkbox text-indigo-600 rounded-md" />
+            <span class="text-gray-700">Route status</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" name="from_dsc" class="form-checkbox text-indigo-600 rounded-md" />
+            <span class="text-gray-700">From DSC</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" name="to_dsc" class="form-checkbox text-indigo-600 rounded-md" />
+            <span class="text-gray-700">To DSC</span>
+          </label>
+        </div>
 
-            <!-- Route Number -->
-            <div>
-                <label for="routeNumber" class="block text-gray-700 font-semibold mb-1">Route number:</label>
-                <input type="text" id="routeNumber" name="route_number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:outline-none shadow-sm">
+        <!-- Route Stoppages -->
+        <div>
+          <div class="bg-indigo-100 px-4 py-2 rounded-t-md border border-indigo-200 font-semibold text-indigo-900">Route Stoppages</div>
+          <div id="stoppageFields" class="border border-t-0 border-indigo-200 rounded-b-md px-4 py-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <!-- Initial Stoppage -->
+            <div class="flex gap-2 items-center">
+              <select name="stoppages[]" class="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:ring-indigo-500 focus:outline-none">
+                <option disabled selected>Choose a stoppage</option>
+                {% for stop in stoppages %}
+                  <option value="{{ stop.id }}">{{ stop.stoppage_name }}</option>
+                {% endfor %}
+              </select>
+              <button type="button" class="remove-stoppage text-red-500 hover:text-red-700">✕</button>
             </div>
+          </div>
+          <button type="button" id="addStoppage" class="mt-3 text-sm text-indigo-600 hover:underline flex items-center gap-1">➕ Add another Route stoppage</button>
+        </div>
 
-            <!-- Checkboxes -->
-            <div class="space-y-2">
-                <label class="flex items-center space-x-2">
-                    <input type="checkbox" name="route_status" class="form-checkbox text-indigo-600 rounded-md">
-                    <span class="text-gray-700">Route status</span>
-                </label>
-                <label class="flex items-center space-x-2">
-                    <input type="checkbox" name="from_dsc" class="form-checkbox text-indigo-600 rounded-md">
-                    <span class="text-gray-700">From DSC</span>
-                </label>
-                <label class="flex items-center space-x-2">
-                    <input type="checkbox" name="to_dsc" class="form-checkbox text-indigo-600 rounded-md">
-                    <span class="text-gray-700">To DSC</span>
-                </label>
-            </div>
-
-            <!-- Route Stoppages -->
-            <div>
-                <div class="bg-indigo-100 px-4 py-2 rounded-t-md border border-indigo-200 font-semibold text-indigo-900">
-                    Route Stoppages
-                </div>
-                <div id="stoppageFields" class="border border-t-0 border-indigo-200 rounded-b-md px-4 py-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <!-- Initial Stoppage -->
-                    <div class="flex gap-2 items-center">
-                        <select name="stoppages[]" class="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:ring-indigo-500 focus:outline-none">
-                            <option disabled selected>Choose a stoppage</option>
-                            {% for stop in stoppages %}
-                                <option value="{{ stop.id }}">{{ stop.stoppage_name }}</option>
-                            {% endfor %}
-                        </select>
-                        <button type="button" class="remove-stoppage text-red-500 hover:text-red-700">✕</button>
-                    </div>
-                </div>
-                <button type="button" id="addStoppage" class="mt-3 text-sm text-indigo-600 hover:underline flex items-center gap-1">
-                    ➕ Add another Route stoppage
-                </button>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex justify-end space-x-3 pt-6 border-t mt-6">
-                <button type="submit" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Save</button>
-                <button type="reset" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">Reset</button>
-            </div>
-        </form>
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-3 pt-6 border-t mt-6">
+          <button type="submit" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Save</button>
+          <button type="reset" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">Reset</button>
+        </div>
+      </form>
     </div>
-</div>
+  </div>
 
-
-
-
-<!-- View Modal -->
-<!-- Edit Route Modal -->
-<div id="editRouteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+  <!-- View Modal -->
+  <!-- Edit Route Modal -->
+  <div id="editRouteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
     <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-4xl mx-4 scale-95 transition">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Edit Route</h2>
-            <button id="closeEditRouteModal" class="text-gray-400 hover:text-gray-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Edit Route</h2>
+        <button id="closeEditRouteModal" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Edit Route Form -->
+      <form id="editRouteForm" method="POST" class="space-y-6">
+        {% csrf_token %}
+        <input type="hidden" name="route_id" id="editRouteId" />
+
+        <!-- Route Name -->
+        <div>
+          <label for="editRouteName" class="block text-gray-700 font-semibold mb-1">Route name:</label>
+          <input type="text" id="editRouteName" name="route_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:outline-none shadow-sm" />
         </div>
 
-        <!-- Edit Route Form -->
-        <form id="editRouteForm" method="POST" class="space-y-6">
-            {% csrf_token %}
-            <input type="hidden" name="route_id" id="editRouteId">
+        <!-- Route Number -->
+        <div>
+          <label for="editRouteNumber" class="block text-gray-700 font-semibold mb-1">Route number:</label>
+          <input type="text" id="editRouteNumber" name="route_number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:outline-none shadow-sm" />
+        </div>
 
-            <!-- Route Name -->
-            <div>
-                <label for="editRouteName" class="block text-gray-700 font-semibold mb-1">Route name:</label>
-                <input type="text" id="editRouteName" name="route_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:outline-none shadow-sm">
-            </div>
+        <!-- Checkboxes -->
+        <div class="space-y-2">
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" id="editRouteStatus" name="route_status" class="form-checkbox text-indigo-600 rounded-md" />
+            <span class="text-gray-700">Route status</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" id="editFromDSC" name="from_dsc" class="form-checkbox text-indigo-600 rounded-md" />
+            <span class="text-gray-700">From DSC</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" id="editToDSC" name="to_dsc" class="form-checkbox text-indigo-600 rounded-md" />
+            <span class="text-gray-700">To DSC</span>
+          </label>
+        </div>
 
-            <!-- Route Number -->
-            <div>
-                <label for="editRouteNumber" class="block text-gray-700 font-semibold mb-1">Route number:</label>
-                <input type="text" id="editRouteNumber" name="route_number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:outline-none shadow-sm">
-            </div>
+        <!-- Route Stoppages -->
+        <div>
+          <div class="bg-indigo-100 px-4 py-2 rounded-t-md border border-indigo-200 font-semibold text-indigo-900">Route Stoppages</div>
+          <div id="editStoppageFields" class="border border-t-0 border-indigo-200 rounded-b-md px-4 py-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <!-- Populated dynamically -->
+          </div>
+          <button type="button" id="addEditStoppage" class="mt-3 text-sm text-indigo-600 hover:underline flex items-center gap-1">➕ Add another Route stoppage</button>
+        </div>
 
-            <!-- Checkboxes -->
-            <div class="space-y-2">
-                <label class="flex items-center space-x-2">
-                    <input type="checkbox" id="editRouteStatus" name="route_status" class="form-checkbox text-indigo-600 rounded-md">
-                    <span class="text-gray-700">Route status</span>
-                </label>
-                <label class="flex items-center space-x-2">
-                    <input type="checkbox" id="editFromDSC" name="from_dsc" class="form-checkbox text-indigo-600 rounded-md">
-                    <span class="text-gray-700">From DSC</span>
-                </label>
-                <label class="flex items-center space-x-2">
-                    <input type="checkbox" id="editToDSC" name="to_dsc" class="form-checkbox text-indigo-600 rounded-md">
-                    <span class="text-gray-700">To DSC</span>
-                </label>
-            </div>
-
-            <!-- Route Stoppages -->
-            <div>
-                <div class="bg-indigo-100 px-4 py-2 rounded-t-md border border-indigo-200 font-semibold text-indigo-900">
-                    Route Stoppages
-                </div>
-                <div id="editStoppageFields" class="border border-t-0 border-indigo-200 rounded-b-md px-4 py-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <!-- Populated dynamically -->
-                </div>
-                <button type="button" id="addEditStoppage" class="mt-3 text-sm text-indigo-600 hover:underline flex items-center gap-1">
-                    ➕ Add another Route stoppage
-                </button>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex justify-end space-x-3 pt-6 border-t mt-6">
-                <button type="submit" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Update</button>
-                <button type="button" id="cancelEditRoute" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">Cancel</button>
-            </div>
-        </form>
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-3 pt-6 border-t mt-6">
+          <button type="submit" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Update</button>
+          <button type="button" id="cancelEditRoute" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">Cancel</button>
+        </div>
+      </form>
     </div>
-</div>
+  </div>
 
-
-<script src="{% static 'js/route_management.js' %}" type="module"></script>
-<script>
-    const stoppagesList = JSON.parse('{{ stoppages_json|safe }}');
-</script>
+  <script src="{% static 'js/route_management.js' %}" type="module"></script>
+  <script>
+    const stoppagesList = JSON.parse('{{ stoppages_json|safe }}')
+  </script>
 {% endblock %}

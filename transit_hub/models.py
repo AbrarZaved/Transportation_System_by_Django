@@ -79,6 +79,10 @@ class Route(models.Model):
             self.from_dsc = True
         else:
             self.to_dsc = True
+        if self.from_dsc:
+            self.to_dsc = False
+        else:
+            self.to_dsc = True
         return super(Route, self).save(*args, **kwargs)
 
 

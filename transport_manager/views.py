@@ -1,6 +1,9 @@
 import json
 import os
+import re
 from django.contrib.auth import authenticate, login, logout
+from django.db import models
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib import messages
@@ -200,19 +203,79 @@ def manage_drivers_buses(request):
 
 
 def route_management(request):
-    routes = Route.objects.all()
+    routes_list = Route.objects.all()
     stoppages = Stoppage.objects.all()
+
+    # Search functionality
+    search_query = request.GET.get("search", "")
+    print(f"Search query received: '{search_query}'")  # Debug print
+    print(f"GET parameters: {request.GET}")  # Debug print
+
+    if search_query:
+        routes_list = routes_list.filter(
+            Q(route_name__icontains=search_query)
+            | Q(route_number__icontains=search_query)
+        )
+        print(f"Filtered routes count: {routes_list.count()}")  # Debug print
+
+    # Pagination
+    paginator = Paginator(routes_list, 15)  # 15 routes per page
+    page_number = request.GET.get("page")
+    routes = paginator.get_page(page_number)
+
     context = {
         "routes": routes,
         "stoppages": stoppages,
-        "stoppages_json": json.dumps(
-            list(stoppages.values("id", "stoppage_name"))
-        ),
+        "stoppages_json": json.dumps(list(stoppages.values("id", "stoppage_name"))),
+        "search_query": search_query,
     }
     return render(request, "transport_manager/route_management.html", context)
 
+
 @csrf_exempt
 def route_stoppages(request):
-    route_id=json.loads(request.body).get("route_id")
+    route_id = json.loads(request.body).get("route_id")
     stoppages = RouteStoppage.objects.filter(route_id=route_id)
-    return JsonResponse({"stoppages": list(stoppages.values("id", "stoppage__stoppage_name"))})
+    return JsonResponse(
+        {"stoppages": list(stoppages.values("id", "stoppage__stoppage_name"))}
+    )
+
+
+def add_route(request):
+    if request.method == "POST":
+        route = Route(
+            route_name=request.POST.get("route_name"),
+            route_number=request.POST.get("route_number"),
+            route_status=request.POST.get("route_status") == "on",
+            from_dsc=bool(request.POST.get("from_dsc")),
+            to_dsc=not bool(request.POST.get("from_dsc")),
+        )
+        route.save()
+
+        stoppages = request.POST.getlist("stoppages[]")
+        for stoppage_id in reversed(stoppages):
+            stoppage = Stoppage.objects.get(id=stoppage_id)
+            RouteStoppage.objects.create(route=route, stoppage=stoppage)
+
+    return redirect("route_management")
+
+
+def update_route(request,id):
+    route = Route.objects.get(id=id)
+    if request.method == "POST":
+        route.route_name = request.POST.get("route_name")
+        route.route_number = request.POST.get("route_number")
+        route.route_status = request.POST.get("route_status") == "on"
+        route.from_dsc = bool(request.POST.get("from_dsc"))
+        route.to_dsc = not bool(request.POST.get("from_dsc"))
+        route.save()
+
+        # Clear existing stoppages
+        RouteStoppage.objects.filter(route=route).delete()
+
+        stoppages = request.POST.getlist("stoppages[]")
+        for stoppage_id in reversed(stoppages):
+            stoppage = Stoppage.objects.get(id=stoppage_id)
+            RouteStoppage.objects.create(route=route, stoppage=stoppage)
+
+    return redirect("route_management")

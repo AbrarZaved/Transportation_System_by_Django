@@ -1,4 +1,33 @@
 import { getCookie } from "/static/js/utils.js";
+function stoppageAdd(stoppageId, buttonId) {
+  const stoppageFields = document.getElementById(`${stoppageId}`);
+  const addBtn = document.getElementById(`${buttonId}`);
+
+  // Remove any existing event listeners by cloning the button
+  if (addBtn && !addBtn.hasAttribute("data-listener-added")) {
+    addBtn.addEventListener("click", () => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "flex gap-2 items-center";
+
+      let options = `<option disabled selected>Choose a stoppage</option>`;
+      stoppagesList.forEach((stop) => {
+        options += `<option value="${stop.id}">${stop.stoppage_name}</option>`;
+      });
+
+      wrapper.innerHTML = `
+          <select name="stoppages[]" class="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:ring-indigo-500 focus:outline-none">
+              ${options}
+          </select>
+          <button type="button" class="remove-stoppage text-red-500 hover:text-red-700">✕</button>
+      `;
+
+      stoppageFields.appendChild(wrapper);
+    });
+
+    // Mark that listener has been added
+    addBtn.setAttribute("data-listener-added", "true");
+  }
+}
 document.addEventListener("DOMContentLoaded", () => {
   const addRouteModal = document.getElementById("addRouteModal");
   const viewRouteModal = document.getElementById("viewRouteModal");
@@ -34,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".view-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       // Fill form with existing route data
+      document.getElementById("editRouteForm").action=`${location.origin}/update_route/${btn.dataset.routeId}`;
       document.getElementById("editRouteId").value = btn.dataset.routeId;
       document.getElementById("editRouteName").value = btn.dataset.routeName;
       document.getElementById("editRouteNumber").value =
@@ -83,7 +113,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 // console.log(String(stop.id), String(stoppage.id));
                 // Safe comparison for preselecting the correct stoppage
                 if (
-                  String(stop.stoppage_name) === String(stoppage.stoppage__stoppage_name)
+                  String(stop.stoppage_name) ===
+                  String(stoppage.stoppage__stoppage_name)
                 ) {
                   option.selected = true;
                 }
@@ -107,6 +138,9 @@ document.addEventListener("DOMContentLoaded", () => {
               data
             );
           }
+
+          // Initialize the add stoppage functionality after loading existing stoppages
+          stoppageAdd("editStoppageFields", "addEditStoppage");
         })
         .catch((error) => {
           console.error("Error fetching route stoppages:", error);
@@ -115,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("editRouteModal").classList.remove("hidden");
     });
   });
-
+  stoppageAdd("stoppageFields", "addStoppage");
   // Close modal
   const closeEditRouteModalBtn = document.getElementById("closeEditRouteModal");
   const cancelEditRouteBtn = document.getElementById("cancelEditRoute");
@@ -132,52 +166,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const searchInput = document.getElementById("routeSearch");
-  const tableRows = document.querySelectorAll("#routeTable tbody tr");
-
-  if (searchInput && tableRows.length > 0) {
-    searchInput.addEventListener("input", function () {
-      const query = this.value.toLowerCase();
-      tableRows.forEach((row) => {
-        const routeNameCell = row.cells[1];
-        const routeNumberCell = row.cells[2];
-
-        const routeName = routeNameCell
-          ? routeNameCell.innerText.toLowerCase()
-          : "";
-        const routeNumber = routeNumberCell
-          ? routeNumberCell.innerText.toLowerCase()
-          : "";
-
-        // Check if query matches route name or route number
-        const matches =
-          routeName.includes(query) || routeNumber.includes(query);
-        row.style.display = matches ? "" : "none";
-      });
-    });
-  }
-
-  const stoppageFields = document.getElementById("stoppageFields");
-  const addBtn = document.getElementById("addStoppage");
-
-  addBtn.addEventListener("click", () => {
-    const wrapper = document.createElement("div");
-    wrapper.className = "flex gap-2 items-center";
-
-    let options = `<option disabled selected>Choose a stoppage</option>`;
-    stoppagesList.forEach((stop) => {
-      options += `<option value="${stop.id}">${stop.stoppage_name}</option>`;
-    });
-
-    wrapper.innerHTML = `
-        <select name="stoppages[]" class="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:ring-indigo-500 focus:outline-none">
-            ${options}
-        </select>
-        <button type="button" class="remove-stoppage text-red-500 hover:text-red-700">✕</button>
-    `;
-
-    stoppageFields.appendChild(wrapper);
-  });
+  // Remove the client-side search since we now have server-side search
+  // Search is now handled by the form submission in the template
 
   // Delegate remove-stoppage button click event for dynamically added buttons
   document.addEventListener("click", function (e) {
