@@ -256,11 +256,11 @@ def add_route(request):
         for stoppage_id in reversed(stoppages):
             stoppage = Stoppage.objects.get(id=stoppage_id)
             RouteStoppage.objects.create(route=route, stoppage=stoppage)
-
+    messages.success(request, "Route added successfully")
     return redirect("route_management")
 
 
-def update_route(request,id):
+def update_route(request, id):
     route = Route.objects.get(id=id)
     if request.method == "POST":
         route.route_name = request.POST.get("route_name")
@@ -277,5 +277,5 @@ def update_route(request,id):
         for stoppage_id in reversed(stoppages):
             stoppage = Stoppage.objects.get(id=stoppage_id)
             RouteStoppage.objects.create(route=route, stoppage=stoppage)
-
+    messages.success(request, "Route updated successfully")
     return redirect("route_management")
