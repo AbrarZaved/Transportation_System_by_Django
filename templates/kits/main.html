@@ -45,23 +45,23 @@
     </section>
     
     <!-- Header -->
-    <header class="bg-white shadow-md">
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-xl border-b border-slate-700">
       <div class="container mx-auto px-4 flex items-center justify-between h-16">
         <!-- Logo -->
-        <a href="{% url 'index' %}" class="flex items-center space-x-2"><span class="text-xl font-bold text-pink-500">BAHON</span></a>
+        <a href="{% url 'index' %}" class="flex items-center space-x-2"><span class="text-xl font-bold text-white">BAHON</span></a>
 
         <!-- Nav Links -->
         <nav>
-          <ul class="nav-links hidden md:flex space-x-6 text-gray-700 font-semibold">
+          <ul class="nav-links hidden md:flex space-x-6 text-white font-semibold">
             <li>
               <a href="{% url 'index' %}"
                 class="{% if request.resolver_match.url_name == 'index' %}
                   
-                  text-pink-500 active
+                  text-cyan-400 active
 
                 {% else %}
                   
-                  hover:text-pink-500
+                  text-white hover:text-cyan-400
 
                 {% endif %} transition">
                 Home
@@ -71,11 +71,11 @@
               <a href="{% url 'view_bus' %}"
                 class="{% if request.resolver_match.url_name == 'view_bus' %}
                   
-                  text-pink-500 active
+                  text-cyan-400 active
 
                 {% else %}
                   
-                  hover:text-pink-500
+                  text-white hover:text-cyan-400
 
                 {% endif %} transition">
                 View Bus
@@ -85,11 +85,11 @@
               <a href="{% url 'subscription' %}"
                 class="{% if request.resolver_match.url_name == 'subscription' %}
 
-                  text-pink-500 active
+                  text-cyan-400 active
 
                 {% else %}
                   
-                  hover:text-pink-500
+                  text-white hover:text-cyan-400
 
                 {% endif %} transition">
                 Subscription
@@ -99,11 +99,11 @@
               <a href="{% url 'about_us' %}"
                 class="{% if request.resolver_match.url_name == 'about_us' %}
                   
-                  text-pink-500 active
+                  text-cyan-400 active
 
                 {% else %}
                   
-                  hover:text-pink-500
+                  text-white hover:text-cyan-400
 
                 {% endif %} transition">
                 About Us
@@ -113,11 +113,11 @@
               <a href="{% url 'contact_us' %}"
                 class="{% if request.resolver_match.url_name == 'contact_us' %}
                   
-                  text-pink-500 active
+                  text-cyan-400 active
 
                 {% else %}
                   
-                  hover:text-pink-500
+                  text-white hover:text-cyan-400
 
                 {% endif %} transition">
                 Contact Us
@@ -128,11 +128,11 @@
                 <a href="{% url 'my_account' %}"
                   class="{% if request.resolver_match.url_name == 'my_account' %}
                     
-                    text-pink-500 active
+                    text-cyan-400 active
 
                   {% else %}
                     
-                    hover:text-pink-500
+                    text-white hover:text-cyan-400
 
                   {% endif %} transition">
                   My Account
@@ -140,7 +140,7 @@
               </li>
             {% else %}
               <li>
-                <a href="#" id="sign_in_desktop" class="hover:text-pink-500 transition">Sign In</a>
+                <a href="#" id="sign_in_desktop" class="text-white hover:text-cyan-400 transition">Sign In</a>
               </li>
             {% endif %}
           </ul>
@@ -148,37 +148,37 @@
 
         <!-- Hamburger -->
         <button aria-label="Toggle Menu" class="hamburger block md:hidden focus:outline-none" id="hamburgerBtn">
-          <span class="bar block w-6 h-0.5 bg-gray-700 mb-1 rounded"></span>
-          <span class="bar block w-6 h-0.5 bg-gray-700 mb-1 rounded"></span>
-          <span class="bar block w-6 h-0.5 bg-gray-700 rounded"></span>
+          <span class="bar block w-6 h-0.5 bg-gray-200 mb-1 rounded"></span>
+          <span class="bar block w-6 h-0.5 bg-gray-200 mb-1 rounded"></span>
+          <span class="bar block w-6 h-0.5 bg-gray-200 rounded"></span>
         </button>
       </div>
 
       <!-- Mobile Menu -->
-      <div id="mobileMenu" class="transition-all duration-500 ease-in-out max-h-0 overflow-hidden opacity-0 md:hidden bg-white shadow-md border-t border-gray-200">
-        <ul class="flex flex-col p-4 space-y-3 text-gray-700 font-semibold">
+      <div id="mobileMenu" class="transition-all duration-500 ease-in-out max-h-0 overflow-hidden opacity-0 md:hidden bg-slate-800 shadow-xl border-t border-slate-600">
+        <ul class="flex flex-col p-4 space-y-3 font-semibold">
           <li>
-            <a href="{% url 'index' %}" class="block hover:text-pink-500 transition">Home</a>
+            <a href="{% url 'index' %}" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">Home</a>
           </li>
           <li>
-            <a href="{% url 'view_bus' %}" class="block hover:text-pink-500 transition">View Bus</a>
+            <a href="{% url 'view_bus' %}" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">View Bus</a>
           </li>
           <li>
-            <a href="{% url 'subscription' %}" class="block hover:text-pink-500 transition">Subscription</a>
+            <a href="{% url 'subscription' %}" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">Subscription</a>
           </li>
           <li>
-            <a href="{% url 'about_us' %}" class="block hover:text-pink-500 transition">About Us</a>
+            <a href="{% url 'about_us' %}" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">About Us</a>
           </li>
           <li>
-            <a href="{% url 'contact_us' %}" class="block hover:text-pink-500 transition">Contact Us</a>
+            <a href="{% url 'contact_us' %}" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">Contact Us</a>
           </li>
           {% if request.session.is_student_authenticated %}
             <li>
-              <a href="{% url 'my_account' %}" class="block hover:text-pink-500 transition">My Account</a>
+              <a href="{% url 'my_account' %}" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">My Account</a>
             </li>
           {% else %}
             <li>
-              <a href="#" id="sign_in_mobile" class="block hover:text-pink-500 transition">Sign In</a>
+              <a href="#" id="sign_in_mobile" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">Sign In</a>
             </li>
           {% endif %}
         </ul>
@@ -186,7 +186,7 @@
 
       <style>
         #mobileMenu.open {
-          max-height: 300px;
+          max-height: 500px;
           opacity: 1;
         }
       </style>
@@ -232,7 +232,7 @@
             </div>
           </div>
           <small id="student-id-error" class="text-red-600 mt-1 hidden"></small>
-          <button type="submit" id="submit_btn" class="w-full bg-pink-600 text-white p-2 rounded-lg hover:bg-pink-700">Login</button>
+          <button type="submit" id="submit_btn" class="w-full bg-slate-600 text-white p-2 rounded-lg hover:bg-slate-700">Login</button>
         </form>
       </div>
     </div>

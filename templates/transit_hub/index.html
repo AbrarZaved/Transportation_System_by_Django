@@ -21,11 +21,11 @@
           <div class="mb-6">
             <h3 class="mb-4 text-base font-medium text-gray-900">Select Departure Time</h3>
             <div id="time-filter-group" class="flex flex-wrap gap-3">
-              <button type="button" data-time="all" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-pink-50 hover:text-pink-600 transition focus:outline-none border-pink-500 text-pink-600 bg-pink-50">All</button>
-              <button type="button" data-time="11:00" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-pink-50 hover:text-pink-600 transition">11:00 AM</button>
-              <button type="button" data-time="13:00" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-pink-50 hover:text-pink-600 transition">1:00 PM</button>
-              <button type="button" data-time="16:00" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-pink-50 hover:text-pink-600 transition">4:00 PM</button>
-              <button type="button" data-time="18:00" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-pink-50 hover:text-pink-600 transition">6:00 PM</button>
+              <button type="button" data-time="all" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition focus:outline-none border-slate-500 text-slate-600 bg-slate-50">All</button>
+              <button type="button" data-time="11:00" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition">11:00 AM</button>
+              <button type="button" data-time="13:00" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition">1:00 PM</button>
+              <button type="button" data-time="16:00" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition">4:00 PM</button>
+              <button type="button" data-time="18:00" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition">6:00 PM</button>
             </div>
           </div>
         {% else %}
@@ -42,12 +42,12 @@
             <ul class="grid grid-cols-2 gap-3 w-full">
               <li>
                 <input type="radio" id="from-dsc" name="trip-type" value="From DSC" class="hidden peer" checked required />
-                <label for="from-dsc" class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-pink-600 hover:bg-pink-50 peer-checked:border-pink-500 peer-checked:text-pink-600 transition text-sm">
+                <label for="from-dsc" class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-slate-600 hover:bg-slate-50 peer-checked:border-slate-500 peer-checked:text-slate-600 transition text-sm">
                   <div class="block">
                     <div class="font-semibold">From DSC</div>
                     <div class="text-xs text-gray-500">Starting your trip from DSC</div>
                   </div>
-                  <svg class="w-4 h-4 ms-2 rtl:rotate-180 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10" aria-hidden="true">
+                  <svg class="w-4 h-4 ms-2 rtl:rotate-180 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10" aria-hidden="true">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
                   </svg>
                 </label>
@@ -55,12 +55,12 @@
 
               <li>
                 <input type="radio" id="to-dsc" name="trip-type" value="To DSC" class="hidden peer" />
-                <label for="to-dsc" class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-pink-600 hover:bg-pink-50 peer-checked:border-pink-500 peer-checked:text-pink-600 transition text-sm">
+                <label for="to-dsc" class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-slate-600 hover:bg-slate-50 peer-checked:border-slate-500 peer-checked:text-slate-600 transition text-sm">
                   <div class="block">
                     <div class="font-semibold">To DSC</div>
                     <div class="text-xs text-gray-500">Ending your trip at DSC</div>
                   </div>
-                  <svg class="w-4 h-4 ms-2 rtl:rotate-180 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10" aria-hidden="true">
+                  <svg class="w-4 h-4 ms-2 rtl:rotate-180 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10" aria-hidden="true">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
                   </svg>
                 </label>
@@ -74,22 +74,43 @@
             <div class="flex flex-wrap md:flex-nowrap md:space-x-2 overflow-x-auto space-x-2 scrollbar-hide" id="recent-searches">
               <!-- Sample tags - replace with dynamic values if needed -->
               {% for preference in preferences %}
-                <span name="recent_searches" class="bg-white border border-pink-200 text-pink-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-pink-50 transition">{{ preference.searched_locations|title }}</span>
+                <span name="recent_searches" class="bg-white border border-slate-200 text-slate-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-slate-50 transition">{{ preference.searched_locations|title }}</span>
               {% endfor %}
             </div>
           {% endif %}
           <div class="relative">
-            <input type="text" id="place" name="place" placeholder="Enter your destination" aria-label="Enter your destination" class="w-full px-4 py-3 pl-10 rounded-md border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:outline-none text-gray-800" required />
+            <input type="text" id="place" name="place" placeholder="Enter your destination" aria-label="Enter your destination" class="w-full px-4 py-3 pl-10 rounded-md border border-gray-300 focus:ring-2 focus:ring-slate-500 focus:outline-none text-gray-800" required autocomplete="off" />
             <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zM7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 2.2-2.5 5.67-5 8.5C9.5 14.67 7 11.2 7 9z" />
               <circle cx="12" cy="9" r="2.5" />
             </svg>
+            <!-- Dropdown container -->
+            <div id="autocomplete-dropdown" class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-50 max-h-60 overflow-y-auto hidden">
+              <!-- Loading indicator -->
+              <div id="autocomplete-loading" class="px-4 py-3 text-gray-500 text-sm hidden">
+                <div class="flex items-center">
+                  <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Searching...
+                </div>
+              </div>
+              <!-- No results message -->
+              <div id="autocomplete-no-results" class="px-4 py-3 text-gray-500 text-sm hidden">
+                No destinations found
+              </div>
+              <!-- Results list -->
+              <ul id="autocomplete-results" class="py-1">
+                <!-- Dynamic results will be inserted here -->
+              </ul>
+            </div>
           </div>
           <div>
             <span id="place-error" class="block mt-2 text-sm font-medium text-red-500 transition-opacity duration-200"></span>
           </div>
 
-          <button type="submit" id="search" class="w-full bg-pink-500 hover:bg-pink-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pink-600 text-white font-semibold py-3 rounded-md transition">Search</button>
+          <button type="submit" id="search" class="w-full bg-blue-600 hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600 text-white font-semibold py-3 rounded-md transition">Search</button>
         </form>
       </div>
       <!-- 🚍 Popular Routes -->
@@ -161,7 +182,7 @@
   </section>
 
   <!-- Scroll to Top Button -->
-  <button id="scrollToTopBtn" title="Top" class="fixed bottom-6 right-6 z-40 bg-pink-500 hover:bg-pink-600 text-white rounded-full p-2 shadow opacity-0 pointer-events-none">
+  <button id="scrollToTopBtn" title="Top" class="fixed bottom-6 right-6 z-40 bg-slate-600 hover:bg-slate-700 text-white rounded-full p-2 shadow opacity-0 pointer-events-none">
     <svg class="w-5 h-5" viewBox="0 0 20 20" fill="none">
       <path d="M10 15V5M10 5l-5 5M10 5l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
@@ -175,6 +196,85 @@
     {% endfor %}
   {% endif %}
 </div>
+
+  <!-- Hero Carousel Section -->
+  <section class="relative bg-gray-100 py-8">
+    <div class="max-w-7xl mx-auto px-6">
+      <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Our Transportation Services</h2>
+      <div id="hero-carousel" class="relative w-full overflow-hidden rounded-xl shadow-lg">
+        <!-- Carousel wrapper -->
+        <div class="relative h-64 md:h-96">
+          <!-- Item 1 -->
+          <div class="carousel-item absolute inset-0 transition-opacity duration-700 ease-in-out opacity-100">
+            <img src="{% static 'img/caraousal1.jpg' %}" class="block w-full h-full object-cover" alt="Transportation Service 1">
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+              <div class="text-center text-white px-4">
+                <h3 class="text-2xl md:text-4xl font-bold mb-2">Fast & Reliable Transportation</h3>
+                <p class="text-sm md:text-lg">Your journey starts here with our modern fleet</p>
+              </div>
+            </div>
+          </div>
+          <!-- Item 2 -->
+          <div class="carousel-item absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0">
+            <img src="{% static 'img/caraousal2.jpg' %}" class="block w-full h-full object-cover" alt="Transportation Service 2">
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+              <div class="text-center text-white px-4">
+                <h3 class="text-2xl md:text-4xl font-bold mb-2">Comfortable & Safe Travel</h3>
+                <p class="text-sm md:text-lg">Experience comfort and safety on every trip</p>
+              </div>
+            </div>
+          </div>
+          <!-- Item 3 -->
+          <div class="carousel-item absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0">
+            <img src="{% static 'img/caraousal3.jpg' %}" class="block w-full h-full object-cover" alt="Transportation Service 3">
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+              <div class="text-center text-white px-4">
+                <h3 class="text-2xl md:text-4xl font-bold mb-2">Connected Campus Life</h3>
+                <p class="text-sm md:text-lg">Connecting students to their destinations</p>
+              </div>
+            </div>
+          </div>
+          <!-- Item 4 -->
+          <div class="carousel-item absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0">
+            <img src="{% static 'img/caraousal4.jpg' %}" class="block w-full h-full object-cover" alt="Transportation Service 4">
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+              <div class="text-center text-white px-4">
+                <h3 class="text-2xl md:text-4xl font-bold mb-2">24/7 Service Available</h3>
+                <p class="text-sm md:text-lg">Round the clock transportation solutions</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Slider indicators -->
+        <div class="absolute z-30 flex space-x-3 -translate-x-1/2 bottom-5 left-1/2">
+          <button type="button" class="carousel-indicator w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all duration-300 active" aria-current="true" aria-label="Slide 1" data-slide="0"></button>
+          <button type="button" class="carousel-indicator w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all duration-300" aria-current="false" aria-label="Slide 2" data-slide="1"></button>
+          <button type="button" class="carousel-indicator w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all duration-300" aria-current="false" aria-label="Slide 3" data-slide="2"></button>
+          <button type="button" class="carousel-indicator w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all duration-300" aria-current="false" aria-label="Slide 4" data-slide="3"></button>
+        </div>
+        
+        <!-- Slider controls -->
+        <button type="button" class="carousel-prev absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-direction="prev">
+          <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none transition-all duration-300">
+            <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
+            </svg>
+            <span class="sr-only">Previous</span>
+          </span>
+        </button>
+        <button type="button" class="carousel-next absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-direction="next">
+          <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none transition-all duration-300">
+            <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+            </svg>
+            <span class="sr-only">Next</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </section>
+
   {% include 'kits/footer.html' %}
   <script type="module" src="{% static 'js/main.js' %}"></script>
 {% endblock %}

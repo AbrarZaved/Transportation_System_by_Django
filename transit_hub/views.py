@@ -1,6 +1,7 @@
 import time
 from asgiref.sync import sync_to_async
 from django.core.cache import cache
+from django.core.mail import send_mail
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -64,15 +65,20 @@ def index(request):
 
 @sync_to_async
 def get_schedules(trip_type, place, student_id=None):
+    from django.db.models import Q
 
-    schedules = Transportation_schedules.objects.select_related(
-        "bus", "driver", "route"
-    ).filter(
-        from_dsc=(trip_type == "From DSC"),
-        route__route_name__icontains=place,
-        departure_time__gte=localtime().time(),
-        days__contains=localtime().strftime("%A").lower(),
-    )
+    # Search for routes by both route name and stoppage name
+    schedules = (
+        Transportation_schedules.objects.select_related("bus", "driver", "route")
+        .filter(
+            Q(route__route_name__icontains=place)
+            | Q(route__routestoppage__stoppage__stoppage_name__icontains=place),
+            from_dsc=(trip_type == "From DSC"),
+            departure_time__gte=localtime().time(),
+            days__contains=localtime().strftime("%A").lower(),
+        )
+        .distinct()
+    )  # Add distinct to avoid duplicates from JOIN
     route_ids = schedules.values_list("route__id", flat=True).distinct()
     route_details = RouteStoppageModel.objects.filter(route_id__in=route_ids)
 
@@ -202,16 +208,48 @@ def contact_us(request):
 
 
 def view_bus(request):
-    buses = (
-        Transportation_schedules.objects.select_related("bus", "route", "driver")
-        .values_list(
-            "bus__bus_name",
-            "bus__bus_capacity",
-            "bus__bus_tag",
-            "route__route_name",
-            "driver__name",
-            
+    # Get distinct schedules with related information
+    schedules = Transportation_schedules.objects.select_related(
+        "bus", "route", "driver"
+    ).distinct()
+
+    buses_data = []
+    for schedule in schedules:
+        # Get stoppages for this route
+        route_stoppages = (
+            RouteStoppageModel.objects.filter(route=schedule.route)
+            .select_related("stoppage")
+            .order_by("-created_at")
         )
-        .distinct()
+
+        stoppage_names = [rs.stoppage.stoppage_name for rs in route_stoppages]
+
+        buses_data.append(
+            {
+                "bus_name": schedule.bus.bus_name,
+                "bus_capacity": schedule.bus.bus_capacity,
+                "bus_tag": schedule.bus.bus_tag,
+                "route_name": schedule.route.route_name,
+                "driver_name": schedule.driver.name,
+                "stoppages": stoppage_names,
+                "departure_time": schedule.departure_time.strftime("%I:%M %p"),
+                "days": schedule.days,
+            }
+        )
+
+    return render(request, "transit_hub/view_bus.html", {"buses": buses_data})
+
+
+def get_all_stoppages(request):
+    """
+    API endpoint to get all stoppages for session storage
+    """
+    from .models import Stoppage
+
+    stoppages = (
+        Stoppage.objects.filter(stoppage_status=True)
+        .values("id", "stoppage_name")
+        .order_by("stoppage_name")
     )
-    return render(request, "transit_hub/view_bus.html", {"buses": buses})
+
+    return JsonResponse({"stoppages": list(stoppages)})

@@ -3,6 +3,7 @@ from django.contrib.auth.hashers import check_password, make_password
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
+from django.utils.timezone import now
 
 
 class SuperVisorManager(BaseUserManager):
@@ -69,7 +70,8 @@ class Student(models.Model):
     batch_code = models.CharField(max_length=5)
     phone_number = models.CharField(max_length=50, unique=True)
     email = models.EmailField(max_length=90, unique=True)
-    password = models.CharField(max_length=128)  # hashed password
+    password = models.CharField(max_length=128) 
+    verified = models.BooleanField(default=False)
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
@@ -80,6 +82,18 @@ class Student(models.Model):
     def __str__(self):
         return self.name
 
+class EmailOTP(models.Model):
+    user = models.ForeignKey(Student, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def is_expired(self):
+        return now() > self.expires_at
+
+    def __str__(self):
+        return f"EmailOTP for {self.user.email}"
+
 
 class Preference(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
@@ -89,5 +103,7 @@ class Preference(models.Model):
 
     def save(self, *args, **kwargs):
         if self.searched_locations:
-            self.searched_locations = self.searched_locations.capitalize()  # Make the first letter upper case
+            self.searched_locations = (
+                self.searched_locations.capitalize()
+            )  # Make the first letter upper case
         super().save(*args, **kwargs)

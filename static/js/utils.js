@@ -40,7 +40,8 @@ function convertTo24Hour(timeStr) {
     hours += 12;
   }
   if (modifier === "AM" && hours === 12) {
-    hours = 0;  k  
+    hours = 0;
+    k;
   }
 
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
@@ -220,7 +221,7 @@ export function buildBusCards(routeData) {
           <span class="text-gray-800">${value.driver.name}</span>
         </p>
         <p>
-          <span class="font-semibold text-pink-700">Stoppages:</span>
+          <span class="font-semibold text-slate-700">Stoppages:</span>
           <span class="text-gray-800">${value.stoppage_names.join(", ")}</span>
         </p>
       </div>

@@ -1,20 +1,52 @@
 import json
+from functools import wraps
 from django.contrib import messages
-from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.core.validators import validate_email
 from django.db import models
 from django.forms import ValidationError
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-import requests
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-import sys, os
-from authentication.models import Preference, Student
+from authentication.email import create_email_otp, send_otp_email
+from authentication.models import EmailOTP, Preference, Student
 
 
-# Create your views here.
+def student_login_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get("is_student_authenticated"):
+            messages.error(request, "Please log in to access this page.")
+            return redirect("index")
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
+
+def send_otp_view(request):
+    otp = create_email_otp(request.user)
+    send_otp_email(request.user, otp)
+    messages.success(request, "OTP sent to your email!")
+    return redirect("verify_otp")
+
+
+def verify_otp_view(request):
+    if request.method == "POST":
+        otp_input = request.POST.get("otp")
+        otp_obj = EmailOTP.objects.filter(user=request.user, otp=otp_input).last()
+
+        if otp_obj and not otp_obj.is_expired():
+            request.user.verified = True
+            request.user.save()
+            messages.success(request, "Email verified successfully!")
+            return redirect("dashboard")
+        else:
+            messages.error(request, "Invalid or expired OTP.")
+
+    return render(request, "verify_otp.html")
+
+
+@student_login_required
 def my_account(request):
     student_id = request.session.get("student_id")
     if not student_id:
