@@ -8,6 +8,7 @@ urlpatterns = [
     path("", include("authentication.urls")),
     path("", include("transit_hub.urls")),
     path("", include("transport_manager.urls")),
+    path("", include("social_django.urls", namespace="social")),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

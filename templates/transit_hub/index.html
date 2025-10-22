@@ -41,7 +41,19 @@
             <h3 class="mb-4 text-base font-medium text-gray-900">Select Trip Type</h3>
             <ul class="grid grid-cols-2 gap-3 w-full">
               <li>
-                <input type="radio" id="from-dsc" name="trip-type" value="From DSC" class="hidden peer" checked required />
+                <input type="radio" id="to-dsc" name="trip-type" value="To DSC" checked class="hidden peer" />
+                <label for="to-dsc" class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-slate-600 hover:bg-slate-50 peer-checked:border-slate-500 peer-checked:text-slate-600 transition text-sm">
+                  <div class="block">
+                    <div class="font-semibold">To DSC</div>
+                    <div class="text-xs text-gray-500">Ending your trip at DSC</div>
+                  </div>
+                  <svg class="w-4 h-4 ms-2 rtl:rotate-180 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10" aria-hidden="true">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
+                  </svg>
+                </label>
+              </li>
+              <li>
+                <input type="radio" id="from-dsc" name="trip-type" value="From DSC" class="hidden peer"  required />
                 <label for="from-dsc" class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-slate-600 hover:bg-slate-50 peer-checked:border-slate-500 peer-checked:text-slate-600 transition text-sm">
                   <div class="block">
                     <div class="font-semibold">From DSC</div>
@@ -53,18 +65,7 @@
                 </label>
               </li>
 
-              <li>
-                <input type="radio" id="to-dsc" name="trip-type" value="To DSC" class="hidden peer" />
-                <label for="to-dsc" class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-slate-600 hover:bg-slate-50 peer-checked:border-slate-500 peer-checked:text-slate-600 transition text-sm">
-                  <div class="block">
-                    <div class="font-semibold">To DSC</div>
-                    <div class="text-xs text-gray-500">Ending your trip at DSC</div>
-                  </div>
-                  <svg class="w-4 h-4 ms-2 rtl:rotate-180 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10" aria-hidden="true">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
-                  </svg>
-                </label>
-              </li>
+              
             </ul>
           </div>
           {% if request.session.is_student_authenticated %}
@@ -224,34 +225,12 @@
               </div>
             </div>
           </div>
-          <!-- Item 3 -->
-          <div class="carousel-item absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0">
-            <img src="{% static 'img/caraousal3.jpg' %}" class="block w-full h-full object-cover" alt="Transportation Service 3">
-            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-              <div class="text-center text-white px-4">
-                <h3 class="text-2xl md:text-4xl font-bold mb-2">Connected Campus Life</h3>
-                <p class="text-sm md:text-lg">Connecting students to their destinations</p>
-              </div>
-            </div>
-          </div>
-          <!-- Item 4 -->
-          <div class="carousel-item absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0">
-            <img src="{% static 'img/caraousal4.jpg' %}" class="block w-full h-full object-cover" alt="Transportation Service 4">
-            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-              <div class="text-center text-white px-4">
-                <h3 class="text-2xl md:text-4xl font-bold mb-2">24/7 Service Available</h3>
-                <p class="text-sm md:text-lg">Round the clock transportation solutions</p>
-              </div>
-            </div>
-          </div>
         </div>
         
         <!-- Slider indicators -->
         <div class="absolute z-30 flex space-x-3 -translate-x-1/2 bottom-5 left-1/2">
           <button type="button" class="carousel-indicator w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all duration-300 active" aria-current="true" aria-label="Slide 1" data-slide="0"></button>
           <button type="button" class="carousel-indicator w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all duration-300" aria-current="false" aria-label="Slide 2" data-slide="1"></button>
-          <button type="button" class="carousel-indicator w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all duration-300" aria-current="false" aria-label="Slide 3" data-slide="2"></button>
-          <button type="button" class="carousel-indicator w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all duration-300" aria-current="false" aria-label="Slide 4" data-slide="3"></button>
         </div>
         
         <!-- Slider controls -->

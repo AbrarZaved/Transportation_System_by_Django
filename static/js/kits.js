@@ -90,6 +90,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
       signInBtn.classList.remove("text-blue-600", "font-semibold");
       signInBtn.classList.add("text-gray-500");
+
+      // Hide Google login, show Google register
+      document.getElementById("google_login_div").classList.add("hidden");
+      document.getElementById("google_register_div").classList.remove("hidden");
+
+      // Hide signin or, show signup or
+      document.getElementById("signin_or").classList.add("hidden");
+      document.getElementById("signup_or").classList.remove("hidden");
     } else {
       submitBtn.textContent = "Login";
       registerFields.classList.remove("max-h-[500px]", "opacity-100");
@@ -100,6 +108,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
       signUpBtn.classList.remove("text-blue-600", "font-semibold");
       signUpBtn.classList.add("text-gray-500");
+
+      // Show Google login, hide Google register
+      document.getElementById("google_login_div").classList.remove("hidden");
+      document.getElementById("google_register_div").classList.add("hidden");
+
+      // Show signin or, hide signup or
+      document.getElementById("signin_or").classList.remove("hidden");
+      document.getElementById("signup_or").classList.add("hidden");
     }
   };
 

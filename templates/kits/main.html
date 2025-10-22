@@ -45,152 +45,96 @@
     </section>
     
     <!-- Header -->
-    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-xl border-b border-slate-700">
-      <div class="container mx-auto px-4 flex items-center justify-between h-16">
-        <!-- Logo -->
-        <a href="{% url 'index' %}" class="flex items-center space-x-2"><span class="text-xl font-bold text-white">BAHON</span></a>
 
-        <!-- Nav Links -->
-        <nav>
-          <ul class="nav-links hidden md:flex space-x-6 text-white font-semibold">
-            <li>
-              <a href="{% url 'index' %}"
-                class="{% if request.resolver_match.url_name == 'index' %}
-                  
-                  text-cyan-400 active
+  <header class="bg-[#BE123C] shadow-md border-b border-[#BE123C]">
+  <div class="container mx-auto px-4 flex items-center justify-between h-16">
+    <!-- Logo -->
+    <a href="{% url 'index' %}" class="flex items-center space-x-2">
+      <span class="text-2xl font-bold text-white tracking-wide">BAHON</span>
+    </a>
 
-                {% else %}
-                  
-                  text-white hover:text-cyan-400
-
-                {% endif %} transition">
-                Home
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'view_bus' %}"
-                class="{% if request.resolver_match.url_name == 'view_bus' %}
-                  
-                  text-cyan-400 active
-
-                {% else %}
-                  
-                  text-white hover:text-cyan-400
-
-                {% endif %} transition">
-                View Bus
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'subscription' %}"
-                class="{% if request.resolver_match.url_name == 'subscription' %}
-
-                  text-cyan-400 active
-
-                {% else %}
-                  
-                  text-white hover:text-cyan-400
-
-                {% endif %} transition">
-                Subscription
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'about_us' %}"
-                class="{% if request.resolver_match.url_name == 'about_us' %}
-                  
-                  text-cyan-400 active
-
-                {% else %}
-                  
-                  text-white hover:text-cyan-400
-
-                {% endif %} transition">
-                About Us
-              </a>
-            </li>
-            <li>
-              <a href="{% url 'contact_us' %}"
-                class="{% if request.resolver_match.url_name == 'contact_us' %}
-                  
-                  text-cyan-400 active
-
-                {% else %}
-                  
-                  text-white hover:text-cyan-400
-
-                {% endif %} transition">
-                Contact Us
-              </a>
-            </li>
-            {% if request.session.is_student_authenticated %}
-              <li>
-                <a href="{% url 'my_account' %}"
-                  class="{% if request.resolver_match.url_name == 'my_account' %}
-                    
-                    text-cyan-400 active
-
-                  {% else %}
-                    
-                    text-white hover:text-cyan-400
-
-                  {% endif %} transition">
-                  My Account
-                </a>
-              </li>
-            {% else %}
-              <li>
-                <a href="#" id="sign_in_desktop" class="text-white hover:text-cyan-400 transition">Sign In</a>
-              </li>
-            {% endif %}
-          </ul>
-        </nav>
-
-        <!-- Hamburger -->
-        <button aria-label="Toggle Menu" class="hamburger block md:hidden focus:outline-none" id="hamburgerBtn">
-          <span class="bar block w-6 h-0.5 bg-gray-200 mb-1 rounded"></span>
-          <span class="bar block w-6 h-0.5 bg-gray-200 mb-1 rounded"></span>
-          <span class="bar block w-6 h-0.5 bg-gray-200 rounded"></span>
-        </button>
-      </div>
-
-      <!-- Mobile Menu -->
-      <div id="mobileMenu" class="transition-all duration-500 ease-in-out max-h-0 overflow-hidden opacity-0 md:hidden bg-slate-800 shadow-xl border-t border-slate-600">
-        <ul class="flex flex-col p-4 space-y-3 font-semibold">
+    <!-- Nav Links -->
+    <nav>
+      <ul class="nav-links hidden md:flex space-x-8 text-white font-semibold">
+        <li>
+          <a href="{% url 'index' %}"
+            class="{% if request.resolver_match.url_name == 'index' %} hover:text-white border-b-2 border-white {% else %} hover:text-white  {% endif %} ">
+            Home
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'view_bus' %}"
+            class="{% if request.resolver_match.url_name == 'view_bus' %} hover:text-white border-b-2 border-white {% else %} hover:text-white {% endif %} focus:outline-none active:outline-none">
+            View Bus
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'subscription' %}"
+            class="{% if request.resolver_match.url_name == 'subscription' %} hover:text-white border-b-2 border-white {% else %} hover:text-white  {% endif %} focus:outline-none active:outline-none">
+            Subscription
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'about_us' %}"
+            class="{% if request.resolver_match.url_name == 'about_us' %} hover:text-white border-b-2 border-white {% else %} hover:text-white  {% endif %} focus:outline-none active:outline-none">
+            About Us
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'contact_us' %}"
+            class="{% if request.resolver_match.url_name == 'contact_us' %} hover:text-white border-b-2 border-white {% else %} hover:text-white  {% endif %} focus:outline-none active:outline-none">
+            Contact Us
+          </a>
+        </li>
+        {% if request.session.is_student_authenticated %}
           <li>
-            <a href="{% url 'index' %}" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">Home</a>
+            <a href="{% url 'my_account' %}"
+              class="{% if request.resolver_match.url_name == 'my_account' %}hover:text-white border-b-2 border-white {% else %} hover:text-white  {% endif %} focus:outline-none active:outline-none">
+              My Account
+            </a>
           </li>
+        {% else %}
           <li>
-            <a href="{% url 'view_bus' %}" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">View Bus</a>
+            <a href="#" id="sign_in_desktop" class="text-white  hover:text-white transition focus:outline-none active:outline-none">Sign In</a>
           </li>
-          <li>
-            <a href="{% url 'subscription' %}" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">Subscription</a>
-          </li>
-          <li>
-            <a href="{% url 'about_us' %}" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">About Us</a>
-          </li>
-          <li>
-            <a href="{% url 'contact_us' %}" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">Contact Us</a>
-          </li>
-          {% if request.session.is_student_authenticated %}
-            <li>
-              <a href="{% url 'my_account' %}" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">My Account</a>
-            </li>
-          {% else %}
-            <li>
-              <a href="#" id="sign_in_mobile" class="block text-white hover:text-cyan-400 transition py-2 px-3 rounded-lg hover:bg-slate-700">Sign In</a>
-            </li>
-          {% endif %}
-        </ul>
-      </div>
+        {% endif %}
+      </ul>
+    </nav>
 
-      <style>
-        #mobileMenu.open {
-          max-height: 500px;
-          opacity: 1;
-        }
-      </style>
-    </header>
+    <!-- Hamburger -->
+    <button aria-label="Toggle Menu" class="hamburger block md:hidden focus:outline-none" id="hamburgerBtn">
+      <span class="bar block w-6 h-0.5 bg-white mb-1 rounded"></span>
+      <span class="bar block w-6 h-0.5 bg-white mb-1 rounded"></span>
+      <span class="bar block w-6 h-0.5 bg-white rounded"></span>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="transition-all duration-500 ease-in-out max-h-0 overflow-hidden opacity-0 md:hidden bg-[#BE123C] shadow-xl border-t border-[#BE123C]">
+    <ul class="flex flex-col p-4 space-y-3 font-semibold text-white">
+      <li><a href="{% url 'index' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">Home</a></li>
+      <li><a href="{% url 'view_bus' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">View Bus</a></li>
+      <li><a href="{% url 'subscription' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">Subscription</a></li>
+      <li><a href="{% url 'about_us' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">About Us</a></li>
+      <li><a href="{% url 'contact_us' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">Contact Us</a></li>
+      {% if request.session.is_student_authenticated %}
+        <li><a href="{% url 'my_account' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">My Account</a></li>
+      {% else %}
+        <li><a href="#" id="sign_in_mobile" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">Sign In</a></li>
+      {% endif %}
+    </ul>
+  </div>
+
+  <style>
+    #mobileMenu.open {
+      max-height: 500px;
+      opacity: 1;
+    }
+
+  </style>
+</header>
+
+
     
     <!-- Modal Dialog -->
 
@@ -200,6 +144,8 @@
           <button id="sign_in" class="text-blue-600 font-semibold">Sign In</button>
           <button id="sign_up" class="text-gray-500 hover:text-blue-600">Sign Up</button>
         </div>
+
+
 
         <form method="POST" action="#" class="space-y-4">
           {% csrf_token %}
@@ -215,7 +161,9 @@
             <input type="password" name="password" id="password" class="w-full p-2 border rounded-lg" required />
           </div>
 
-          <!-- Register-Only Fields -->
+                  <!-- Google Login Button (only for sign in) -->
+
+
           <!-- Register-Only Fields -->
           <div id="register_fields" class="max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
             <div>
@@ -232,8 +180,29 @@
             </div>
           </div>
           <small id="student-id-error" class="text-red-600 mt-1 hidden"></small>
+
           <button type="submit" id="submit_btn" class="w-full bg-slate-600 text-white p-2 rounded-lg hover:bg-slate-700">Login</button>
+          <div class="text-center" id="signin_or">
+            <span>or</span>
+          </div>
+        <div id="google_login_div" class="mb-4">
+          <a href="{% url 'social:begin' 'google-oauth2' %}" class="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 font-semibold py-2 rounded-lg shadow hover:bg-gray-50 transition">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="h-5 w-5" />
+            Login with Google
+          </a>
+        </div>
         </form>
+
+        <!-- Google Register Button (only for sign up) -->
+        <div class="text-center mt-4 hidden" id="signup_or">
+          <span>or</span>
+        </div>
+        <div id="google_register_div" class="mt-4 hidden">
+          <a href="{% url 'social:begin' 'google-oauth2' %}" class="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 font-semibold py-2 rounded-lg shadow hover:bg-gray-50 transition">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="h-5 w-5" />
+            Register with Google
+          </a>
+        </div>
       </div>
     </div>
     
