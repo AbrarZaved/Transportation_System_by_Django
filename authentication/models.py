@@ -3,7 +3,9 @@ from django.contrib.auth.hashers import check_password, make_password
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
+from django.utils.text import slugify
 from django.utils.timezone import now
+import uuid
 
 
 class SuperVisorManager(BaseUserManager):
@@ -65,13 +67,22 @@ class Supervisor(AbstractBaseUser):
 
 class Student(models.Model):
     name = models.CharField(max_length=50)
+    profile_pic = models.ImageField(
+        upload_to="student_profiles/", default="meerkat.png"
+    )
     student_id = models.CharField(max_length=20, unique=True)
     dept_name = models.CharField(max_length=50)
     batch_code = models.CharField(max_length=5)
     phone_number = models.CharField(max_length=50, unique=True)
     email = models.EmailField(max_length=90, unique=True)
-    password = models.CharField(max_length=128) 
+    password = models.CharField(max_length=128)
+    username = models.CharField(max_length=50, null=True, blank=True)
     verified = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if not self.username:
+            self.username = f"{slugify(self.name)}-{uuid.uuid4().hex[:4]}"
+        super().save(*args, **kwargs)
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)

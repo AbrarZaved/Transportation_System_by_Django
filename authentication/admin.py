@@ -16,8 +16,8 @@ class SuperVisorAdmin(admin.ModelAdmin):
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ["student_id", "dept_name"]
-    search_fields = ["student_id"]
+    list_display = ["student_id", "username", "dept_name"]
+    search_fields = ["student_id", "username"]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

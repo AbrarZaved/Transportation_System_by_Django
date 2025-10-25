@@ -8,6 +8,7 @@ from django.forms import ValidationError
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from social_core.backends import username
 from authentication.email import create_email_otp, send_otp_email
 from authentication.models import EmailOTP, Preference, Student
 
@@ -48,11 +49,11 @@ def verify_otp_view(request):
 
 @student_login_required
 def my_account(request):
-    student_id = request.session.get("student_id")
-    if not student_id:
+    username = request.session.get("username")
+    if not username:
         return redirect("index")
 
-    student = get_object_or_404(Student, student_id=student_id)
+    student = get_object_or_404(Student, username=username)
     total_searches = (
         Preference.objects.filter(student=student)
         .aggregate(total_searches=models.Sum("total_searches"))
@@ -95,7 +96,7 @@ def student_auth(request):
                 {"success": False, "message": "Invalid password."}, status=401
             )
 
-        request.session["student_id"] = student_id
+        request.session["username"] = student.username
         request.session["is_student_authenticated"] = True
         return JsonResponse(
             {
@@ -141,7 +142,7 @@ def student_auth(request):
         student.set_password(password)
         student.save()
 
-        request.session["student_id"] = student.student_id
+        request.session["username"] = student.username
         request.session["is_student_authenticated"] = True
         request.session.set_expiry(3600)
         return JsonResponse(
@@ -193,19 +194,27 @@ def delete_history(request, id):
 
 def edit_profile(request):
     if request.method == "POST":
-        student_id = request.POST.get("student_id")
-        full_name = request.POST.get("full_name", "").strip()
-        phone_number = request.POST.get("phone_number", "").strip()
-        dept_name = request.POST.get("dept_name", "").strip()
-        batch_code = request.POST.get("batch_code", "").strip()
+        username = request.session.get("username")
+        student = get_object_or_404(Student, username=username)
 
-        student = get_object_or_404(Student, student_id=student_id)
+        # Fields to check in POST
+        fields = ["name", "phone_number", "dept_name", "batch_code", "student_id"]
 
-        student.name = full_name
-        student.phone_number = phone_number
-        student.dept_name = dept_name
-        student.batch_code = batch_code
+        for field in fields:
+            value = request.POST.get(field, "").strip()
+            if value and value != getattr(student, field):
+                setattr(student, field, value)
+
+        # Handle profile picture separately
+        profile_pic = request.FILES.get("profile_pic")
+        if profile_pic:
+            student.profile_pic = profile_pic
+
         student.save()
-
         messages.success(request, "Your profile has been updated successfully.")
         return redirect("my_account")
+
+
+def social_auth_error(request):
+    messages.error(request, "Not Allowed")
+    return redirect("index")

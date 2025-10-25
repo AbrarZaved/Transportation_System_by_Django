@@ -10,15 +10,26 @@
   <section class="bg-gray-100 py-14">
     <div class="max-w-5xl mx-auto px-4">
       <!-- Hero Section -->
-      <div class="bg-white rounded-2xl shadow-lg p-8 mb-10 relative overflow-hidden">
+      <form method="POST" action="{% url 'edit_profile' %}" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-lg p-8 mb-10 relative overflow-hidden">
+        {% csrf_token %}
+
         <div class="flex items-center justify-between flex-wrap gap-4">
           <div class="flex items-center gap-4">
-            <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg" alt="Avatar" class="w-16 h-16 rounded-full shadow-md border-2 border-pink-500 object-cover" />
+            <!-- Editable Profile Image -->
+            <label class="relative w-16 h-16 cursor-pointer">
+              <img src="{{ student.profile_pic.url }}" alt="Avatar" class="w-16 h-16 rounded-full shadow-md border-2 border-pink-500 object-cover" />
+              <input type="file" name="profile_pic" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="this.form.submit()" />
+              <div class="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center rounded-full opacity-0 hover:opacity-100 transition">
+                <i class="fas fa-camera text-white"></i>
+              </div>
+            </label>
+
             <div>
               <h2 class="text-2xl font-bold text-gray-900">Hello, {{ student.name|first_name }}</h2>
               <p class="text-gray-500 text-sm">Student ID: {{ student.student_id }}</p>
             </div>
           </div>
+
           <a href="{% url 'sign_out' %}" class="text-red-500 font-medium hover:underline text-sm">Logout</a>
         </div>
 
@@ -39,7 +50,7 @@
             <p class="text-sm text-gray-500">Upcoming Trips</p>
           </div>
         </div>
-      </div>
+      </form>
 
       <!-- Profile Card -->
       <div class="bg-white rounded-2xl shadow-md p-8 mb-10">
@@ -99,7 +110,12 @@
                 <span class="info-label">Full Name</span>
                 <input type="text" value="{{ student.name }}" required name="full_name" class="w-full p-2 border rounded-lg" />
               </div>
-              <input type="hidden" name="student_id" value="{{ student.student_id }}" />
+              <input type="hidden" name="username" value="{{ student.username }}" />
+              <div class="info-group">
+                <span class="info-label">Student ID</span>
+                <input type="text" value="{{ student.student_id }}" required name="student_id" class="w-full p-2 border rounded-lg" />
+              </div>
+
               <div class="info-group">
                 <span class="info-label">Phone Number</span>
                 <input type="text" value="{{ student.phone_number }}" required name="phone_number" class="w-full p-2 border rounded-lg" />
