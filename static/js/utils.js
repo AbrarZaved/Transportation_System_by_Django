@@ -16,7 +16,9 @@ export function getCookie(name) {
 export async function showToast(title, message) {
   var toasts = {
     "Logged Out!": "You have been successfully logged out.",
+    "Logged In!": "Welcome back! You have successfully logged in.",
     "Not Allowed": "Only DIU students are allowed to access this system.",
+    "OTP Sent!": "A One-Time Password has been sent to your registered email.",
   };
   const toastTitle = document.getElementById("toast-title");
   const toastMessage = document.getElementById("toast-message");

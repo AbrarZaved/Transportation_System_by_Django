@@ -193,7 +193,7 @@
 <div>
   {% if messages %}
     {% for message in messages %}
-      <div id="messages" data-message="{{ message }}"></div>
+      <div id="messages" data-message="{{ message.tags }}"></div>
     {% endfor %}
   {% endif %}
 </div>

@@ -1,5 +1,7 @@
+from django.contrib import messages
 from django.shortcuts import redirect
 from authentication.models import Student
+from authentication.views import send_otp_view
 
 
 def create_or_update_student(backend, user, details, *args, **kwargs):
@@ -21,9 +23,13 @@ def create_or_update_student(backend, user, details, *args, **kwargs):
     student, created = Student.objects.get_or_create(
         email=email, defaults={"name": full_name}
     )
-    if not created and full_name and student.name != full_name:
-        student.name = full_name
-        student.save()
+    if created:
+        otp_sent = send_otp_view(student)
+        if otp_sent:
+            messages.warning(request, "OTP Sent!")
+            return redirect("verify_otp")
+        else:
+            return redirect("social_auth_error")
 
     # Setup session
     if request:

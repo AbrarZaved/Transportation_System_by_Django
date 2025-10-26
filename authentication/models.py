@@ -102,6 +102,7 @@ class EmailOTP(models.Model):
     def is_expired(self):
         return now() > self.expires_at
 
+    
     def __str__(self):
         return f"EmailOTP for {self.user.email}"
 

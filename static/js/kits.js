@@ -1,51 +1,21 @@
-import { getCookie } from "/static/js/utils.js";
-function clearStudentSession() {
-  ["student_id", "student_name", "greeting"].forEach(
-    localStorage.removeItem.bind(localStorage)
-  );
-  ["welcome_shown"].forEach(sessionStorage.removeItem.bind(sessionStorage));
-}
-
 document.addEventListener("DOMContentLoaded", function () {
   const hamburger = document.getElementById("hamburgerBtn");
-  const signInBtn = document.getElementById("sign_in");
-  const signUpBtn = document.getElementById("sign_up");
-  const registerFields = document.getElementById("register_fields");
-  const authMode = document.getElementById("auth_mode");
   const mobileMenu = document.getElementById("mobileMenu");
   const modal = document.getElementById("customModal");
   const modalContent = document.getElementById("modalContent");
-  const studentIdInput = document.getElementById("student_id");
-  const errorDisplay = document.getElementById("student-id-error");
-  const submitBtn = document.getElementById("submit_btn");
+  const signInBtn = document.getElementById("signInBtn");
+  const signUpBtn = document.getElementById("signUpBtn");
+  const signInForm = document.getElementById("signInForm");
+  const signUpForm = document.getElementById("signUpForm");
 
-  // Handle hamburger toggle
-  hamburger?.addEventListener("click", () => {
-    hamburger.classList.toggle("active");
-    mobileMenu.classList.toggle("open");
-  });
-
-  ["sign_in_desktop", "sign_in_mobile", "login-button"].forEach((id) => {
-    const btn = document.getElementById(id);
-    if (btn?.textContent === "Sign In") {
-      clearStudentSession();
-    }
-    btn?.addEventListener("click", () => {
-      if (hamburger && mobileMenu.classList.contains("open")) {
-        hamburger.classList.remove("active");
-        mobileMenu.classList.remove("open");
-      }
-      openModal();
-    });
-  });
-
-  // Open and close modal
+  /* --- Modal Controls --- */
   function openModal() {
     modal.classList.remove("hidden");
     setTimeout(() => {
       modalContent.classList.remove("scale-90", "opacity-0");
       modalContent.classList.add("scale-100", "opacity-100");
-      studentIdInput.focus();
+      const firstInput = modal.querySelector("form:not(.hidden) input");
+      firstInput?.focus();
     }, 10);
     document.body.style.overflow = "hidden";
   }
@@ -64,146 +34,88 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
-      closeModal();
-    }
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
   });
 
-  // Initial transition setup
-  registerFields.classList.add(
-    "transition-all",
-    "duration-500",
-    "ease-in-out",
-    "overflow-hidden"
-  );
+  /* --- Open Modal Buttons --- */
+  ["sign_in_desktop", "sign_in_mobile", "login-button"].forEach((id) => {
+    const btn = document.getElementById(id);
+    btn?.addEventListener("click", () => {
+      if (hamburger && mobileMenu.classList.contains("open")) {
+        hamburger.classList.remove("active");
+        mobileMenu.classList.remove("open");
+      }
+      openModal();
+    });
+  });
 
-  window.toggleForm = function (mode) {
-    authMode.value = mode;
+  /* --- Hamburger --- */
+  hamburger?.addEventListener("click", () => {
+    hamburger.classList.toggle("active");
+    mobileMenu.classList.toggle("open");
+  });
 
-    if (mode === "signup") {
-      submitBtn.textContent = "Sign Up";
-      registerFields.classList.remove("max-h-0", "opacity-0");
-      registerFields.classList.add("max-h-[500px]", "opacity-100");
-
-      signUpBtn.classList.add("text-blue-600", "font-semibold");
-      signUpBtn.classList.remove("text-gray-500");
-
-      signInBtn.classList.remove("text-blue-600", "font-semibold");
-      signInBtn.classList.add("text-gray-500");
-
-      // Hide Google login, show Google register
-      document.getElementById("google_login_div").classList.add("hidden");
-      document.getElementById("google_register_div").classList.remove("hidden");
-
-      // Hide signin or, show signup or
-      document.getElementById("signin_or").classList.add("hidden");
-      document.getElementById("signup_or").classList.remove("hidden");
-    } else {
-      submitBtn.textContent = "Login";
-      registerFields.classList.remove("max-h-[500px]", "opacity-100");
-      registerFields.classList.add("max-h-0", "opacity-0");
-
-      signInBtn.classList.add("text-blue-600", "font-semibold");
-      signInBtn.classList.remove("text-gray-500");
-
-      signUpBtn.classList.remove("text-blue-600", "font-semibold");
+  /* --- Smooth Form Toggle with Tailwind --- */
+  function switchTo(mode) {
+    if (mode === "signin") {
+      signInBtn.classList.add("text-blue-600", "border-b-2", "border-blue-600");
+      signUpBtn.classList.remove(
+        "text-blue-600",
+        "border-b-2",
+        "border-blue-600"
+      );
       signUpBtn.classList.add("text-gray-500");
 
-      // Show Google login, hide Google register
-      document.getElementById("google_login_div").classList.remove("hidden");
-      document.getElementById("google_register_div").classList.add("hidden");
-
-      // Show signin or, hide signup or
-      document.getElementById("signin_or").classList.remove("hidden");
-      document.getElementById("signup_or").classList.add("hidden");
-    }
-  };
-
-  signInBtn.addEventListener("click", () => toggleForm("signin"));
-  signUpBtn.addEventListener("click", () => toggleForm("signup"));
-  // Hide error message when user starts typing again
-  ["student_id", "password", "name", "email", "phone_number"].forEach((id) => {
-    const input = document.getElementById(id);
-    if (input) {
-      input.addEventListener("input", () => {
-        errorDisplay.classList.add("hidden");
-        errorDisplay.textContent = "";
-      });
-    }
-  });
-
-  submitBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-
-    const student_id = document.getElementById("student_id").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const name = document.getElementById("name")?.value?.trim();
-    const email = document.getElementById("email")?.value?.trim();
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@diu\.edu\.bd$/;
-    if (email && !emailRegex.test(email)) {
-      return showError("Please enter a valid DIU email address.", "signup");
-    }
-
-    const phone_number = document.getElementById("phone_number")?.value?.trim();
-    const mode = authMode.value;
-    const csrftoken = getCookie("csrftoken");
-
-    // Validate input
-    if (!student_id || !password) {
-      return showError("Student ID and Password are required.");
-    }
-
-    if (mode === "signup" && (!name || !email || !phone_number)) {
-      showError("All registration fields are required.", mode);
-      return;
-    }
-
-    const payload = {
-      student_id,
-      password,
-      mode,
-      ...(mode === "signup" && { name, email, phone_number }),
-    };
-    if (mode == "signin") {
-      submitBtn.textContent = "Logging in...";
-      submitBtn.disabled = true;
+      // Animate Sign Up → Sign In
+      signUpForm.classList.add("opacity-0", "scale-95");
+      setTimeout(() => {
+        signUpForm.classList.add("hidden");
+        signInForm.classList.remove("hidden");
+        setTimeout(() => {
+          signInForm.classList.remove("opacity-0", "scale-95");
+          signInForm.classList.add("opacity-100", "scale-100");
+        }, 20);
+      }, 200);
     } else {
-      submitBtn.textContent = "Signing Up...";
-      submitBtn.disabled = true;
+      signUpBtn.classList.add("text-blue-600", "border-b-2", "border-blue-600");
+      signInBtn.classList.remove(
+        "text-blue-600",
+        "border-b-2",
+        "border-blue-600"
+      );
+      signInBtn.classList.add("text-gray-500");
+
+      // Animate Sign In → Sign Up
+      signInForm.classList.add("opacity-0", "scale-95");
+      setTimeout(() => {
+        signInForm.classList.add("hidden");
+        signUpForm.classList.remove("hidden");
+        setTimeout(() => {
+          signUpForm.classList.remove("opacity-0", "scale-95");
+          signUpForm.classList.add("opacity-100", "scale-100");
+        }, 20);
+      }, 200);
     }
 
-    fetch("/student_auth", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": csrftoken,
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          localStorage.setItem("student_id", student_id);
-          localStorage.setItem("student_name", data.student_name || "");
-          localStorage.setItem("greeting", data.greeting);
-          window.location.reload();
-        } else {
-          showError(data.message || "An error occurred.", mode);
-          return;
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        showError("Something went wrong. Try again.", mode);
-      });
-  });
-
-  function showError(message, mode) {
-    errorDisplay.textContent = message;
-    errorDisplay.classList.remove("hidden");
-    if (mode === "signup") submitBtn.textContent = "Sign Up";
-    else submitBtn.textContent = "Login";
-
-    submitBtn.disabled = false;
+    setTimeout(() => {
+      const visibleForm = document.querySelector("form:not(.hidden) input");
+      visibleForm?.focus();
+    }, 400);
   }
+  switchTo("signin");
+  signInBtn.addEventListener("click", () => switchTo("signin"));
+  signUpBtn.addEventListener("click", () => switchTo("signup"));
+
+  /* --- Hide Error Messages When Typing --- */
+  ["student_id", "password", "name", "email", "phone_number"].forEach((id) => {
+    document.querySelectorAll(`[name="${id}"]`).forEach((input) => {
+      input.addEventListener("input", () => {
+        const errorDisplay = document.getElementById("student-id-error");
+        if (errorDisplay) {
+          errorDisplay.classList.add("hidden");
+          errorDisplay.textContent = "";
+        }
+      });
+    });
+  });
 });

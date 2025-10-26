@@ -2,26 +2,28 @@
 :root {
   --primary-color: #475569;
   --primary-dark: #334155;
-  --primary-light: #E2E8F0;
-  --secondary-color: #3B82F6;
-  --secondary-dark: #1D4ED8;
-  --secondary-light: #DBEAFE;
-  --accent-color: #10B981;
-  --accent-dark: #065F46;
-  --accent-light: #D1FAE5;
-  --warning-color: #F59E0B;
-  --error-color: #EF4444;
-  --success-color: #22C55E;
+  --primary-light: #e2e8f0;
+  --secondary-color: #3b82f6;
+  --secondary-dark: #1d4ed8;
+  --secondary-light: #dbeafe;
+  --accent-color: #10b981;
+  --accent-dark: #065f46;
+  --accent-light: #d1fae5;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+  --success-color: #22c55e;
   --black: #111827;
   --dark-gray: #374151;
-  --gray: #6B7280;
-  --light-gray: #D1D5DB;
-  --very-light-gray: #F3F4F6;
-  --white: #FFFFFF;
+  --gray: #6b7280;
+  --light-gray: #d1d5db;
+  --very-light-gray: #f3f4f6;
+  --white: #ffffff;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --border-radius-sm: 0.125rem;
   --border-radius: 0.25rem;
   --border-radius-md: 0.375rem;
@@ -39,7 +41,7 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   color: var(--black);
   line-height: 1.5;
   background-color: var(--very-light-gray);
@@ -73,11 +75,13 @@ img {
 
 button {
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
-input, select, textarea {
-  font-family: 'Inter', sans-serif;
+input,
+select,
+textarea {
+  font-family: "Inter", sans-serif;
 }
 
 /* Header */
@@ -127,7 +131,7 @@ nav {
 
 .nav-links a.active::after,
 .nav-links a:hover::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -140,7 +144,7 @@ nav {
 }
 
 .nav-links a::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -204,9 +208,6 @@ nav {
 .page-link.next {
   font-size: 0.75rem;
 }
-
-
-
 
 /* App Download */
 .app-download {
@@ -381,3 +382,8 @@ h2 {
 .history-list button:hover {
   background: #d32f2f;
 }
+.form-section {
+  transition: all 0.3s ease-in-out;
+  transform-origin: top center;
+}
+

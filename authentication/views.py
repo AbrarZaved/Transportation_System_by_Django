@@ -1,5 +1,7 @@
+from email import message
 import json
 from functools import wraps
+import re
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.validators import validate_email
@@ -24,27 +26,29 @@ def student_login_required(view_func):
     return wrapper
 
 
-def send_otp_view(request):
-    otp = create_email_otp(request.user)
-    send_otp_email(request.user, otp)
-    messages.success(request, "OTP sent to your email!")
+def send_otp_view(user):
+    otp = create_email_otp(user)
+    send_otp_email(user, otp)
     return redirect("verify_otp")
 
 
 def verify_otp_view(request):
     if request.method == "POST":
-        otp_input = request.POST.get("otp")
-        otp_obj = EmailOTP.objects.filter(user=request.user, otp=otp_input).last()
+        otp_input = json.loads(request.body).get("otp")
+        print(otp_input)
+        otp_obj = EmailOTP.objects.filter(otp=otp_input).last()
 
         if otp_obj and not otp_obj.is_expired():
-            request.user.verified = True
-            request.user.save()
+            otp_obj.user.verified = True
+            otp_obj.user.save()
+            request.session["username"] = otp_obj.user.username
+            request.session["is_student_authenticated"] = True
             messages.success(request, "Email verified successfully!")
-            return redirect("dashboard")
+            return JsonResponse({"success": True})
         else:
             messages.error(request, "Invalid or expired OTP.")
 
-    return render(request, "verify_otp.html")
+    return render(request, "authentication/verify_otp.html")
 
 
 @student_login_required
@@ -66,62 +70,31 @@ def my_account(request):
     )
 
 
-def student_auth(request):
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse(
-            {"success": False, "message": "Invalid JSON format."}, status=400
-        )
-
-    mode = data.get("mode", "").strip()
-    student_id = data.get("student_id", "").strip()
-    password = data.get("password", "").strip()
-
-    if not student_id or not password:
-        return JsonResponse(
-            {"success": False, "message": "Student ID and password are required."},
-            status=400,
-        )
-
-    if mode == "signin":
+def login_request(request):
+    if request.method == "POST":
+        student_id = request.POST.get("student_id", "").strip()
+        password = request.POST.get("password", "").strip()
         student = Student.objects.filter(student_id=student_id).first()
-        if not student:
-            return JsonResponse(
-                {"success": False, "message": "Student ID does not exist."}, status=404
-            )
+        if student and student.check_password(password):
+            request.session["username"] = student.username
+            request.session["is_student_authenticated"] = True
+            request.session.set_expiry(3600)  # 1 hour
+            messages.success(request, "Logged in!", extra_tags=str(student.name))
+            return redirect("index")
 
-        if not student.check_password(password):
-            return JsonResponse(
-                {"success": False, "message": "Invalid password."}, status=401
-            )
 
-        request.session["username"] = student.username
-        request.session["is_student_authenticated"] = True
-        return JsonResponse(
-            {
-                "success": True,
-                "message": "Signed in successfully.",
-                "student_name": student.name,
-                "greeting": True,
-            },
-            status=200,
-        )
-
-    elif mode == "signup":
+def register_request(request):
+    if request.method == "POST":
+        student_id = request.POST.get("student_id", "").strip()
+        password = request.POST.get("password", "").strip()
         if Student.objects.filter(student_id=student_id).exists():
             return JsonResponse(
                 {"success": False, "message": "Student ID already exists."}, status=400
             )
 
-        name = data.get("name", "").strip()
-        email = data.get("email", "").strip()
-        phone_number = data.get("phone_number", "").strip()
-
-        if not all([name, email, phone_number]):
-            return JsonResponse(
-                {"success": False, "message": "All fields are required."}, status=400
-            )
+        name = request.POST.get("name", "").strip()
+        email = request.POST.get("email", "").strip()
+        phone_number = request.POST.get("phone_number", "").strip()
 
         # Optional: Email validation
         try:
@@ -131,8 +104,6 @@ def student_auth(request):
                 {"success": False, "message": "Invalid email address."}, status=400
             )
 
-        # Optional: Add phone number format validation here if needed
-
         student = Student(
             student_id=student_id,
             name=name,
@@ -141,22 +112,11 @@ def student_auth(request):
         )
         student.set_password(password)
         student.save()
-
-        request.session["username"] = student.username
-        request.session["is_student_authenticated"] = True
-        request.session.set_expiry(3600)
-        return JsonResponse(
-            {
-                "success": True,
-                "message": "Signed up and logged in.",
-                "student_name": name,
-                "greeting": False,
-            },
-            status=201,
-        )
-
-    else:
-        return JsonResponse({"success": False, "message": "Invalid mode."}, status=400)
+        otp_sent = send_otp_view(student)
+        if otp_sent:
+            messages.warning(request, "OTP Sent!")
+            return redirect("verify_otp")
+    return redirect("index")
 
 
 def sign_out(request):

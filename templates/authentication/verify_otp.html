@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify OTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4">
+
+    <!-- OTP Verification Card -->
+    <div class="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-md text-center relative overflow-hidden">
+      
+      <!-- Branding Header -->
+      <div class="mb-6">
+        <img src="{% static 'img/logo.png' %}" alt="Logo" class="w-12 h-12 mx-auto mb-3" />
+        <h2 class="text-2xl font-semibold text-gray-800">Verify Your Account</h2>
+        <p class="text-gray-500 text-sm">Enter the 6-digit code sent to your email or phone.</p>
+      </div>
+
+      <!-- OTP Boxes -->
+      <form method="POST" action="" class="flex justify-center gap-3 mb-6">
+        {% csrf_token %}
+        {% for i in "123456" %}
+          <input
+            type="text"
+            maxlength="1"
+            class="otp-input w-12 h-12 text-center border border-gray-300 rounded-xl text-xl font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 transition transform hover:scale-105"
+          />
+        {% endfor %}
+      </form>
+
+      <!-- Verify Button -->
+      <button
+        type="submit"
+        id="verifyOtpBtn"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl shadow-sm transition transform hover:translate-y-[-1px] hover:shadow-md"
+      >
+        Verify OTP
+      </button>
+
+      <!-- Links -->
+      <div class="mt-6 space-y-2 text-sm">
+        <p class="text-gray-600">
+          Didn’t receive the code?
+          <a href="#" class="text-blue-600 font-semibold hover:underline">Resend</a>
+        </p>
+
+        <a href="{% url "index" %}" class="inline-flex items-center justify-center gap-2 text-blue-600 font-semibold hover:underline">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Go Back Home
+        </a>
+      </div>
+
+      <!-- Decorative Accent -->
+      <div class="absolute -top-8 -right-8 w-24 h-24 bg-blue-100 rounded-full blur-2xl opacity-60"></div>
+      <div class="absolute -bottom-10 -left-10 w-28 h-28 bg-blue-50 rounded-full blur-2xl opacity-70"></div>
+    </div>
+<div>
+  {% if messages %}
+    {% for message in messages %}
+      <div id="messages" data-message="{{ message.tags }}"></div>
+    {% endfor %}
+  {% endif %}
+</div>
+    <!-- OTP Auto-Focus Script -->
+    <script type="module" src="{% static 'js/otp.js' %}"></script>
+
+  </body>
+</html>
