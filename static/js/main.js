@@ -180,7 +180,7 @@ function clearStoppagesCache() {
 document.addEventListener("DOMContentLoaded", async () => {
   const messages = document.getElementById("messages");
   if (messages) {
-    showToast(messages.dataset.message, "You are successfully logged out!");
+    showToast(messages.dataset.message, "");
     // Clear stoppages cache on logout
     clearStoppagesCache();
   }

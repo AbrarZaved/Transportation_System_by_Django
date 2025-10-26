@@ -161,7 +161,7 @@ def student_auth(request):
 
 def sign_out(request):
     request.session.flush()
-    messages.success(request, "Logged out!")
+    messages.success(request, "Logged Out!")
     return redirect("index")
 
 

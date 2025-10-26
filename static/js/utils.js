@@ -14,13 +14,17 @@ export function getCookie(name) {
   return cookieValue;
 }
 export async function showToast(title, message) {
+  var toasts = {
+    "Logged Out!": "You have been successfully logged out.",
+    "Not Allowed": "Only DIU students are allowed to access this system.",
+  };
   const toastTitle = document.getElementById("toast-title");
   const toastMessage = document.getElementById("toast-message");
   const toastNotification = document.getElementById("toast-notification");
   toastNotification.classList.add("translate-x-full", "opacity-0");
   toastNotification.classList.remove("hidden");
   toastTitle.textContent = title;
-  toastMessage.textContent = message;
+  toastMessage.textContent = toasts[title] || message || "";
   setTimeout(() => {
     toastNotification.classList.remove("translate-x-full", "opacity-0");
   }, 50);
