@@ -38,20 +38,18 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
     const otp = Array.from(inputs)
       .map((input) => input.value)
-          .join("");
-      console.log(otp)
-      if (otp.length < 6) {
-          showToast("Invalid OTP", "Please enter a 6-digit OTP.");
+      .join("");
+    if (otp.length < 6) {
+      showToast("Invalid OTP", "Please enter a 6-digit OTP.");
+    } else {
+      const response = csrfFetch("/verify_otp", {
+        method: "POST",
+        body: JSON.stringify({ otp }),
+      });
+      console.log(response);
+      if (response) {
+        window.location.href = "/my_account";
       }
-      else {
-          const response = csrfFetch("/verify_otp", {
-              method: "POST",
-              body: JSON.stringify({ otp }),
-          })
-          console.log(response)
-          if (response) {
-              window.location.href = "/my_account";
-          }
-      }
+    }
   });
 });

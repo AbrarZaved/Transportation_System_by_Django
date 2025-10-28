@@ -32,7 +32,10 @@ def create_or_update_student(backend, user, details, *args, **kwargs):
             return redirect("social_auth_error")
 
     # Setup session
-    if request:
+    if request and student.verified:
         request.session["username"] = student.username
         request.session["is_student_authenticated"] = True
         request.session.set_expiry(3600)
+    else:
+        if request:
+            return redirect("social_auth_error")  # Unverified email

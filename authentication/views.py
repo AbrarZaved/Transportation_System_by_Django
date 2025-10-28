@@ -35,7 +35,6 @@ def send_otp_view(user):
 def verify_otp_view(request):
     if request.method == "POST":
         otp_input = json.loads(request.body).get("otp")
-        print(otp_input)
         otp_obj = EmailOTP.objects.filter(otp=otp_input).last()
 
         if otp_obj and not otp_obj.is_expired():
@@ -74,7 +73,7 @@ def login_request(request):
     if request.method == "POST":
         student_id = request.POST.get("student_id", "").strip()
         password = request.POST.get("password", "").strip()
-        student = Student.objects.filter(student_id=student_id).first()
+        student = Student.objects.filter(student_id=student_id, verified=True).first()
         if student and student.check_password(password):
             request.session["username"] = student.username
             request.session["is_student_authenticated"] = True
