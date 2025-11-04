@@ -1,5 +1,4 @@
 import json
-from asgiref.sync import sync_to_async
 from django.contrib import messages
 from django.core.validators import validate_email
 from django.db import models
@@ -9,15 +8,9 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from authentication.email import create_email_otp, send_otp_email
 from authentication.models import EmailOTP, Preference, Student
-from django.core.mail import send_mail
 from threading import Thread
 
 
-@sync_to_async
-def send_otp_view(user):
-    otp = create_email_otp(user)
-    send_otp_email(user, otp)
-    return redirect("verify_otp")
 
 
 def verify_otp_view(request):

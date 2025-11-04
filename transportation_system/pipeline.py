@@ -1,5 +1,7 @@
+from threading import Thread
 from django.contrib import messages
 from django.shortcuts import redirect
+from authentication.email import create_email_otp, send_otp_email
 from authentication.models import Student
 from authentication.views import send_otp_view
 
@@ -24,12 +26,12 @@ def create_or_update_student(backend, user, details, *args, **kwargs):
         email=email, defaults={"name": full_name}
     )
     if created:
-        otp_sent = send_otp_view(student)
-        if otp_sent:
-            messages.warning(request, "OTP Sent!")
-            return redirect("verify_otp")
-        else:
-            return redirect("social_auth_error")
+        otp = create_email_otp(student)
+        email_thread = Thread(target=send_otp_email, args=(student, otp))
+        email_thread.daemon = True  # Thread will die when main program exits
+        email_thread.start()
+        return redirect("verify_otp")  # New student, redirect to OTP verification
+
 
     # Setup session
     if request and student.verified:
