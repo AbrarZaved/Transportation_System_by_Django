@@ -2,7 +2,7 @@ import { showToast } from "./utils.js";
 import { csrfFetch } from "./api.js";
 document.addEventListener("DOMContentLoaded", function () {
   const inputs = document.querySelectorAll(".otp-input");
-
+  showToast("Info", "Please enter the 6-digit OTP sent to your email.");
   inputs.forEach((input, index) => {
     input.addEventListener("input", (e) => {
       const value = e.target.value;

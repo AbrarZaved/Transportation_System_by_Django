@@ -1,3 +1,4 @@
+from functools import wraps
 import json
 from django.contrib import messages
 from django.core.validators import validate_email
@@ -6,13 +7,24 @@ from django.forms import ValidationError
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from social_core.backends import username
 from authentication.email import create_email_otp, send_otp_email
 from authentication.models import EmailOTP, Preference, Student
 from threading import Thread
 
+def student_wrapper(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        username = request.session.get("username")
+        student = get_object_or_404(Student, username=username)
+        if student.verified or not username:
+            return redirect("index")
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view
 
 
-
+@student_wrapper
 def verify_otp_view(request):
     if request.method == "POST":
         otp_input = json.loads(request.body).get("otp")
@@ -91,7 +103,7 @@ def register_request(request):
         )
         student.set_password(password)
         student.save()
-
+        request.session["username"] = student.username
         # Send OTP asynchronously using threading
         otp = create_email_otp(student)
         email_thread = Thread(target=send_otp_email, args=(student, otp))
