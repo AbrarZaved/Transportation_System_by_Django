@@ -34,6 +34,7 @@ def create_or_update_student(backend, user, details, *args, **kwargs):
     # Setup session
     if request and student.verified:
         request.session["username"] = student.username
+        messages.success(request, "Logged In!", extra_tags=student.name)
         request.session["is_student_authenticated"] = True
         request.session.set_expiry(3600)
     else:

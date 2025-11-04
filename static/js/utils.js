@@ -25,8 +25,16 @@ export async function showToast(title, message) {
   const toastNotification = document.getElementById("toast-notification");
   toastNotification.classList.add("translate-x-full", "opacity-0");
   toastNotification.classList.remove("hidden");
-  toastTitle.textContent = title;
-  toastMessage.textContent = toasts[title] || message || "";
+  if (title == "Logged In!") {
+    toastTitle.textContent = message;
+    toastMessage.textContent = toasts["Logged In!"];
+    console.log(title, message);
+  } else {
+    toastTitle.textContent = title;
+    console.log(title);
+    toastMessage.textContent = toasts[title] || message || "";
+  }
+
   setTimeout(() => {
     toastNotification.classList.remove("translate-x-full", "opacity-0");
   }, 50);

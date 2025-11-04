@@ -34,22 +34,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
   inputs[0].focus();
 
-  document.getElementById("verifyOtpBtn")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    const otp = Array.from(inputs)
-      .map((input) => input.value)
-      .join("");
-    if (otp.length < 6) {
-      showToast("Invalid OTP", "Please enter a 6-digit OTP.");
-    } else {
-      const response = csrfFetch("/verify_otp", {
-        method: "POST",
-        body: JSON.stringify({ otp }),
-      });
-      console.log(response);
-      if (response) {
-        window.location.href = "/my_account";
+  document
+    .getElementById("verifyOtpBtn")
+    ?.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const otp = Array.from(inputs)
+        .map((input) => input.value)
+        .join("");
+      if (otp.length < 6) {
+        showToast("Invalid OTP", "Please enter a 6-digit OTP.");
+      } else {
+        try {
+          const response = await csrfFetch("/verify_otp", {
+            method: "POST",
+            body: JSON.stringify({ otp }),
+          });
+          if (response) {
+            // Wait a moment for session to be set, then redirect
+            setTimeout(() => {
+              window.location.href = `${window.location.origin}`;
+            }, 100);
+          } else {
+            showToast("Invalid OTP", data.message || "Please try again.");
+          }
+        } catch (error) {
+          console.error("OTP verification error:", error);
+          showToast("Error", "Something went wrong. Please try again.");
+        }
       }
-    }
-  });
+    });
 });

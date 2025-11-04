@@ -180,30 +180,19 @@ function clearStoppagesCache() {
 document.addEventListener("DOMContentLoaded", async () => {
   const messages = document.getElementById("messages");
   if (messages) {
-    showToast(messages.dataset.message, "");
+    console.log(messages.dataset.message, messages.dataset.messageUsername);
+  }
+  
+  if (messages) {
+    showToast(messages.dataset.message, messages.dataset.messageUsername || null);
     // Clear stoppages cache on logout
     clearStoppagesCache();
   }
   const studentId = localStorage.getItem("student_id");
   const results = document.getElementById("results");
-  const hasWelcomed = sessionStorage.getItem("welcome_shown") || "false";
-  const greeting = localStorage.getItem("greeting");
   results.style.display = "none";
 
-  if (studentId && hasWelcomed === "false" && greeting === "true") {
-    const studentName = localStorage.getItem("student_name") || "";
-    if (studentName) {
-      showToast(`Welcome back,`, ` ${studentName}!`);
-    } else {
-      showToast("Welcome back!");
-    }
-    sessionStorage.setItem("welcome_shown", "true");
-    localStorage.setItem("greeting", "true");
-  } else if (studentId && greeting === "false") {
-    const studentName = localStorage.getItem("student_name") || "";
-    showToast(`Greetings,`, ` ${studentName}!`);
-    localStorage.setItem("greeting", "true");
-  }
+
 
   setupScrollToTop();
   setupTimeFilterButtons();

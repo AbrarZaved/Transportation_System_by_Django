@@ -1,31 +1,19 @@
-from email import message
 import json
-from functools import wraps
-import re
+from asgiref.sync import sync_to_async
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.validators import validate_email
 from django.db import models
 from django.forms import ValidationError
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from social_core.backends import username
 from authentication.email import create_email_otp, send_otp_email
 from authentication.models import EmailOTP, Preference, Student
+from django.core.mail import send_mail
+from threading import Thread
 
 
-def student_login_required(view_func):
-    @wraps(view_func)
-    def wrapper(request, *args, **kwargs):
-        if not request.session.get("is_student_authenticated"):
-            messages.error(request, "Please log in to access this page.")
-            return redirect("index")
-        return view_func(request, *args, **kwargs)
-
-    return wrapper
-
-
+@sync_to_async
 def send_otp_view(user):
     otp = create_email_otp(user)
     send_otp_email(user, otp)
@@ -50,7 +38,6 @@ def verify_otp_view(request):
     return render(request, "authentication/verify_otp.html")
 
 
-@student_login_required
 def my_account(request):
     username = request.session.get("username")
     if not username:
@@ -78,7 +65,7 @@ def login_request(request):
             request.session["username"] = student.username
             request.session["is_student_authenticated"] = True
             request.session.set_expiry(3600)  # 1 hour
-            messages.success(request, "Logged in!", extra_tags=str(student.name))
+            messages.success(request, "Logged In!", extra_tags=student.name)
             return redirect("index")
 
 
@@ -111,10 +98,15 @@ def register_request(request):
         )
         student.set_password(password)
         student.save()
-        otp_sent = send_otp_view(student)
-        if otp_sent:
-            messages.warning(request, "OTP Sent!")
-            return redirect("verify_otp")
+
+        # Send OTP asynchronously using threading
+        otp = create_email_otp(student)
+        email_thread = Thread(target=send_otp_email, args=(student, otp))
+        email_thread.daemon = True  # Thread will die when main program exits
+        email_thread.start()
+
+        messages.warning(request, "OTP Sent!")
+        return redirect("verify_otp")
     return redirect("index")
 
 

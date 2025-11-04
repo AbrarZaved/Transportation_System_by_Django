@@ -22,7 +22,7 @@ def format_time(dt):
 
 
 def index(request):
-    user = request.session.get("student_id")
+    user = request.session.get("username")
     preferences = []
     current_time = localtime().time()
     current_day = localtime().strftime("%A").lower()
@@ -48,7 +48,7 @@ def index(request):
         cache.set("popular_routes", data, timeout=60)
     if user:
         preferences = list(
-            Preference.objects.filter(student__student_id=user).order_by("-created_at")[
+            Preference.objects.filter(student__username=user).order_by("-created_at")[
                 :3
             ]
         )
