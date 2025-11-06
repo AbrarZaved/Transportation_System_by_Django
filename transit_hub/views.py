@@ -1,7 +1,5 @@
-import time
 from asgiref.sync import sync_to_async
 from django.core.cache import cache
-from django.core.mail import send_mail
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,8 +13,8 @@ from .models import RouteStoppage as RouteStoppageModel
 from django.db.models import F
 from django.shortcuts import render
 from django.utils.timezone import localtime
-
-
+from django.db.models import Q
+from .models import Stoppage
 def format_time(dt):
     return dt.strftime("%I:%M %p")  # e.g., 08:30 AM
 
@@ -65,7 +63,7 @@ def index(request):
 
 @sync_to_async
 def get_schedules(trip_type, place, student_id=None):
-    from django.db.models import Q
+
 
     # Search for routes by both route name and stoppage name
     schedules = (
@@ -146,11 +144,12 @@ def save_preference_by_session(student_id, place):
 
 async def search_route(request):
     if request.method == "POST":
-        start_time = time.time()
         body = json.loads(request.body)
         trip_type = body.get("tripType")
         place = body.get("place")
         student_id = body.get("studentId")
+        if trip_type=="From DSC" and place=="Daffodil Smart City":
+            return JsonResponse({"routes": []})
         data = await get_schedules(trip_type, place, student_id)
 
         try:
@@ -158,8 +157,6 @@ async def search_route(request):
                 await save_preference_by_session(student_id, place)
         except Exception as e:
             print(e)
-        end_time = time.time()
-        print((end_time - start_time) * 1000)
         return JsonResponse({"routes": data})
 
     return JsonResponse({"message": "Invalid request method"}, status=405)
@@ -241,11 +238,10 @@ def view_bus(request):
 
 
 def get_all_stoppages(request):
+
     """
     API endpoint to get all stoppages for session storage
     """
-    from .models import Stoppage
-
     stoppages = (
         Stoppage.objects.filter(stoppage_status=True)
         .values("id", "stoppage_name")

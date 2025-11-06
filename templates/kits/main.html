@@ -27,10 +27,11 @@
     <!-- Header -->
 
   <header class="bg-[#BE123C] shadow-md border-b border-[#BE123C]">
-  <div class="container mx-auto px-4 flex items-center justify-between h-16">
+  <div class="container mx-auto px-4 lg:pl-10 -pl-10 flex items-center justify-between h-20">
     <!-- Logo -->
-    <a href="{% url 'index' %}" class="flex items-center space-x-2">
-      <span class="text-2xl font-bold text-white tracking-wide">BAHON</span>
+    <a href="{% url 'index' %}" class="flex items-center space-x-1">
+      <img src="{% static 'img/logo_4.png' %}" alt="BAHON Logo" class="h-[50px] w-auto" />
+      <span class="text-2xl font-bold text-white tracking-wide ml-1">BAHON</span>
     </a>
 
     <!-- Nav Links -->
@@ -136,7 +137,18 @@
       </div>
       <div>
         <label class="block mb-1 font-medium">Password</label>
-        <input type="password" name="password" class="w-full p-2 border rounded-lg" required />
+        <div class="relative">
+          <input type="password" name="password" id="loginPassword" class="w-full p-2 pr-10 border rounded-lg" required />
+          <button type="button" id="toggleLoginPassword" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-600 hover:text-gray-800">
+            <svg id="showLoginIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+            <svg id="hideLoginIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <button type="submit" class="w-full bg-slate-600 text-white p-2 rounded-lg hover:bg-slate-700">Login</button>
@@ -173,7 +185,21 @@
       </div>
       <div>
         <label class="block mb-1 font-medium">Password</label>
-        <input type="password" name="password" class="w-full p-2 border rounded-lg" required />
+        <div class="relative">
+          <input type="password" name="password" id="registerPassword" class="w-full p-2 pr-10 border rounded-lg" required />
+          <button type="button" id="toggleRegisterPassword" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-600 hover:text-gray-800">
+            <svg id="showRegisterIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+            <svg id="hideRegisterIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
+            </svg>
+          </button>
+        </div>
+        <div id="passwordStrength" class="mt-1 text-xs hidden">
+          <span class="text-red-500">Password must be at least 6 characters long</span>
+        </div>
       </div>
 
       <button type="submit" class="w-full bg-slate-600 text-white p-2 rounded-lg hover:bg-slate-700">Register</button>
@@ -196,5 +222,134 @@
     {% block content %}
 
     {% endblock %}
+
+    <script>
+      // Password toggle functionality for login form
+      document.addEventListener('DOMContentLoaded', function() {
+        const toggleLoginPassword = document.getElementById('toggleLoginPassword');
+        const loginPassword = document.getElementById('loginPassword');
+        const showLoginIcon = document.getElementById('showLoginIcon');
+        const hideLoginIcon = document.getElementById('hideLoginIcon');
+
+        const toggleRegisterPassword = document.getElementById('toggleRegisterPassword');
+        const registerPassword = document.getElementById('registerPassword');
+        const showRegisterIcon = document.getElementById('showRegisterIcon');
+        const hideRegisterIcon = document.getElementById('hideRegisterIcon');
+
+        // Login password toggle
+        if (toggleLoginPassword) {
+          toggleLoginPassword.addEventListener('click', function() {
+            const type = loginPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            loginPassword.setAttribute('type', type);
+            
+            if (type === 'text') {
+              showLoginIcon.classList.add('hidden');
+              hideLoginIcon.classList.remove('hidden');
+            } else {
+              showLoginIcon.classList.remove('hidden');
+              hideLoginIcon.classList.add('hidden');
+            }
+          });
+        }
+
+        // Register password toggle
+        if (toggleRegisterPassword) {
+          toggleRegisterPassword.addEventListener('click', function() {
+            const type = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            registerPassword.setAttribute('type', type);
+            
+            if (type === 'text') {
+              showRegisterIcon.classList.add('hidden');
+              hideRegisterIcon.classList.remove('hidden');
+            } else {
+              showRegisterIcon.classList.remove('hidden');
+              hideRegisterIcon.classList.add('hidden');
+            }
+          });
+        }
+
+        // Password strength validation for registration
+        if (registerPassword) {
+          const passwordStrength = document.getElementById('passwordStrength');
+          
+          registerPassword.addEventListener('input', function() {
+            const password = this.value;
+            const submitBtn = document.querySelector('#signUpForm button[type="submit"]');
+            
+            if (password.length > 0 && password.length < 6) {
+              this.classList.add('border-red-500');
+              this.classList.remove('border-green-500');
+              passwordStrength.classList.remove('hidden');
+              passwordStrength.innerHTML = '<span class="text-red-500">Password must be at least 6 characters long</span>';
+              if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+              }
+            } else if (password.length >= 6) {
+              this.classList.remove('border-red-500');
+              this.classList.add('border-green-500');
+              passwordStrength.innerHTML = '<span class="text-green-500">Password strength: Good</span>';
+              if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+              }
+            } else {
+              this.classList.remove('border-red-500', 'border-green-500');
+              passwordStrength.classList.add('hidden');
+              if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+              }
+            }
+          });
+        }
+
+        // Form validation
+        const signInForm = document.getElementById('signInForm');
+        const signUpForm = document.getElementById('signUpForm');
+
+        if (signInForm) {
+          signInForm.addEventListener('submit', function(e) {
+            const studentId = this.querySelector('input[name="student_id"]').value.trim();
+            const password = this.querySelector('input[name="password"]').value.trim();
+
+            if (!studentId || !password) {
+              e.preventDefault();
+              alert('Please fill in all fields');
+              return false;
+            }
+          });
+        }
+
+        if (signUpForm) {
+          signUpForm.addEventListener('submit', function(e) {
+            const inputs = this.querySelectorAll('input[required]');
+            let isValid = true;
+
+            inputs.forEach(input => {
+              if (!input.value.trim()) {
+                isValid = false;
+                input.classList.add('border-red-500');
+              } else {
+                input.classList.remove('border-red-500');
+              }
+            });
+
+            if (!isValid) {
+              e.preventDefault();
+              alert('Please fill in all required fields');
+              return false;
+            }
+
+            const password = this.querySelector('input[name="password"]').value;
+            if (password.length < 6) {
+              e.preventDefault();
+              alert('Password must be at least 6 characters long');
+              return false;
+            }
+          });
+        }
+      });
+    </script>
   </body>
 </html>

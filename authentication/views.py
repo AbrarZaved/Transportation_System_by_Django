@@ -12,6 +12,7 @@ from authentication.email import create_email_otp, send_otp_email
 from authentication.models import EmailOTP, Preference, Student
 from threading import Thread
 
+
 def student_wrapper(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
@@ -65,53 +66,96 @@ def login_request(request):
     if request.method == "POST":
         student_id = request.POST.get("student_id", "").strip()
         password = request.POST.get("password", "").strip()
-        student = Student.objects.filter(student_id=student_id, verified=True).first()
-        if student and student.check_password(password):
-            request.session["username"] = student.username
-            request.session["is_student_authenticated"] = True
-            request.session.set_expiry(3600)  # 1 hour
-            messages.success(request, "Logged In!", extra_tags=student.name)
+
+        if not student_id or not password:
+            messages.error(request, "Please provide both Student ID and password.")
             return redirect("index")
+
+        student = Student.objects.filter(student_id=student_id, verified=True).first()
+
+        if not student:
+            messages.error(request, "Student ID not found or account not verified.")
+            return redirect("index")
+
+        if not student.check_password(password):
+            messages.error(request, "Incorrect password. Please try again.")
+            return redirect("index")
+
+        # Login successful
+        request.session["username"] = student.username
+        request.session["is_student_authenticated"] = True
+        request.session.set_expiry(3600)  # 1 hour
+        messages.success(request, "Logged In!", extra_tags=student.name)
+        return redirect("index")
+
+    return redirect("index")
 
 
 def register_request(request):
     if request.method == "POST":
         student_id = request.POST.get("student_id", "").strip()
         password = request.POST.get("password", "").strip()
-        if Student.objects.filter(student_id=student_id).exists():
-            return JsonResponse(
-                {"success": False, "message": "Student ID already exists."}, status=400
-            )
-
         name = request.POST.get("name", "").strip()
         email = request.POST.get("email", "").strip()
         phone_number = request.POST.get("phone_number", "").strip()
 
-        # Optional: Email validation
+        # Validate required fields
+        if not all([student_id, password, name, email, phone_number]):
+            messages.error(request, "All fields are required.")
+            return redirect("index")
+
+        # Check if student ID already exists
+        if Student.objects.filter(student_id=student_id).exists():
+            messages.error(
+                request, "Student ID already exists. Please use a different ID."
+            )
+            return redirect("index")
+
+        # Check if email already exists
+        if Student.objects.filter(email=email).exists():
+            messages.error(
+                request, "Email already registered. Please use a different email."
+            )
+            return redirect("index")
+
+        # Validate email format
         try:
             validate_email(email)
         except ValidationError:
-            return JsonResponse(
-                {"success": False, "message": "Invalid email address."}, status=400
+            messages.error(request, "Please enter a valid email address.")
+            return redirect("index")
+
+        # Validate password length
+        if len(password) < 6:
+            messages.error(request, "Password must be at least 6 characters long.")
+            return redirect("index")
+
+        try:
+            student = Student(
+                student_id=student_id,
+                name=name,
+                email=email,
+                phone_number=phone_number,
             )
+            student.set_password(password)
+            student.save()
+            request.session["username"] = student.username
 
-        student = Student(
-            student_id=student_id,
-            name=name,
-            email=email,
-            phone_number=phone_number,
-        )
-        student.set_password(password)
-        student.save()
-        request.session["username"] = student.username
-        # Send OTP asynchronously using threading
-        otp = create_email_otp(student)
-        email_thread = Thread(target=send_otp_email, args=(student, otp))
-        email_thread.daemon = True  # Thread will die when main program exits
-        email_thread.start()
+            # Send OTP asynchronously using threading
+            otp = create_email_otp(student)
+            email_thread = Thread(target=send_otp_email, args=(student, otp))
+            email_thread.daemon = True  # Thread will die when main program exits
+            email_thread.start()
 
-        messages.warning(request, "OTP Sent!")
-        return redirect("verify_otp")
+            messages.success(
+                request,
+                "Registration successful! Please check your email for OTP verification.",
+            )
+            return redirect("verify_otp")
+        except Exception as e:
+            messages.error(request, "Registration failed. Please try again.")
+            return redirect("index")
+
     return redirect("index")
 
 

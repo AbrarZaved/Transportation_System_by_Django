@@ -34,7 +34,7 @@ class Bus(models.Model):
     bus_number = models.CharField(max_length=30)
     bus_model = models.CharField(max_length=30)
     bus_capacity = models.IntegerField()
-    bus_photo = models.ImageField(upload_to="bus_photos")
+    bus_photo = models.ImageField(upload_to="bus_photos",null=True, blank=True)
     bus_status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -42,6 +42,13 @@ class Bus(models.Model):
 
     def __str__(self):
         return self.bus_name
+
+    def save(self, *args, **kwargs):
+        if not self.bus_photo and "S" in self.bus_tag:
+            self.bus_photo="bus_photos/sunflower.jpg"
+        if not self.bus_photo and "R" in self.bus_tag:
+            self.bus_photo="bus_photos/tuberose.jpg"
+        super(Bus, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = "Buses"
