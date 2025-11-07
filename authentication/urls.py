@@ -9,6 +9,7 @@ urlpatterns = [
     path("login_request", views.login_request, name="login_request"),
     path("register", views.register_request, name="register"),
     path("verify_otp", csrf_exempt(views.verify_otp_view), name="verify_otp"),
+    path("resend_otp", views.resend_otp, name="resend_otp"),
     path("edit_profile", views.edit_profile, name="edit_profile"),
     path("sign_out", views.sign_out, name="sign_out"),
     path("get_history", csrf_exempt(views.get_history), name="get_history"),

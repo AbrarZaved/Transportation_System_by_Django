@@ -52,7 +52,7 @@ class Bus(models.Model):
 
     class Meta:
         verbose_name_plural = "Buses"
-        unique_together = ["bus_name", "bus_number"]
+        unique_together = ["bus_name", "bus_number", "bus_tag"]
 
 
 class Stoppage(models.Model):

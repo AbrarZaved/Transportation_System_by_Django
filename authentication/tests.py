@@ -192,3 +192,39 @@ class AuthenticationTestCase(TestCase):
         self.assertTrue(
             any("at least 6 characters" in str(message) for message in messages)
         )
+
+    def test_resend_otp_success(self):
+        """Test successful OTP resend"""
+        # Create unverified student and set session
+        unverified_student = Student.objects.create(
+            student_id="RESEND001",
+            name="Resend Student",
+            email="resend@example.com",
+            phone_number="9999999999",
+            verified=False,
+        )
+        unverified_student.set_password("testpassword123")
+        unverified_student.save()
+
+        # Set session to simulate logged in unverified user
+        session = self.client.session
+        session["username"] = unverified_student.username
+        session.save()
+
+        response = self.client.post(reverse("resend_otp"))
+
+        # Should return success JSON response
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["success"])
+        self.assertIn("sent to your email", data["message"])
+
+    def test_resend_otp_no_session(self):
+        """Test OTP resend failure without session"""
+        response = self.client.post(reverse("resend_otp"))
+
+        # Should return error JSON response
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertFalse(data["success"])
+        self.assertIn("Session expired", data["message"])

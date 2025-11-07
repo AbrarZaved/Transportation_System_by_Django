@@ -44,6 +44,62 @@ def verify_otp_view(request):
     return render(request, "authentication/verify_otp.html")
 
 
+@csrf_exempt
+def resend_otp(request):
+    if request.method == "POST":
+        try:
+            username = request.session.get("username")
+            if not username:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Session expired. Please register again.",
+                    },
+                    status=400,
+                )
+
+            try:
+                student = Student.objects.get(username=username)
+                if student.verified:
+                    return JsonResponse(
+                        {"success": False, "message": "Account already verified."},
+                        status=400,
+                    )
+            except Student.DoesNotExist:
+                return JsonResponse(
+                    {"success": False, "message": "Student not found."}, status=400
+                )
+
+            # Delete any existing OTPs for this user
+            EmailOTP.objects.filter(user=student).delete()
+
+            # Create and send new OTP
+            otp = create_email_otp(student)
+            email_thread = Thread(target=send_otp_email, args=(student, otp))
+            email_thread.daemon = True
+            email_thread.start()
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "message": "New OTP has been sent to your email address.",
+                }
+            )
+
+        except Exception as e:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": "Failed to resend OTP. Please try again.",
+                },
+                status=500,
+            )
+
+    return JsonResponse(
+        {"success": False, "message": "Invalid request method."}, status=405
+    )
+
+
 def my_account(request):
     username = request.session.get("username")
     if not username:

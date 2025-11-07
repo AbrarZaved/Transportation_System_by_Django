@@ -14,7 +14,13 @@
       
       <!-- Branding Header -->
       <div class="mb-6">
-        <img src="{% static 'img/logo.png' %}" alt="Logo" class="w-12 h-12 mx-auto mb-3" />
+        <div class="mb-4 ml-6">
+        <a href="{% url 'index' %}" class="flex items-center space-x-1">
+          <img src="{% static 'img/logo_5.png' %}" alt="BAHON Logo" class="h-[50px] w-auto" />
+          <span class="text-2xl font-bold text-[#BE123C] tracking-wide ml-1">BAHON</span>
+       </a>
+        </div>
+
         <h2 class="text-2xl font-semibold text-gray-800">Verify Your Account</h2>
         <p class="text-gray-500 text-sm">Enter the 6-digit code sent to your email or phone.</p>
       </div>
@@ -43,8 +49,8 @@
       <!-- Links -->
       <div class="mt-6 space-y-2 text-sm">
         <p class="text-gray-600">
-          Didn’t receive the code?
-          <a href="#" class="text-blue-600 font-semibold hover:underline">Resend</a>
+          Didn't receive the code?
+          <a href="#" id="resendOtpBtn" class="text-blue-600 font-semibold hover:underline transition-all duration-200">Resend</a>
         </p>
 
         <a href="{% url "index" %}" class="inline-flex items-center justify-center gap-2 text-blue-600 font-semibold hover:underline">

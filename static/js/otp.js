@@ -63,4 +63,63 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
     });
+
+  // Resend OTP functionality
+  document
+    .getElementById("resendOtpBtn")
+    ?.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const resendBtn = e.target;
+      const originalText = resendBtn.textContent;
+
+      // Disable button and show loading state
+      resendBtn.textContent = "Sending...";
+      resendBtn.classList.add("opacity-50", "cursor-not-allowed");
+      resendBtn.style.pointerEvents = "none";
+
+      try {
+        const response = await csrfFetch("/resend_otp", {
+          method: "POST",
+        });
+
+       
+
+        if (response) {
+          showToast("Success", response.message || "New OTP sent successfully!");
+
+          // Clear all OTP inputs
+          inputs.forEach((input) => (input.value = ""));
+          inputs[0].focus();
+
+          // Start countdown timer (60 seconds)
+          let countdown = 60;
+          const updateTimer = () => {
+            if (countdown > 0) {
+              resendBtn.textContent = `Resend (${countdown}s)`;
+              countdown--;
+              setTimeout(updateTimer, 1000);
+            } else {
+              resendBtn.textContent = originalText;
+              resendBtn.classList.remove("opacity-50", "cursor-not-allowed");
+              resendBtn.style.pointerEvents = "auto";
+            }
+          };
+          updateTimer();
+        } else {
+          showToast(
+            "Error",
+            data.message || "Failed to resend OTP. Please try again."
+          );
+          resendBtn.textContent = originalText;
+          resendBtn.classList.remove("opacity-50", "cursor-not-allowed");
+          resendBtn.style.pointerEvents = "auto";
+        }
+      } catch (error) {
+        console.error("Resend OTP error:", error);
+        showToast("Error", "Something went wrong. Please try again.");
+        resendBtn.textContent = originalText;
+        resendBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        resendBtn.style.pointerEvents = "auto";
+      }
+    });
 });
