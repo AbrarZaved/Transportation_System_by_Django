@@ -81,9 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function fetchSearchHistory() {
-    const studentId = localStorage.getItem("student_id");
-    if (!studentId) return;
-
     try {
       const res = await fetch(`get_history`, {
         method: "POST",
@@ -91,7 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
           "Content-Type": "application/json",
           "X-CSRFToken": getCookie("csrftoken"),
         },
-        body: JSON.stringify({ studentId }),
       });
 
       const data = await res.json();

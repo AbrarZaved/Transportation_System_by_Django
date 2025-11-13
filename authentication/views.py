@@ -224,8 +224,8 @@ def sign_out(request):
 def get_history(request):
     try:
         if request.method == "POST":
-            student_id = json.loads(request.body).get("studentId").strip()
-            student = Student.objects.filter(student_id=student_id).first()
+            username = request.session.get("username")
+            student = Student.objects.filter(username=username).first()
             if not student:
                 return JsonResponse({"history": []})
 

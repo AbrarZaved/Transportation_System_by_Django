@@ -7,7 +7,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const signUpBtn = document.getElementById("signUpBtn");
   const signInForm = document.getElementById("signInForm");
   const signUpForm = document.getElementById("signUpForm");
-
+  if (signInBtn) {
+    localStorage.clear();
+  }
   /* --- Modal Controls --- */
   function openModal() {
     modal.classList.remove("hidden");

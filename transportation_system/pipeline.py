@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from authentication.email import create_email_otp, send_otp_email
 from authentication.models import Student
-from authentication.views import send_otp_view
+
 
 
 def create_or_update_student(backend, user, details, *args, **kwargs):
