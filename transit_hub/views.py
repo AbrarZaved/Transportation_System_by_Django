@@ -210,17 +210,17 @@ class RouteDetails(APIView):
 
 def about_us(request):
     return render(
-        request, 
+        request,
         "transit_hub/about.html",
-        {"google_maps_api_key": settings.GOOGLE_MAPS_API_KEY}
+        {"google_maps_api_key": settings.GOOGLE_MAPS_API_KEY},
     )
 
 
 def contact_us(request):
     return render(
-        request, 
+        request,
         "transit_hub/contact.html",
-        {"google_maps_api_key": settings.GOOGLE_MAPS_API_KEY}
+        {"google_maps_api_key": settings.GOOGLE_MAPS_API_KEY},
     )
 
 

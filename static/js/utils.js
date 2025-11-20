@@ -393,14 +393,30 @@ window.closeTrackModal = function () {
 
 // Demo route coordinates (simulating a bus route in Dhaka with more realistic stops)
 const demoRoute = [
-  { lat: 23.8103, lng: 90.4125, location: "Daffodil Smart City", isOrigin: true },
+  {
+    lat: 23.8103,
+    lng: 90.4125,
+    location: "Daffodil Smart City",
+    isOrigin: true,
+  },
   { lat: 23.815, lng: 90.42, location: "Kalabagan", estimatedTime: "2 min" },
   { lat: 23.82, lng: 90.425, location: "Green Road", estimatedTime: "5 min" },
   { lat: 23.825, lng: 90.43, location: "Panthapath", estimatedTime: "8 min" },
-  { lat: 23.83, lng: 90.435, location: "Karwan Bazar", estimatedTime: "12 min" },
+  {
+    lat: 23.83,
+    lng: 90.435,
+    location: "Karwan Bazar",
+    estimatedTime: "12 min",
+  },
   { lat: 23.835, lng: 90.44, location: "Tejgaon", estimatedTime: "15 min" },
   { lat: 23.84, lng: 90.445, location: "Farmgate", estimatedTime: "18 min" },
-  { lat: 23.845, lng: 90.45, location: "Bijoy Sarani", estimatedTime: "22 min", isDestination: true },
+  {
+    lat: 23.845,
+    lng: 90.45,
+    location: "Bijoy Sarani",
+    estimatedTime: "22 min",
+    isDestination: true,
+  },
 ];
 
 let trackingMap = null;
@@ -425,7 +441,7 @@ function initializeTrackingMapWithApiLoad() {
         initializeTrackingMap();
       }
     }, 100);
-    
+
     // Timeout after 10 seconds
     setTimeout(() => {
       clearInterval(checkGoogleMaps);
@@ -437,43 +453,45 @@ function initializeTrackingMapWithApiLoad() {
   }
 
   // Get the API key from a meta tag or use a default (you'll need to set this)
-  let apiKey = '';
+  let apiKey = "";
   const metaApiKey = document.querySelector('meta[name="google-maps-api-key"]');
   if (metaApiKey) {
-    apiKey = metaApiKey.getAttribute('content');
+    apiKey = metaApiKey.getAttribute("content");
   }
 
   // If no API key found, show demo mode
   if (!apiKey) {
-    console.warn('Google Maps API key not found, running in demo mode');
+    console.warn("Google Maps API key not found, running in demo mode");
     initializeTrackingMap(); // Will show demo mode
     return;
   }
 
   // Set up global callbacks for API loading
-  window.initGoogleMapsTracking = function() {
+  window.initGoogleMapsTracking = function () {
     window.googleMapsLoaded = true;
     console.log("Google Maps API loaded successfully for tracking");
     initializeTrackingMap();
   };
 
-  window.gm_authFailure = function() {
-    console.warn("Google Maps API authentication failed - running in demo mode");
+  window.gm_authFailure = function () {
+    console.warn(
+      "Google Maps API authentication failed - running in demo mode"
+    );
     window.googleMapsLoaded = false;
     initializeTrackingMap(); // Will show demo mode
   };
 
   // Dynamically load Google Maps API
-  const script = document.createElement('script');
+  const script = document.createElement("script");
   script.async = true;
   script.defer = true;
   script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker&callback=initGoogleMapsTracking&loading=async`;
-  script.onerror = function() {
-    console.warn('Google Maps API failed to load - running in demo mode');
+  script.onerror = function () {
+    console.warn("Google Maps API failed to load - running in demo mode");
     window.googleMapsLoaded = false;
     initializeTrackingMap(); // Will show demo mode
   };
-  
+
   document.head.appendChild(script);
 }
 
@@ -519,7 +537,7 @@ function initializeTrackingMap() {
       {
         featureType: "transit",
         stylers: [{ visibility: "simplified" }],
-      }
+      },
     ],
   });
 
@@ -554,11 +572,13 @@ function initializeTrackingMap() {
   demoRoute.forEach((stop, index) => {
     const isOrigin = stop.isOrigin;
     const isDestination = stop.isDestination;
-    
+
     const marker = new google.maps.Marker({
       position: stop,
       map: trackingMap,
-      title: stop.location + (stop.estimatedTime ? ` (ETA: ${stop.estimatedTime})` : ''),
+      title:
+        stop.location +
+        (stop.estimatedTime ? ` (ETA: ${stop.estimatedTime})` : ""),
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
         scale: isOrigin || isDestination ? 8 : 6,
@@ -574,14 +594,26 @@ function initializeTrackingMap() {
       content: `
         <div class="p-2">
           <h3 class="font-semibold text-gray-800">${stop.location}</h3>
-          ${stop.estimatedTime ? `<p class="text-sm text-gray-600">ETA: ${stop.estimatedTime}</p>` : ''}
-          ${isOrigin ? '<p class="text-xs text-green-600">Starting Point</p>' : ''}
-          ${isDestination ? '<p class="text-xs text-red-600">Final Destination</p>' : ''}
+          ${
+            stop.estimatedTime
+              ? `<p class="text-sm text-gray-600">ETA: ${stop.estimatedTime}</p>`
+              : ""
+          }
+          ${
+            isOrigin
+              ? '<p class="text-xs text-green-600">Starting Point</p>'
+              : ""
+          }
+          ${
+            isDestination
+              ? '<p class="text-xs text-red-600">Final Destination</p>'
+              : ""
+          }
         </div>
-      `
+      `,
     });
 
-    marker.addListener('click', () => {
+    marker.addListener("click", () => {
       infoWindow.open(trackingMap, marker);
     });
   });
@@ -592,7 +624,7 @@ function initializeTrackingMap() {
 
 function startDemoTracking() {
   let startTime = Date.now();
-  
+
   window.trackingInterval = setInterval(() => {
     const current = demoRoute[currentIndex];
     const next = demoRoute[(currentIndex + 1) % demoRoute.length];
@@ -603,7 +635,8 @@ function startDemoTracking() {
 
     // Calculate more realistic speed and timing
     const elapsedMinutes = (Date.now() - startTime) / 60000;
-    const currentSpeed = 15 + Math.sin(elapsedMinutes * 0.5) * 10 + Math.random() * 8; // Variable speed 15-33 km/h
+    const currentSpeed =
+      15 + Math.sin(elapsedMinutes * 0.5) * 10 + Math.random() * 8; // Variable speed 15-33 km/h
     const remainingStops = demoRoute.length - currentIndex - 1;
     const estimatedETA = remainingStops * 2.5 + (1 - progress) * 2.5; // ~2.5 min per stop
     const totalDistance = 8.5 - (currentIndex + progress) * 1.1; // Decreasing distance
@@ -620,26 +653,43 @@ function startDemoTracking() {
     if (latElement) latElement.textContent = lat.toFixed(6);
     if (lngElement) lngElement.textContent = lng.toFixed(6);
     if (locationElement) {
-      const locationText = progress > 0.7 ? `Approaching ${next.location}` : `At ${current.location}`;
+      const locationText =
+        progress > 0.7
+          ? `Approaching ${next.location}`
+          : `At ${current.location}`;
       locationElement.textContent = locationText;
     }
     if (speedElement) speedElement.textContent = currentSpeed.toFixed(1);
-    if (lastUpdatedElement) lastUpdatedElement.textContent = new Date().toLocaleTimeString();
-    if (etaElement) etaElement.textContent = Math.max(0, estimatedETA).toFixed(0);
-    if (distanceElement) distanceElement.textContent = Math.max(0, totalDistance).toFixed(1);
+    if (lastUpdatedElement)
+      lastUpdatedElement.textContent = new Date().toLocaleTimeString();
+    if (etaElement)
+      etaElement.textContent = Math.max(0, estimatedETA).toFixed(0);
+    if (distanceElement)
+      distanceElement.textContent = Math.max(0, totalDistance).toFixed(1);
 
     // Update demo coordinates display for non-map mode
     const demoCoordinatesElement = document.getElementById("demoCoordinates");
     if (demoCoordinatesElement) {
-      const nextStopInfo = next.estimatedTime ? ` (ETA: ${next.estimatedTime})` : '';
+      const nextStopInfo = next.estimatedTime
+        ? ` (ETA: ${next.estimatedTime})`
+        : "";
       demoCoordinatesElement.innerHTML = `
         <div class="space-y-1">
           <div><span class="text-blue-600">Lat:</span> ${lat.toFixed(6)}</div>
           <div><span class="text-blue-600">Lng:</span> ${lng.toFixed(6)}</div>
-          <div><span class="text-green-600">Current:</span> ${current.location}</div>
-          <div><span class="text-purple-600">Next Stop:</span> ${next.location}${nextStopInfo}</div>
-          <div><span class="text-orange-600">Speed:</span> ${currentSpeed.toFixed(1)} km/h</div>
-          <div><span class="text-indigo-600">ETA:</span> ${Math.max(0, estimatedETA).toFixed(0)} min</div>
+          <div><span class="text-green-600">Current:</span> ${
+            current.location
+          }</div>
+          <div><span class="text-purple-600">Next Stop:</span> ${
+            next.location
+          }${nextStopInfo}</div>
+          <div><span class="text-orange-600">Speed:</span> ${currentSpeed.toFixed(
+            1
+          )} km/h</div>
+          <div><span class="text-indigo-600">ETA:</span> ${Math.max(
+            0,
+            estimatedETA
+          ).toFixed(0)} min</div>
           <div class="text-xs text-gray-500">Updated: ${new Date().toLocaleTimeString()}</div>
         </div>
       `;
@@ -649,24 +699,28 @@ function startDemoTracking() {
     if (busMarker) {
       const newPosition = { lat, lng };
       busMarker.setPosition(newPosition);
-      
+
       // Smooth pan to bus location
       if (trackingMap) {
         trackingMap.panTo(newPosition);
       }
 
       // Update marker title with current info
-      busMarker.setTitle(`Bus Location - Speed: ${currentSpeed.toFixed(1)} km/h - ETA: ${Math.max(0, estimatedETA).toFixed(0)} min`);
+      busMarker.setTitle(
+        `Bus Location - Speed: ${currentSpeed.toFixed(
+          1
+        )} km/h - ETA: ${Math.max(0, estimatedETA).toFixed(0)} min`
+      );
     }
 
     // Update progress with variable speed
     const progressIncrement = 0.08 + Math.random() * 0.04; // Variable progress 0.08-0.12
     progress += progressIncrement;
-    
+
     if (progress >= 1) {
       progress = 0;
       currentIndex = (currentIndex + 1) % demoRoute.length;
-      
+
       // Reset start time when completing full route
       if (currentIndex === 0) {
         startTime = Date.now();
