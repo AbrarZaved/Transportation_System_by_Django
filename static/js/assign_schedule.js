@@ -1,6 +1,6 @@
 // import CSRF-safe fetch utility
 import { csrfFetch } from "./api.js";
-
+import { showToast } from "./utils.js";
 // Utility: Render route radio buttons
 async function renderRouteOptions(routes) {
   const routeList = document.getElementById("route-list");
@@ -53,7 +53,13 @@ async function fetchRoutesByDirection(direction) {
 document.addEventListener("DOMContentLoaded", async () => {
   const directionRadios = document.getElementsByName("direction");
   const storedDirection = localStorage.getItem("direction") || "from_dsc";
-
+  const messages = document.getElementById("messages");
+  if (messages) {
+    showToast(
+      messages.dataset.message,
+      messages.dataset.messageUsername || null
+    );
+  }
   // Set the previously selected direction if it exists
   const selectedRadio = document.querySelector(
     `input[name="direction"][value="${storedDirection}"]`

@@ -25,7 +25,7 @@
 <script
   async
   defer
-  src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=marker&callback=initGoogleMaps&loading=async"
+  src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=marker&callback=initGoogleMaps&loading=async"
   onerror="console.warn('Google Maps API failed to load - running in demo mode'); window.googleMapsLoaded = false;"
 ></script>
 <!-- Hero Section -->
@@ -95,7 +95,8 @@
         <div>
           <p><span class="font-medium">Driver:</span> {{ bus.driver_name }}</p>
           <p>
-            <span class="font-medium">Bus Capacity:</span> {{ bus.bus_capacity }}
+            <span class="font-medium">Bus Capacity:</span> {{ bus.bus_capacity
+            }}
           </p>
           <p>
             <span class="font-medium">Departure:</span> {{ bus.departure_time }}

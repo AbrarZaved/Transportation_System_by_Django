@@ -45,6 +45,10 @@ SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = True
 
 AUTH_USER_MODEL = "authentication.Supervisor"
+
+# Google Maps API Key
+GOOGLE_MAPS_API_KEY = env("GOOGLE_MAPS_API_KEY", default="")
+
 # Application definition
 
 INSTALLED_APPS = [

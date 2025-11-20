@@ -1,257 +1,469 @@
-{% extends 'admin_kits/base.html' %}
-{% load static %}
+{% extends 'admin_kits/base.html' %} {% load static %} {% block title %} Drivers
+& Buses - DIU Admin {% endblock %} {% block content %}
+<div class="p-4 bg-gray-50 min-h-screen text-gray-900 sm:p-6">
+  <h1 class="text-2xl font-bold mb-4 text-gray-800 text-center sm:text-3xl">
+    DIU Transport Admin
+  </h1>
 
-{% block title %}
-  Drivers & Buses - DIU Admin
-{% endblock %}
-
-{% block content %}
-  <div class="p-4 bg-gray-50 min-h-screen text-gray-900 sm:p-6">
-    <h1 class="text-2xl font-bold mb-4 text-gray-800 text-center sm:text-3xl">DIU Transport Admin</h1>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-      <div class="bg-white rounded-md p-3 shadow-sm flex items-center justify-between border border-blue-100">
-        <div class="flex items-center gap-3">
-          <div class="bg-blue-500 p-2 rounded-full">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-          </div>
-          <div>
-            <p class="text-xs text-gray-500">Total Buses</p>
-            <p class="text-xl font-bold text-gray-900">{{ buses.paginator.count }}</p>
-          </div>
-        </div>
-        <button onclick="toggleModal('busModal')" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-0.5 px-2 rounded-md text-xs transition-colors">Add</button>
-      </div>
-
-      <div class="bg-white rounded-md p-3 shadow-sm flex items-center justify-between border border-green-100">
-        <div class="flex items-center gap-3">
-          <div class="bg-green-500 p-2 rounded-full">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.387 0 4.615.563 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </div>
-          <div>
-            <p class="text-xs text-gray-500">Total Drivers</p>
-            <p class="text-xl font-bold text-gray-900">{{ drivers.paginator.count }}</p>
-          </div>
-        </div>
-        <button onclick="toggleModal('driverModal')" class="bg-green-500 hover:bg-green-600 text-white font-medium py-0.5 px-2 rounded-md text-xs transition-colors">Add</button>
-      </div>
-
-      <div class="bg-white rounded-md p-3 shadow-sm flex items-center gap-3 border border-yellow-100">
-        <div class="bg-yellow-500 p-2 rounded-full">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+    <div
+      class="bg-white rounded-md p-3 shadow-sm flex items-center justify-between border border-blue-100"
+    >
+      <div class="flex items-center gap-3">
+        <div class="bg-blue-500 p-2 rounded-full">
+          <svg
+            class="w-5 h-5 text-white"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+            />
           </svg>
         </div>
         <div>
-          <p class="text-xs text-gray-500">Active Buses</p>
-          <p class="text-xl font-bold text-gray-900">{{buses|length}}</p>
+          <p class="text-xs text-gray-500">Total Buses</p>
+          <p class="text-xl font-bold text-gray-900">
+            {{ buses.paginator.count }}
+          </p>
         </div>
       </div>
+      <button
+        onclick="toggleModal('busModal')"
+        class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-0.5 px-2 rounded-md text-xs transition-colors"
+      >
+        Add
+      </button>
     </div>
 
-    <hr class="border-gray-300 mb-6" />
-
-    <div class="mb-6">
-      <h2 class="text-xl font-bold mb-3 text-gray-800 sm:text-2xl">Bus List</h2>
-      <div class="bg-white rounded-md shadow-sm overflow-hidden border border-gray-100">
-        <div class="p-3 border-b border-gray-200">
-          <input type="text" placeholder="Search buses..." id="filter-bus" class="w-full px-2 py-1.5 border border-gray-300 rounded-sm focus:ring-blue-400 focus:border-blue-400 text-sm"/>
+    <div
+      class="bg-white rounded-md p-3 shadow-sm flex items-center justify-between border border-green-100"
+    >
+      <div class="flex items-center gap-3">
+        <div class="bg-green-500 p-2 rounded-full">
+          <svg
+            class="w-5 h-5 text-white"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M5.121 17.804A13.937 13.937 0 0112 15c2.387 0 4.615.563 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
         </div>
-        <div class="overflow-x-auto">
-          {# Enables horizontal scroll on small screens #}
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Bus Name</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Capacity</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-100">
-              {% for bus in buses.object_list %}
-                <tr id="bus-details" bus-data="{{ bus.bus_name }} {{ bus.route }} {{ bus.bus_tag }}">
-                  <td class="px-3 py-2 whitespace-nowrap">
-                    <div class="w-8 h-8 bg-blue-50 rounded-md flex items-center justify-center overflow-hidden">
-                      {% if bus.bus_photo %}
-                        <img src="{{ bus.bus_photo.url }}" alt="{{ bus.bus_name }}" class="w-full h-full object-cover" />
-                      {% else %}
-                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.129-1.125V11.25m0 0V9a2.25 2.25 0 0 0-2.25-2.25h-2.25M12 10.5v6m3-3H9m1.5-6a2.25 2.25 0 0 0-2.25-2.25H6A2.25 2.25 0 0 0 3.75 6v1.5M12 10.5a2.25 2.25 0 0 0 2.25-2.25V6m-7.5 0h7.5" />
-                        </svg>
-                      {% endif %}
-                    </div>
-                  </td>
-                  <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{ bus.bus_name }}</td>
-                  <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-700">{{ bus.bus_capacity }}</td>
-                  <td class="px-3 py-2 whitespace-nowrap">
-                    <span class="px-1.5 py-0.5 inline-flex text-xs font-medium rounded-full bg-green-100 text-green-800">Operational</span>
-                  </td>
-                </tr>
-              {% empty %}
-                <tr>
-                  <td colspan="5" class="px-3 py-2 text-center text-gray-500">No buses found.</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
-        <nav class="px-3 py-2 flex items-center justify-between border-t border-gray-200" aria-label="Pagination">
-          <p class="text-xs text-gray-700 sm:text-sm">
-            Showing <span class="font-medium">{{ buses.start_index }}</span> to <span class="font-medium">{{ buses.end_index }}</span> of <span class="font-medium">{{ buses.paginator.count }}</span> results
+        <div>
+          <p class="text-xs text-gray-500">Total Drivers</p>
+          <p class="text-xl font-bold text-gray-900">
+            {{ drivers.paginator.count }}
           </p>
-          <div class="flex-1 flex justify-end">
-            {% if buses.has_previous %}
-              <a href="?bus_page={{ buses.previous_page_number }}{% if request.GET.bus_search %}
-                  
-                  &bus_search={{ request.GET.bus_search }}
-                {% endif %}&driver_page={{ drivers.number }}"
-                class="relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 sm:text-sm">
-                Prev
-              </a>
-            {% else %}
-              <span class="relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-400 bg-gray-50 cursor-not-allowed sm:text-sm">Prev</span>
-            {% endif %}
-            {% if buses.has_next %}
-              <a href="?bus_page={{ buses.next_page_number }}{% if request.GET.bus_search %}
-                  
-                  &bus_search={{ request.GET.bus_search }}
-                {% endif %}&driver_page={{ drivers.number }}"
-                class="ml-1.5 relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 sm:text-sm">
-                Next
-              </a>
-            {% else %}
-              <span class="ml-1.5 relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-400 bg-gray-50 cursor-not-allowed sm:text-sm">Next</span>
-            {% endif %}
-          </div>
-        </nav>
+        </div>
       </div>
+      <button
+        onclick="toggleModal('driverModal')"
+        class="bg-green-500 hover:bg-green-600 text-white font-medium py-0.5 px-2 rounded-md text-xs transition-colors"
+      >
+        Add
+      </button>
     </div>
 
-    <hr class="border-gray-300 mb-6" />
-
-    <div class="mb-6">
-      <h2 class="text-xl font-bold mb-3 text-gray-800 sm:text-2xl">Driver List</h2>
-      <div class="bg-white rounded-md shadow-sm overflow-hidden border border-gray-100">
-        <div class="p-3 border-b border-gray-200">
-          <input type="text" id="filter-driver" placeholder="Search drivers..." class="w-full px-2 py-1.5 border border-gray-300 rounded-sm focus:ring-green-400 focus:border-green-400 text-sm" />
-        </div>
-        <div class="overflow-x-auto">
-          {# Enables horizontal scroll on small screens #}
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Photo</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Driver Name</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">License</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-100">
-              {% for driver in drivers.object_list %}
-                <tr id="driver-details" driver-data="{{ driver.name }} {{ driver.license_number }} {{ driver.phone_number }}">
-                  <td class="px-3 py-2 whitespace-nowrap">
-                    <div class="w-8 h-8 bg-green-50 rounded-full flex items-center justify-center overflow-hidden">
-                      {% if driver.driver_photo %}
-                        <img src="{{ driver.driver_photo.url }}" alt="{{ driver.name }}" class="w-full h-full object-cover" />
-                      {% else %}
-                        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                        </svg>
-                      {% endif %}
-                    </div>
-                  </td>
-                  <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{ driver.name }}</td>
-                  <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-700">{{ driver.license_number }}</td>
-                  <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-700">{{ driver.phone_number|default:'N/A' }}</td>
-                </tr>
-              {% empty %}
-                <tr>
-                  <td colspan="5" class="px-3 py-2 text-center text-gray-500">No drivers found.</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
-        <nav class="px-3 py-2 flex items-center justify-between border-t border-gray-200" aria-label="Pagination">
-          <p class="text-xs text-gray-700 sm:text-sm">
-            Showing <span class="font-medium">{{ drivers.start_index }}</span> to <span class="font-medium">{{ drivers.end_index }}</span> of <span class="font-medium">{{ drivers.paginator.count }}</span> results
-          </p>
-          <div class="flex-1 flex justify-end">
-            {% if drivers.has_previous %}
-              <a href="?driver_page={{ drivers.previous_page_number }}{% if request.GET.driver_search %}
-                  
-                  &driver_search={{ request.GET.driver_search }}
-                {% endif %}&bus_page={{ buses.number }}"
-                class="relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 sm:text-sm">
-                Prev
-              </a>
-            {% else %}
-              <span class="relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-400 bg-gray-50 cursor-not-allowed sm:text-sm">Prev</span>
-            {% endif %}
-            {% if drivers.has_next %}
-              <a href="?driver_page={{ drivers.next_page_number }}{% if request.GET.driver_search %}
-                  
-                  &driver_search={{ request.GET.driver_search }}
-                {% endif %}&bus_page={{ buses.number }}"
-                class="ml-1.5 relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 sm:text-sm">
-                Next
-              </a>
-            {% else %}
-              <span class="ml-1.5 relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-400 bg-gray-50 cursor-not-allowed sm:text-sm">Next</span>
-            {% endif %}
-          </div>
-        </nav>
+    <div
+      class="bg-white rounded-md p-3 shadow-sm flex items-center gap-3 border border-yellow-100"
+    >
+      <div class="bg-yellow-500 p-2 rounded-full">
+        <svg
+          class="w-5 h-5 text-white"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M8 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <div>
+        <p class="text-xs text-gray-500">Active Buses</p>
+        <p class="text-xl font-bold text-gray-900">{{buses|length}}</p>
       </div>
     </div>
   </div>
 
-  {% include 'admin_kits/modals.html' %}
+  <hr class="border-gray-300 mb-6" />
 
-  <script src="{% static 'js/manage_drivers_buses.js' %}"></script>
+  <div class="mb-6">
+    <h2 class="text-xl font-bold mb-3 text-gray-800 sm:text-2xl">Bus List</h2>
+    <div
+      class="bg-white rounded-md shadow-sm overflow-hidden border border-gray-100"
+    >
+      <div class="p-3 border-b border-gray-200">
+        <input
+          type="text"
+          placeholder="Search buses..."
+          id="filter-bus"
+          class="w-full px-2 py-1.5 border border-gray-300 rounded-sm focus:ring-blue-400 focus:border-blue-400 text-sm"
+        />
+      </div>
+      <div class="overflow-x-auto">
+        {# Enables horizontal scroll on small screens #}
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th
+                class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+              >
+                Image
+              </th>
+              <th
+                class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+              >
+                Bus Name
+              </th>
+              <th
+                class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+              >
+                Capacity
+              </th>
+              <th
+                class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+              >
+                Status
+              </th>
+              <th
+                class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+            {% for bus in buses.object_list %}
+            <tr
+              id="bus-details"
+              bus-data="{{ bus.bus_name }} {{ bus.route }} {{ bus.bus_tag }}"
+            >
+              <td class="px-3 py-2 whitespace-nowrap">
+                <div
+                  class="w-8 h-8 bg-blue-50 rounded-md flex items-center justify-center overflow-hidden"
+                >
+                  {% if bus.bus_photo %}
+                  <img
+                    src="{{ bus.bus_photo.url }}"
+                    alt="{{ bus.bus_name }}"
+                    class="w-full h-full object-cover"
+                  />
+                  {% else %}
+                  <svg
+                    class="w-5 h-5 text-blue-400"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.129-1.125V11.25m0 0V9a2.25 2.25 0 0 0-2.25-2.25h-2.25M12 10.5v6m3-3H9m1.5-6a2.25 2.25 0 0 0-2.25-2.25H6A2.25 2.25 0 0 0 3.75 6v1.5M12 10.5a2.25 2.25 0 0 0 2.25-2.25V6m-7.5 0h7.5"
+                    />
+                  </svg>
+                  {% endif %}
+                </div>
+              </td>
+              <td
+                class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900"
+              >
+                {{ bus.bus_name }}
+              </td>
+              <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-700">
+                {{ bus.bus_capacity }}
+              </td>
+              <td class="px-3 py-2 whitespace-nowrap">
+                <span
+                  class="px-1.5 py-0.5 inline-flex text-xs font-medium rounded-full bg-green-100 text-green-800"
+                  >Operational</span
+                >
+              </td>
+              <td class="px-3 py-2 whitespace-nowrap">
+                <button
+                  onclick="editBus('{{ bus.id }}', '{{ bus.bus_name }}', '{{ bus.bus_tag }}', '{{ bus.bus_number }}', '{{ bus.bus_model }}', '{{ bus.bus_capacity }}', {{ bus.bus_status|yesno:'true,false' }})"
+                  class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-2 rounded text-xs transition-colors"
+                >
+                  Edit
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="px-3 py-2 text-center text-gray-500">
+                No buses found.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-  <style>
-    @keyframes fade-in {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
+      <nav
+        class="px-3 py-2 flex items-center justify-between border-t border-gray-200"
+        aria-label="Pagination"
+      >
+        <p class="text-xs text-gray-700 sm:text-sm">
+          Showing <span class="font-medium">{{ buses.start_index }}</span> to
+          <span class="font-medium">{{ buses.end_index }}</span> of
+          <span class="font-medium">{{ buses.paginator.count }}</span> results
+        </p>
+        <div class="flex-1 flex justify-end">
+          {% if buses.has_previous %}
+          <a
+            href="?bus_page={{ buses.previous_page_number }}{% if request.GET.bus_search %}
+                  
+                  &bus_search={{ request.GET.bus_search }}
+                {% endif %}&driver_page={{ drivers.number }}"
+            class="relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 sm:text-sm"
+          >
+            Prev
+          </a>
+          {% else %}
+          <span
+            class="relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-400 bg-gray-50 cursor-not-allowed sm:text-sm"
+            >Prev</span
+          >
+          {% endif %} {% if buses.has_next %}
+          <a
+            href="?bus_page={{ buses.next_page_number }}{% if request.GET.bus_search %}
+                  
+                  &bus_search={{ request.GET.bus_search }}
+                {% endif %}&driver_page={{ drivers.number }}"
+            class="ml-1.5 relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 sm:text-sm"
+          >
+            Next
+          </a>
+          {% else %}
+          <span
+            class="ml-1.5 relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-400 bg-gray-50 cursor-not-allowed sm:text-sm"
+            >Next</span
+          >
+          {% endif %}
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <hr class="border-gray-300 mb-6" />
+
+  <div class="mb-6">
+    <h2 class="text-xl font-bold mb-3 text-gray-800 sm:text-2xl">
+      Driver List
+    </h2>
+    <div
+      class="bg-white rounded-md shadow-sm overflow-hidden border border-gray-100"
+    >
+      <div class="p-3 border-b border-gray-200">
+        <input
+          type="text"
+          id="filter-driver"
+          placeholder="Search drivers..."
+          class="w-full px-2 py-1.5 border border-gray-300 rounded-sm focus:ring-green-400 focus:border-green-400 text-sm"
+        />
+      </div>
+      <div class="overflow-x-auto">
+        {# Enables horizontal scroll on small screens #}
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th
+                class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+              >
+                Photo
+              </th>
+              <th
+                class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+              >
+                Driver Name
+              </th>
+              <th
+                class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+              >
+                License
+              </th>
+              <th
+                class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+              >
+                Contact
+              </th>
+              <th
+                class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+            {% for driver in drivers.object_list %}
+            <tr
+              id="driver-details"
+              driver-data="{{ driver.name }} {{ driver.license_number }} {{ driver.phone_number }}"
+            >
+              <td class="px-3 py-2 whitespace-nowrap">
+                <div
+                  class="w-8 h-8 bg-green-50 rounded-full flex items-center justify-center overflow-hidden"
+                >
+                  {% if driver.driver_photo %}
+                  <img
+                    src="{{ driver.driver_photo.url }}"
+                    alt="{{ driver.name }}"
+                    class="w-full h-full object-cover"
+                  />
+                  {% else %}
+                  <svg
+                    class="w-5 h-5 text-green-400"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                    />
+                  </svg>
+                  {% endif %}
+                </div>
+              </td>
+              <td
+                class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900"
+              >
+                {{ driver.name }}
+              </td>
+              <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-700">
+                {{ driver.license_number }}
+              </td>
+              <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-700">
+                {{ driver.phone_number|default:'N/A' }}
+              </td>
+              <td class="px-3 py-2 whitespace-nowrap">
+                <button
+                  onclick="editDriver('{{ driver.id }}', '{{ driver.name }}', '{{ driver.phone_number }}', '{{ driver.license_number }}', '{{ driver.license_class }}', '{{ driver.license_issued|date:'Y-m-d' }}', '{{ driver.license_expiry|date:'Y-m-d' }}', '{{ driver.license_country }}', {{ driver.driver_status|yesno:'true,false' }})"
+                  class="bg-green-500 hover:bg-green-600 text-white font-medium py-1 px-2 rounded text-xs transition-colors"
+                >
+                  Edit
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="px-3 py-2 text-center text-gray-500">
+                No drivers found.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <nav
+        class="px-3 py-2 flex items-center justify-between border-t border-gray-200"
+        aria-label="Pagination"
+      >
+        <p class="text-xs text-gray-700 sm:text-sm">
+          Showing <span class="font-medium">{{ drivers.start_index }}</span> to
+          <span class="font-medium">{{ drivers.end_index }}</span> of
+          <span class="font-medium">{{ drivers.paginator.count }}</span> results
+        </p>
+        <div class="flex-1 flex justify-end">
+          {% if drivers.has_previous %}
+          <a
+            href="?driver_page={{ drivers.previous_page_number }}{% if request.GET.driver_search %}
+                  
+                  &driver_search={{ request.GET.driver_search }}
+                {% endif %}&bus_page={{ buses.number }}"
+            class="relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 sm:text-sm"
+          >
+            Prev
+          </a>
+          {% else %}
+          <span
+            class="relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-400 bg-gray-50 cursor-not-allowed sm:text-sm"
+            >Prev</span
+          >
+          {% endif %} {% if drivers.has_next %}
+          <a
+            href="?driver_page={{ drivers.next_page_number }}{% if request.GET.driver_search %}
+                  
+                  &driver_search={{ request.GET.driver_search }}
+                {% endif %}&bus_page={{ buses.number }}"
+            class="ml-1.5 relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 sm:text-sm"
+          >
+            Next
+          </a>
+          {% else %}
+          <span
+            class="ml-1.5 relative inline-flex items-center px-2.5 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-400 bg-gray-50 cursor-not-allowed sm:text-sm"
+            >Next</span
+          >
+          {% endif %}
+        </div>
+      </nav>
+    </div>
+  </div>
+</div>
+
+{% include 'admin_kits/modals.html' %}
+
+<script src="{% static 'js/manage_drivers_buses.js' %}"></script>
+
+<style>
+  @keyframes fade-in {
+    from {
+      opacity: 0;
     }
-    @keyframes fade-out {
-      from {
-        opacity: 1;
-      }
-      to {
-        opacity: 0;
-      }
+    to {
+      opacity: 1;
     }
-    @keyframes slide-up {
-      from {
-        transform: translateY(20px) scale(0.9);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-      }
+  }
+  @keyframes fade-out {
+    from {
+      opacity: 1;
     }
-    
-    .animate-fade-in {
-      animation: fade-in 0.3s ease-out forwards;
+    to {
+      opacity: 0;
     }
-    .animate-fade-out {
-      animation: fade-out 0.3s ease-in forwards;
+  }
+  @keyframes slide-up {
+    from {
+      transform: translateY(20px) scale(0.9);
+      opacity: 0;
     }
-    .animate-slide-up {
-      animation: slide-up 0.3s ease-out forwards;
+    to {
+      transform: translateY(0) scale(1);
+      opacity: 1;
     }
-  </style>
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out forwards;
+  }
+  .animate-fade-out {
+    animation: fade-out 0.3s ease-in forwards;
+  }
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out forwards;
+  }
+</style>
 {% endblock %}

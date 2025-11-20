@@ -186,18 +186,44 @@ def manage_drivers_buses(request):
             driver_form = DriverForm(request.POST, request.FILES)
             if driver_form.is_valid():
                 driver_form.save()
+                messages.success(request, "Driver added successfully!")
                 return redirect("manage_drivers_buses")
-        elif "add_bus" in request.POST:  # Check for the 'add_bus' button name
+        elif "add_bus" in request.POST:
             bus_form = BusForm(request.POST, request.FILES)
             if bus_form.is_valid():
                 bus_form.save()
-                return redirect("manage_drivers_buses")  # Redirect to refresh the list
+                messages.success(request, "Bus added successfully!")
+                return redirect("manage_drivers_buses")
+        elif "edit_driver" in request.POST:
+            driver_id = request.POST.get("driver_id")
+            try:
+                driver_instance = Driver.objects.get(id=driver_id)
+                driver_form = DriverForm(
+                    request.POST, request.FILES, instance=driver_instance
+                )
+                if driver_form.is_valid():
+                    driver_form.save()
+                    messages.success(request, "Driver updated successfully!")
+                    return redirect("manage_drivers_buses")
+            except Driver.DoesNotExist:
+                messages.error(request, "Driver not found!")
+        elif "edit_bus" in request.POST:
+            bus_id = request.POST.get("bus_id")
+            try:
+                bus_instance = Bus.objects.get(id=bus_id)
+                bus_form = BusForm(request.POST, request.FILES, instance=bus_instance)
+                if bus_form.is_valid():
+                    bus_form.save()
+                    messages.success(request, "Bus updated successfully!")
+                    return redirect("manage_drivers_buses")
+            except Bus.DoesNotExist:
+                messages.error(request, "Bus not found!")
 
     context = {
         "drivers": drivers,
         "buses": buses,
         "driver_form": driver_form,
-        "bus_form": bus_form,  # Pass the bus form to the template
+        "bus_form": bus_form,
     }
     return render(request, "transport_manager/manage_drivers_buses.html", context)
 

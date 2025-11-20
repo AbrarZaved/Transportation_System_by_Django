@@ -3,6 +3,7 @@ from django.core.cache import cache
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from social_core.backends import username
 from authentication.models import Preference, Student
 from transit_hub.models import Route
 from django.http import JsonResponse
@@ -15,6 +16,9 @@ from django.shortcuts import render
 from django.utils.timezone import localtime
 from django.db.models import Q
 from .models import Stoppage
+from django.conf import settings
+
+
 def format_time(dt):
     return dt.strftime("%I:%M %p")  # e.g., 08:30 AM
 
@@ -57,13 +61,13 @@ def index(request):
         {
             "preferences": preferences,
             "popular_routes": data,
+            "google_maps_api_key": settings.GOOGLE_MAPS_API_KEY,
         },
     )
 
 
 @sync_to_async
-def get_schedules(trip_type, place, student_id=None):
-
+def get_schedules(trip_type, place, username=None):
 
     # Search for routes by both route name and stoppage name
     schedules = (
@@ -96,7 +100,7 @@ def get_schedules(trip_type, place, student_id=None):
                 "audience": schedule.get_audience_display(),
                 "departure_time": (
                     schedule.departure_time.strftime("%I:%M %p")
-                    if student_id
+                    if username
                     else "Available"
                 ),
                 "stoppage_names": [
@@ -122,8 +126,8 @@ def get_schedules(trip_type, place, student_id=None):
 
 
 @sync_to_async(thread_sensitive=False)
-def save_preference_by_session(student_id, place):
-    student = Student.objects.filter(student_id=student_id).first()
+def save_preference_by_session(username, place):
+    student = Student.objects.filter(username=username).first()
 
     if (
         student
@@ -142,19 +146,27 @@ def save_preference_by_session(student_id, place):
         )
 
 
+@sync_to_async
+def get_username_from_session(request):
+    return request.session.get("username")
+
+
 async def search_route(request):
     if request.method == "POST":
         body = json.loads(request.body)
         trip_type = body.get("tripType")
         place = body.get("place")
-        student_id = body.get("studentId")
-        if trip_type=="From DSC" and place=="Daffodil Smart City":
+        if trip_type == "From DSC" and place == "Daffodil Smart City":
             return JsonResponse({"routes": []})
-        data = await get_schedules(trip_type, place, student_id)
+
+        # Get username from session using sync helper
+        username = await get_username_from_session(request)
+        data = await get_schedules(trip_type, place, username=username)
 
         try:
-            if data and student_id:
-                await save_preference_by_session(student_id, place)
+            if data and username:
+                print(data)
+                await save_preference_by_session(username, place)
         except Exception as e:
             print(e)
         return JsonResponse({"routes": data})
@@ -197,11 +209,19 @@ class RouteDetails(APIView):
 
 
 def about_us(request):
-    return render(request, "transit_hub/about.html")
+    return render(
+        request, 
+        "transit_hub/about.html",
+        {"google_maps_api_key": settings.GOOGLE_MAPS_API_KEY}
+    )
 
 
 def contact_us(request):
-    return render(request, "transit_hub/contact.html")
+    return render(
+        request, 
+        "transit_hub/contact.html",
+        {"google_maps_api_key": settings.GOOGLE_MAPS_API_KEY}
+    )
 
 
 def view_bus(request):
@@ -234,11 +254,15 @@ def view_bus(request):
             }
         )
 
-    return render(request, "transit_hub/view_bus.html", {"buses": buses_data})
+    context = {
+        "buses": buses_data,
+        "google_maps_api_key": settings.GOOGLE_MAPS_API_KEY,
+    }
+
+    return render(request, "transit_hub/view_bus.html", context)
 
 
 def get_all_stoppages(request):
-
     """
     API endpoint to get all stoppages for session storage
     """

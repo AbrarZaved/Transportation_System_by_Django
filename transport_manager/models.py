@@ -50,7 +50,9 @@ class Transportation_schedules(models.Model):
     def save(self, *args, **kwargs):
         if self.departure_time:
             if not self.estimated_end_time:
-                dt = datetime.datetime.combine(datetime.date.today(), self.departure_time)
+                dt = datetime.datetime.combine(
+                    datetime.date.today(), self.departure_time
+                )
                 dt += timedelta(hours=3)
                 self.estimated_end_time = dt.time()
         if self.schedule_status:

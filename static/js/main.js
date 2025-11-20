@@ -23,18 +23,18 @@ async function handleRecentSearch(studentId) {
   });
 }
 
-async function fetchRoutes(place, tripType, studentId, timeFilter = "all") {
+async function fetchRoutes(place, tripType, timeFilter = "all") {
   const recentSearchContainer = document.getElementById("recent-searches");
   const loadingSpinner = document.getElementById("loading-screen");
   const results = document.getElementById("results");
-
+  
   let recentSearches = [];
   if (recentSearchContainer) {
     recentSearches = Array.from(recentSearchContainer.children).map((child) =>
       child.textContent.trim()
     );
   }
-
+  console.log(recentSearches);
   let routeData = null;
   try {
     loadingSpinner?.classList.remove("hidden");
@@ -42,7 +42,7 @@ async function fetchRoutes(place, tripType, studentId, timeFilter = "all") {
 
     const response = await csrfFetch(`${location.origin}/search_route/`, {
       method: "POST",
-      body: JSON.stringify({ tripType, place, studentId }),
+      body: JSON.stringify({ tripType, place }),
     });
 
     routeData = response.routes;
@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  if (studentId) await handleRecentSearch(studentId);
+  await handleRecentSearch(studentId);
   document.getElementById("place").addEventListener("input", function () {
     document.getElementById("place-error").textContent = "";
   });

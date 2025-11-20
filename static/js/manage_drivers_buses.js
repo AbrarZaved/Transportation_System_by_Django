@@ -36,6 +36,46 @@ function toggleModal(id) {
     setTimeout(() => modal.classList.add("hidden"), 300);
   }
 }
+
+function editBus(id, name, tag, number, model, capacity, status) {
+  // Populate the edit form with current values
+  document.getElementById("editBusId").value = id;
+  document.getElementById("editBusName").value = name;
+  document.getElementById("editBusTag").value = tag;
+  document.getElementById("editBusNumber").value = number;
+  document.getElementById("editBusModel").value = model;
+  document.getElementById("editBusCapacity").value = capacity;
+  document.getElementById("editBusStatus").checked = status;
+
+  // Open the edit modal
+  toggleModal("editBusModal");
+}
+
+function editDriver(
+  id,
+  name,
+  phone,
+  license,
+  licenseClass,
+  issued,
+  expiry,
+  country,
+  status
+) {
+  // Populate the edit form with current values
+  document.getElementById("editDriverId").value = id;
+  document.getElementById("editDriverName").value = name;
+  document.getElementById("editDriverPhone").value = phone || "";
+  document.getElementById("editDriverLicense").value = license;
+  document.getElementById("editDriverLicenseClass").value = licenseClass;
+  document.getElementById("editDriverLicenseIssued").value = issued;
+  document.getElementById("editDriverLicenseExpiry").value = expiry;
+  document.getElementById("editDriverLicenseCountry").value = country;
+  document.getElementById("editDriverStatus").checked = status;
+
+  // Open the edit modal
+  toggleModal("editDriverModal");
+}
 document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("filter-bus").addEventListener("input", filterBuses);
   document
