@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from transit_hub.models import Bus, Driver, Route, RouteStoppage, Stoppage
+from transit_hub.models import Bus, Driver, Helper, Route, RouteStoppage, Stoppage
 
 # Register your models here.
 
@@ -29,6 +29,21 @@ class DriverAdmin(admin.ModelAdmin):
     ]
     list_per_page = 100
 
+@admin.register(Helper)
+class HelperAdmin(admin.ModelAdmin):
+    list_display = [
+        "name",
+        "phone_number",
+        "helper_status",
+        "created_at",
+        "updated_at",
+    ]
+    list_filter = ["helper_status", "created_at", "updated_at"]
+    search_fields = [
+        "name",
+        "phone_number",
+    ]
+    list_per_page = 100
 
 @admin.register(Bus)
 class BusAdmin(admin.ModelAdmin):

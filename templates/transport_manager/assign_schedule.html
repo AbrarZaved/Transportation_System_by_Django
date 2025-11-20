@@ -1,121 +1,280 @@
 <!DOCTYPE html>
-{% extends 'admin_kits/base.html' %}
-{% load static %}
-{% block style %}
-  <style>
-    .scrollable-container::-webkit-scrollbar {
-      height: 8px;
-    }
-    .scrollable-container::-webkit-scrollbar-track {
-      background: #e0e7ff;
-      border-radius: 10px;
-    }
-    .scrollable-container::-webkit-scrollbar-thumb {
-      background: #a5b4fc;
-      border-radius: 10px;
-    }
-    .scrollable-container::-webkit-scrollbar-thumb:hover {
-      background: #818cf8;
-    }
-  </style>
-{% endblock %}
+{% extends 'admin_kits/base.html' %} {% load static %} {% block style %}
+<style>
+  .scrollable-container::-webkit-scrollbar {
+    height: 8px;
+  }
+  .scrollable-container::-webkit-scrollbar-track {
+    background: #e0e7ff;
+    border-radius: 10px;
+  }
+  .scrollable-container::-webkit-scrollbar-thumb {
+    background: #a5b4fc;
+    border-radius: 10px;
+  }
+  .scrollable-container::-webkit-scrollbar-thumb:hover {
+    background: #818cf8;
+  }
 
-{% block content %}
-  {% include "kits/message.html" %}
-  <body class="bg-gray-100 min-h-screen p-4 sm:p-6 lg:p-10">
-    <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-lg p-6 sm:p-8 lg:p-10">
-      <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 text-indigo-700">Assign Bus Schedule</h2>
+  .custom-time {
+    border-left: 4px solid #10b981 !important;
+    background: linear-gradient(to right, #f0fdf4, #f9fafb) !important;
+  }
 
-      <!-- From / To DSC -->
-       <form method="POST" action="#">
-      <div class="flex justify-center gap-4 mb-8" id="direction-selector">
-        <label class="flex items-center bg-indigo-50 hover:bg-indigo-100 px-6 py-3 rounded-full shadow-md cursor-pointer text-lg">
-          <input type="radio" name="direction" value="from_dsc" class="w-6 h-6 mr-3 accent-indigo-600" />
+  .custom-time:hover {
+    background: linear-gradient(to right, #dcfce7, #e0e7ff) !important;
+  }
+
+  /* Responsive grid adjustments */
+  @media (max-width: 1279px) {
+    .scrollable-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+  }
+</style>
+{% endblock %} {% block content %} {% include "kits/message.html" %}
+<body class="bg-gray-100 min-h-screen p-4 sm:p-6 lg:p-10">
+  <div
+    class="max-w-full mx-auto bg-white shadow-xl rounded-lg p-4 sm:p-6 lg:p-8"
+  >
+    <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 text-indigo-700">
+      Assign Bus Schedule
+    </h2>
+
+    <!-- From / To DSC -->
+    <form method="POST" action="#">
+      <div class="flex justify-center gap-4 mb-6" id="direction-selector">
+        <label
+          class="flex items-center bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-full shadow-md cursor-pointer text-base"
+        >
+          <input
+            type="radio"
+            name="direction"
+            value="from_dsc"
+            class="w-5 h-5 mr-2 accent-indigo-600"
+          />
           <span class="text-indigo-800 font-medium">From DSC</span>
         </label>
-        <label class="flex items-center bg-indigo-50 hover:bg-indigo-100 px-6 py-3 rounded-full shadow-md cursor-pointer text-lg">
-          <input type="radio" name="direction" value="to_dsc" class="w-6 h-6 mr-3 accent-indigo-600" />
+        <label
+          class="flex items-center bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-full shadow-md cursor-pointer text-base"
+        >
+          <input
+            type="radio"
+            name="direction"
+            value="to_dsc"
+            class="w-5 h-5 mr-2 accent-indigo-600"
+          />
           <span class="text-indigo-800 font-medium">To DSC</span>
         </label>
       </div>
 
-      
-        {% csrf_token %}
+      {% csrf_token %}
 
-        <div class="flex flex-col lg:flex-row lg:space-x-6 overflow-x-auto pb-4 scrollable-container">
-          <!-- Time Section -->
-          <div class="w-full lg:w-64 flex-shrink-0 mb-6 lg:mb-0">
-            <h3 class="text-lg font-semibold text-gray-800 mb-3">Select Time</h3>
-            <input type="text" oninput="filterItems(this, 'time-list')" placeholder="Search Time" class="mb-3 w-full px-3 py-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-300" />
-            <div id="time-list" class="space-y-2 max-h-64 overflow-y-auto">
-              {% for time in times %}
-                <label class="flex items-center p-3 bg-gray-50 rounded border hover:bg-indigo-50 cursor-pointer text-base">
-                  <input type="radio" name="time" value="{{ time }}" required class="mr-3" />
-                  <span class="text-gray-700 font-medium">{{ time }}</span>
-                </label>
-              {% endfor %}
-            </div>
-          </div>
-
-          <!-- Scrollable Right Section -->
-          <div class="flex flex-col sm:flex-row lg:flex-row sm:space-x-4 lg:space-x-6 w-full lg:min-w-[calc(100%-18rem)] overflow-x-auto pb-4">
-            <!-- Bus Section -->
-            <div class="w-full sm:w-64 flex-shrink-0 mb-6 sm:mb-0">
-              <h3 class="text-lg font-semibold text-gray-800 mb-3">Select Buses</h3>
-              <input type="text" oninput="filterItems(this, 'bus-list')" placeholder="Search Bus" class="mb-3 w-full px-3 py-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-300" />
-              <div id="bus-list" class="space-y-2 max-h-64 overflow-y-auto">
-                {% for bus in buses %}
-                  <label class="flex items-center p-3 bg-gray-50 rounded border hover:bg-indigo-50 cursor-pointer text-base">
-                    <input type="radio" name="buses" value="{{ bus.bus_tag }}" class="mr-3" />
-                    <span class="text-gray-700 font-medium">{{ bus.bus_name }}</span>
-                  </label>
-                {% endfor %}
-              </div>
-            </div>
-
-            <!-- Route Section -->
-            <div class="w-full sm:w-64 flex-shrink-0 mb-6 sm:mb-0">
-              <h3 class="text-lg font-semibold text-gray-800 mb-3">Select Route</h3>
-              <input type="text" oninput="filterItems(this, 'route-list')" placeholder="Search Route" class="mb-3 w-full px-3 py-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-300" />
-              <div id="route-list" class="space-y-2 max-h-64 overflow-y-auto">
-
-              </div>
-            </div>
-
-            <!-- Driver Section -->
-            <div class="w-full sm:w-64 flex-shrink-0">
-              <h3 class="text-lg font-semibold text-gray-800 mb-3">Select Driver</h3>
-              <input type="text" oninput="filterItems(this, 'driver-list')" placeholder="Search Driver" class="mb-3 w-full px-3 py-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-300" />
-              <div id="driver-list" class="space-y-2 max-h-64 overflow-y-auto">
-                {% for driver in drivers %}
-                  <label class="flex items-center p-3 bg-gray-50 rounded border hover:bg-indigo-50 cursor-pointer text-base">
-                    <input type="radio" name="driver" value="{{ driver.id }}" required class="mr-3" />
-                    <span class="text-gray-700 font-medium">{{ driver.name }}</span>
-                  </label>
-                {% endfor %}
-              </div>
-            </div>
+      <div
+        class="flex flex-col xl:flex-row xl:space-x-4 gap-4 pb-4 scrollable-container"
+      >
+        <!-- Bus Section (First Column) -->
+        <div class="w-full xl:w-52 flex-shrink-0">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3">Select Bus</h3>
+          <input
+            type="text"
+            oninput="filterItems(this, 'bus-list')"
+            placeholder="Search Bus"
+            class="mb-3 w-full px-3 py-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-300"
+          />
+          <div id="bus-list" class="space-y-2 max-h-60 overflow-y-auto">
+            {% for bus in buses %}
+            <label
+              class="flex items-center p-2 bg-gray-50 rounded border hover:bg-indigo-50 cursor-pointer text-sm"
+            >
+              <input
+                type="radio"
+                name="buses"
+                value="{{ bus.bus_tag }}"
+                required
+                class="mr-2"
+              />
+              <span class="text-gray-700 font-medium">{{ bus.bus_name }}</span>
+            </label>
+            {% endfor %}
           </div>
         </div>
 
-        <!-- Submit -->
-        <div class="text-center mt-10">
-          <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-lg px-8 py-3 rounded shadow-md">Save Assignment</button>
+        <!-- Route Section (Second Column) -->
+        <div class="w-full xl:w-52 flex-shrink-0">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3">Select Route</h3>
+          <input
+            type="text"
+            oninput="filterItems(this, 'route-list')"
+            placeholder="Search Route"
+            class="mb-3 w-full px-3 py-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-300"
+          />
+          <div id="route-list" class="space-y-2 max-h-60 overflow-y-auto">
+            <!-- Routes will be populated dynamically -->
+          </div>
         </div>
-      </form>
-    </div>
 
-    <!-- Simple Client-Side Filtering -->
-  </body>
-  <script src="{% static 'js/assign_schedule.js' %}" type="module"></script>
-  <script>
-    function filterItems(inputEl, containerId) {
-      const filter = inputEl.value.toLowerCase()
-      const items = document.querySelectorAll(`#${containerId} label`)
-      items.forEach((label) => {
-        const text = label.innerText.toLowerCase()
-        label.style.display = text.includes(filter) ? 'flex' : 'none'
-      })
-    }
-  </script>
+        <!-- Time Section (Third Column) -->
+        <div class="w-full xl:w-56 flex-shrink-0">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3">
+            Select Times (Max 3)
+          </h3>
+          <p class="text-xs text-gray-600 mb-3">
+            Select up to 3 times or add custom
+          </p>
+
+          <!-- Custom Time Input -->
+          <div class="mb-3 p-2 bg-blue-50 rounded border">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Add Custom Time:</label
+            >
+            <div class="flex gap-2">
+              <input
+                type="time"
+                id="custom-time"
+                class="flex-1 px-2 py-1 text-sm rounded border border-gray-300 focus:outline-none focus:ring focus:ring-blue-300"
+              />
+              <button
+                type="button"
+                onclick="addCustomTime()"
+                class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+
+          <div id="time-list" class="space-y-2 max-h-48 overflow-y-auto">
+            {% for time in times %}
+            <label
+              class="flex items-center p-2 bg-gray-50 rounded border hover:bg-indigo-50 cursor-pointer text-sm"
+            >
+              <input
+                type="checkbox"
+                name="times"
+                value="{{ time }}"
+                class="mr-2 accent-indigo-600"
+                onchange="limitTimeSelection(this)"
+              />
+              <span class="text-gray-700 font-medium">{{ time }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Driver Section (Fourth Column) -->
+        <div class="w-full xl:w-52 flex-shrink-0">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3">
+            Select Driver
+          </h3>
+          <input
+            type="text"
+            oninput="filterItems(this, 'driver-list')"
+            placeholder="Search Driver"
+            class="mb-3 w-full px-3 py-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-300"
+          />
+          <div id="driver-list" class="space-y-2 max-h-60 overflow-y-auto">
+            {% for driver in drivers %}
+            <label
+              class="flex items-center justify-between p-2 bg-gray-50 rounded border hover:bg-indigo-50 cursor-pointer text-sm"
+            >
+              <div class="flex items-center">
+                <input
+                  type="radio"
+                  name="driver"
+                  value="{{ driver.id }}"
+                  required
+                  class="mr-2"
+                />
+                <span class="text-gray-700 font-medium">{{ driver.name }}</span>
+              </div>
+              <span
+                class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
+              >
+                {{ driver.total_buses_assigned }}/3 trips
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Helper Section (Fifth Column) -->
+        <div class="w-full xl:w-52 flex-shrink-0">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3">
+            Select Helper (Optional)
+          </h3>
+          <input
+            type="text"
+            oninput="filterItems(this, 'helper-list')"
+            placeholder="Search Helper"
+            class="mb-3 w-full px-3 py-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-300"
+          />
+          <div id="helper-list" class="space-y-2 max-h-60 overflow-y-auto">
+            <label
+              class="flex items-center p-2 bg-gray-50 rounded border hover:bg-indigo-50 cursor-pointer text-sm"
+            >
+              <input type="radio" name="helper" value="" class="mr-2" checked />
+              <span class="text-gray-500 font-medium italic">No Helper</span>
+            </label>
+            {% for helper in helpers %}
+            <label
+              class="flex items-center p-2 bg-gray-50 rounded border hover:bg-indigo-50 cursor-pointer text-sm"
+            >
+              <input
+                type="radio"
+                name="helper"
+                value="{{ helper.id }}"
+                class="mr-2"
+              />
+              <span class="text-gray-700 font-medium">{{ helper.name }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="text-center mt-10">
+        <button
+          type="submit"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-lg px-8 py-3 rounded shadow-md"
+        >
+          Save Assignment
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Simple Client-Side Filtering -->
+</body>
+<script>
+  // Store route data in JavaScript variables for initial caching
+  const routeData = {
+    from_dsc: [
+      {% for route in from_dsc_routes %}
+      {
+        id: {{ route.id }},
+        name: "{{ route.route_name|escapejs }}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ],
+    to_dsc: [
+      {% for route in to_dsc_routes %}
+      {
+        id: {{ route.id }},
+        name: "{{ route.route_name|escapejs }}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  };
+
+  // Clear any existing route cache when page loads to ensure fresh data
+  if (typeof Storage !== "undefined") {
+    localStorage.removeItem('from_dsc_routes_cache');
+    localStorage.removeItem('to_dsc_routes_cache');
+  }
+</script>
+<script src="{% static 'js/assign_schedule.js' %}" type="module"></script>
 {% endblock %}

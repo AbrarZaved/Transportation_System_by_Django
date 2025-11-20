@@ -20,12 +20,28 @@ class Driver(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     bus_assigned = models.BooleanField(default=False)
+    total_buses_assigned = models.IntegerField(default=0)
 
     def __str__(self):
         return str(self.name)
 
     class Meta:
         unique_together = ["phone_number", "license_number"]
+
+class Helper(models.Model):
+    name = models.CharField(max_length=100, blank=True, null=True)
+    phone_number = models.CharField(max_length=15)
+    helper_photo = models.ImageField(upload_to="helper_photos", null=True, blank=True)
+    helper_status = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    bus_assigned = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.name)
+
+    class Meta:
+        unique_together = ["phone_number"]
 
 
 class Bus(models.Model):

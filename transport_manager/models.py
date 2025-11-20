@@ -1,7 +1,7 @@
 import datetime
 from django.db import models
 from multiselectfield import MultiSelectField
-from transit_hub.models import Bus, Driver, Route
+from transit_hub.models import Bus, Driver, Helper, Route
 from datetime import timedelta
 
 
@@ -22,11 +22,17 @@ class Transportation_schedules(models.Model):
         ("saturday", "Saturday"),
         ("sunday", "Sunday"),
     ]
+    TRIP_TYPES = [
+        ("one_time", "One Time"),
+        ('fixed_route','Fixed Route'),
+    ]
 
     schedule_id = models.AutoField(primary_key=True)
     route = models.ForeignKey(Route, on_delete=models.DO_NOTHING)
+    trip_type = models.CharField(max_length=20, choices=TRIP_TYPES, default="one_time")
     bus = models.ForeignKey(Bus, on_delete=models.DO_NOTHING)
     driver = models.ForeignKey(Driver, on_delete=models.DO_NOTHING)
+    helper=models.ForeignKey(Helper,on_delete=models.DO_NOTHING,null=True,blank=True)
     audience = models.CharField(max_length=20, choices=audiences, default="student")
 
     # Changed from JSONField to MultiSelectField
@@ -41,6 +47,7 @@ class Transportation_schedules(models.Model):
     schedule_status = models.BooleanField()
     from_dsc = models.BooleanField(default=False)
     to_dsc = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

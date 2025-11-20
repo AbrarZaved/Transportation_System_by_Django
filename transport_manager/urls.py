@@ -7,6 +7,8 @@ urlpatterns = [
     path("diu_admin/", views.admin_login, name="diu_admin"),
     path("dashboard/", views.dashboard, name="dashboard"),
     path("today_schedules/", views.today_schedules, name="today_schedules"),
+    path("edit_schedule/", views.edit_schedule, name="edit_schedule"),
+    path("delete_schedule/", views.delete_schedule, name="delete_schedule"),
     path("filter_route/", views.filter_route, name="filter_route"),
     path("assign_schedule/", views.assign_schedule, name="assign_schedule"),
     path(
