@@ -311,29 +311,31 @@ window.openTrackModal = function (busName, routeName) {
         <button onclick="closeTrackModal()" class="text-white hover:text-gray-200 text-2xl font-bold">&times;</button>
       </div>
       
-      <div class="p-6">
-        <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+      <div class="p-4">
+        <div class="mb-3 p-3 bg-green-50 border border-green-200 rounded-lg">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             <span class="text-green-800 font-semibold">Bus is currently moving</span>
           </div>
-          <div class="text-sm text-gray-700 space-y-1">
-            <p><span class="font-medium">Current Location:</span> <span id="currentLocation">Loading...</span></p>
-            <p><span class="font-medium">Latitude:</span> <span id="currentLat">0.000000</span></p>
-            <p><span class="font-medium">Longitude:</span> <span id="currentLng">0.000000</span></p>
-            <p><span class="font-medium">Speed:</span> <span id="currentSpeed">0</span> km/h</p>
-            <p><span class="font-medium">Last Updated:</span> <span id="lastUpdated">--</span></p>
+          <div class="text-sm text-gray-700">
+            <p class="mb-2"><span class="font-medium">Current Location:</span> <span id="currentLocation">Loading...</span></p>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+              <p><span class="font-medium">Latitude:</span> <span id="currentLat">0.000000</span></p>
+              <p><span class="font-medium">Longitude:</span> <span id="currentLng">0.000000</span></p>
+              <p><span class="font-medium">Speed:</span> <span id="currentSpeed">0</span> km/h</p>
+              <p><span class="font-medium">Last Updated:</span> <span id="lastUpdated">--</span></p>
+            </div>
           </div>
         </div>
         
-        <div class="mb-4">
+        <div class="mb-3">
           <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
             <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m-6 3l6-3"/>
             </svg>
             Live Map View
           </h4>
-          <div id="trackingMap" class="h-64 bg-gray-200 rounded-lg overflow-hidden">
+          <div id="trackingMap" class="h-60 bg-gray-200 rounded-lg overflow-hidden">
             <div class="h-full flex items-center justify-center">
               <div class="text-center">
                 <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
@@ -341,10 +343,9 @@ window.openTrackModal = function (busName, routeName) {
                 <p class="text-xs text-gray-500 mt-1">Initializing Google Maps API</p>
               </div>
             </div>
-          </div>
         </div>
         
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-4 mt-3">
           <div class="bg-blue-50 p-3 rounded-lg text-center">
             <p class="text-2xl font-bold text-blue-600" id="etaMinutes">--</p>
             <p class="text-sm text-gray-600">ETA (minutes)</p>
@@ -356,7 +357,7 @@ window.openTrackModal = function (busName, routeName) {
         </div>
       </div>
       
-      <div class="bg-gray-50 px-6 py-3 flex justify-end">
+      <div class="bg-gray-50 px-4 py-3 flex justify-end">
         <button onclick="closeTrackModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition">
           Close Tracking
         </button>
@@ -674,22 +675,24 @@ function startDemoTracking() {
         ? ` (ETA: ${next.estimatedTime})`
         : "";
       demoCoordinatesElement.innerHTML = `
-        <div class="space-y-1">
-          <div><span class="text-blue-600">Lat:</span> ${lat.toFixed(6)}</div>
-          <div><span class="text-blue-600">Lng:</span> ${lng.toFixed(6)}</div>
+        <div class="space-y-2">
           <div><span class="text-green-600">Current:</span> ${
             current.location
           }</div>
           <div><span class="text-purple-600">Next Stop:</span> ${
             next.location
           }${nextStopInfo}</div>
-          <div><span class="text-orange-600">Speed:</span> ${currentSpeed.toFixed(
-            1
-          )} km/h</div>
-          <div><span class="text-indigo-600">ETA:</span> ${Math.max(
-            0,
-            estimatedETA
-          ).toFixed(0)} min</div>
+          <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+            <div><span class="text-blue-600">Lat:</span> ${lat.toFixed(6)}</div>
+            <div><span class="text-blue-600">Lng:</span> ${lng.toFixed(6)}</div>
+            <div><span class="text-orange-600">Speed:</span> ${currentSpeed.toFixed(
+              1
+            )} km/h</div>
+            <div><span class="text-indigo-600">ETA:</span> ${Math.max(
+              0,
+              estimatedETA
+            ).toFixed(0)} min</div>
+          </div>
           <div class="text-xs text-gray-500">Updated: ${new Date().toLocaleTimeString()}</div>
         </div>
       `;

@@ -165,7 +165,6 @@ async def search_route(request):
 
         try:
             if data and username:
-                print(data)
                 await save_preference_by_session(username, place)
         except Exception as e:
             print(e)
