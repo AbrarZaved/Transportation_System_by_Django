@@ -193,7 +193,7 @@
               <span
                 class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
               >
-                {{ driver.total_buses_assigned }}/3 trips
+                {{ driver.current_trips }}/3 trips
               </span>
             </label>
             {% endfor %}
@@ -235,11 +235,49 @@
         </div>
       </div>
 
+      <!-- Trip Type Selection -->
+      <div class="bg-gray-50 rounded-lg p-4 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-3 text-center">
+          Trip Type
+        </h3>
+        <div class="flex justify-center gap-6">
+          <label
+            class="flex items-center bg-white hover:bg-indigo-50 px-4 py-3 rounded-lg shadow-md cursor-pointer border-2 border-gray-200 hover:border-indigo-300 transition-all"
+          >
+            <input
+              type="radio"
+              name="trip_type"
+              value="one_time"
+              checked
+              class="w-5 h-5 mr-3 accent-indigo-600"
+            />
+            <div class="text-left">
+              <span class="text-gray-800 font-medium block">One Time</span>
+              <span class="text-xs text-gray-500">Single trip assignment</span>
+            </div>
+          </label>
+          <label
+            class="flex items-center bg-white hover:bg-indigo-50 px-4 py-3 rounded-lg shadow-md cursor-pointer border-2 border-gray-200 hover:border-indigo-300 transition-all"
+          >
+            <input
+              type="radio"
+              name="trip_type"
+              value="fixed_route"
+              class="w-5 h-5 mr-3 accent-indigo-600"
+            />
+            <div class="text-left">
+              <span class="text-gray-800 font-medium block">Fixed Route</span>
+              <span class="text-xs text-gray-500">Regular scheduled route</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
       <!-- Submit -->
-      <div class="text-center mt-10">
+      <div class="text-center">
         <button
           type="submit"
-          class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-lg px-8 py-3 rounded shadow-md"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-lg px-8 py-3 rounded shadow-md transform hover:scale-105 transition-all duration-200"
         >
           Save Assignment
         </button>

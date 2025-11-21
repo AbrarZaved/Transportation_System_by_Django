@@ -2,11 +2,12 @@ import json
 import os
 from datetime import datetime as dt_class, date, timedelta
 from django.contrib.auth import authenticate, login, logout
-from django.db.models import Q,F
+from django.db.models import Q, F
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.utils.timezone import localtime
 import requests
 from rest_framework.views import csrf_exempt
 from transit_hub.forms import BusForm, DriverForm
@@ -82,11 +83,12 @@ def dashboard(request):
 @login_required(login_url="diu_admin")
 def today_schedules(request):
     current_time = datetime.now().replace(second=0, microsecond=0)
+    current_day = localtime().strftime("%A").lower()
     schedules = (
         Transportation_schedules.objects.select_related(
             "bus", "driver", "route", "helper"
         )
-        .filter(departure_time__gte=current_time)
+        .filter(departure_time__gte=current_time, days__contains=current_day)
         .order_by("departure_time")
     )
 
@@ -272,6 +274,7 @@ def assign_schedule(request):
         )  # Changed to getlist for multiple selections
         driver_id = request.POST.get("driver")
         helper_id = request.POST.get("helper")
+        trip_type = request.POST.get("trip_type", "one_time")
 
         # Validate that no more than 3 times are selected
         if len(selected_times) > 3:
@@ -313,12 +316,14 @@ def assign_schedule(request):
                         bus=bus_instance,
                         driver=driver_instance,
                         helper=helper_instance,
+                        trip_type=trip_type,
                         departure_time=datetime.strptime(
                             selected_time, "%I:%M %p"
                         ).time(),
                         from_dsc=(direction == "from_dsc"),
                         to_dsc=(direction == "to_dsc"),
                         schedule_status=True,
+                        days=localtime().strftime("%A").lower(),
                     )
                     driver_instance.total_buses_assigned += 1
                     driver_instance.save()
@@ -354,7 +359,7 @@ def assign_schedule(request):
 
     # Filter drivers who have less than 3 trips assigned today
     available_drivers = []
-    for driver in Driver.objects.filter(total_buses_assigned__lt=3):
+    for driver in Driver.objects.filter(bus_assigned=False):
         trip_count = Transportation_schedules.objects.filter(
             driver=driver, created_at__date=today
         ).count()
@@ -525,6 +530,7 @@ def edit_schedule(request):
         try:
             schedule_id = request.POST.get("schedule_id")
             schedule = Transportation_schedules.objects.get(schedule_id=schedule_id)
+            create_new_trip = request.POST.get("create_new_trip") == "on"
 
             # Store old values for comparison
             old_route = schedule.route
@@ -543,6 +549,45 @@ def edit_schedule(request):
             schedule_status = request.POST.get("schedule_status") == "true"
             from_dsc = request.POST.get("direction") == "from_dsc"
 
+            # Parse new departure time
+            new_departure_time = datetime.strptime(departure_time, "%H:%M").time()
+
+            # Check if time has changed and create_new_trip is checked
+            if create_new_trip and old_departure_time != new_departure_time:
+                # Create a new schedule with the new time
+                route = Route.objects.get(id=route_id) if route_id else schedule.route
+                bus = Bus.objects.get(id=bus_id) if bus_id else schedule.bus
+                driver = (
+                    Driver.objects.get(id=driver_id) if driver_id else schedule.driver
+                )
+                helper = Helper.objects.get(id=helper_id) if helper_id else None
+
+                Transportation_schedules.objects.create(
+                    route=route,
+                    bus=bus,
+                    driver=driver,
+                    helper=helper,
+                    trip_type=schedule.trip_type,
+                    departure_time=new_departure_time,
+                    from_dsc=from_dsc,
+                    to_dsc=not from_dsc,
+                    schedule_status=schedule_status,
+                )
+
+                # Send SMS for new trip
+                send_sms(driver, route, new_departure_time.strftime("%I:%M %p"), bus)
+                if helper:
+                    send_helper_sms(
+                        helper, route, new_departure_time.strftime("%I:%M %p"), bus
+                    )
+
+                messages.success(
+                    request,
+                    "New trip created successfully! Original trip remains unchanged.",
+                )
+                return redirect("today_schedules")
+
+            # Update the existing schedule (normal edit mode)
             # Update schedule fields
             if route_id:
                 schedule.route = Route.objects.get(id=route_id)
@@ -560,11 +605,9 @@ def edit_schedule(request):
                 schedule.helper = None
 
             if departure_time:
-                schedule.departure_time = datetime.strptime(
-                    departure_time, "%H:%M"
-                ).time()
+                schedule.departure_time = new_departure_time
                 # Recalculate estimated end time
-
+                from datetime import datetime as dt_class, date, timedelta
 
                 dt = dt_class.combine(date.today(), schedule.departure_time)
                 dt += timedelta(hours=3)

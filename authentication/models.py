@@ -53,6 +53,10 @@ class Supervisor(AbstractBaseUser):
     USERNAME_FIELD = "employee_id"
     REQUIRED_FIELDS = []
 
+    def save(self, *args, **kwargs):
+        self.password = make_password(self.password)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.email
 
