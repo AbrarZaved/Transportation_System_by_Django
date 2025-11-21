@@ -11,4 +11,5 @@ sync_db.ps1
 dump.rdb
 Dockerfile
 dump_db.py
-railway_backup.sql
+
+*.sql

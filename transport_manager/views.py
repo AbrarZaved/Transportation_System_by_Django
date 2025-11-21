@@ -8,7 +8,6 @@ from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.timezone import localtime
-import requests
 from rest_framework.views import csrf_exempt
 from transit_hub.forms import BusForm, DriverForm
 from transit_hub.models import Bus, Driver, Helper, Route, Stoppage
@@ -747,3 +746,14 @@ def delete_schedule(request):
             messages.error(request, f"Error deleting schedule: {str(e)}")
 
     return redirect("today_schedules")
+
+
+
+def get_location(request):
+    data=json.loads(request.body)
+    print(data)
+    return JsonResponse({"status":"success"})
+
+def trips(request,driver_id):
+    trips_list=Transportation_schedules.objects.filter(driver_id=driver_id).order_by('-created_at')
+    return JsonResponse({"trips":list(trips_list.values())})
