@@ -20,6 +20,6 @@ urlpatterns = [
     path("route_stoppages", views.route_stoppages, name="route_stoppages"),
     path("add_route", views.add_route, name="add_route"),
     path("update_route/<int:id>", views.update_route, name="update_route"),
-    path("get_location/", views.get_location, name="get_location"),
+    path("get_location/", csrf_exempt(views.get_location), name="get_location"),
     path("trips/<int:driver_id>", csrf_exempt(views.trips), name="trips"),
 ]
