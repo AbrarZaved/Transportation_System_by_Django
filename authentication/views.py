@@ -1,16 +1,19 @@
 from functools import wraps
 import json
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
 from django.core.validators import validate_email
 from django.db import models
 from django.forms import ValidationError
+from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from social_core.backends import username
+from rest_framework import status
 from authentication.email import create_email_otp, send_otp_email
 from authentication.models import EmailOTP, Preference, Student
 from threading import Thread
+from authentication.models import DriverAuth
 
 
 def student_wrapper(view_func):
@@ -274,3 +277,65 @@ def edit_profile(request):
 def social_auth_error(request):
     messages.error(request, "Not Allowed")
     return redirect("index")
+
+
+def admin_login(request):
+    if request.method == "POST":
+        employee_id = request.POST.get("employee_id")
+        password = request.POST.get("password")
+        user = authenticate(request, employee_id=employee_id, password=password)
+        if user is not None:
+            login(request, user)
+            messages.success(request, "Login successful!")
+            return redirect("dashboard")
+        else:
+            messages.error(request, "Invalid Employee ID or Password.")
+            return redirect("diu_admin")
+    return render(request, "transport_manager/admin_login.html")
+
+
+def admin_logout(request):
+    logout(request)
+    messages.success(request, "You have been logged out successfully.")
+    return redirect("diu_admin")
+
+
+def driver_login(request):
+    if request.method == "POST":
+        username = json.loads(request.body).get("username")
+        password = json.loads(request.body).get("password")
+        device_id = json.loads(request.body).get("device_id")
+
+        user = DriverAuth.objects.filter(username=username).first()
+        print(user)
+        if user and user.check_password(password):
+            if not user.device_id:
+                user.device_id = device_id
+            else:
+                if user.device_id != device_id:
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "message": "Device not recognized. Please contact admin.",
+                        },
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+            user.last_login = now()
+            user.save()
+            return JsonResponse(
+                {
+                    "success": True,
+                    "auth_token": user.auth_token,
+                    "driver_id": user.driver.id,
+                }
+            )
+        else:
+            return JsonResponse(
+                {"success": False, "message": "Invalid credentials."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+    else:
+        return JsonResponse(
+            {"success": False, "message": "Invalid request method."},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )

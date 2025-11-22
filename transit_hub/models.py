@@ -19,8 +19,8 @@ class Driver(models.Model):
     driver_status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    bus_assigned = models.BooleanField(default=False)
-    total_buses_assigned = models.IntegerField(default=0)
+    total_trip_assigned = models.IntegerField(default=0)
+    total_trip_completed = models.IntegerField(default=0)
 
     def __str__(self):
         return str(self.name)

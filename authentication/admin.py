@@ -1,9 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group as groups
+from authentication.models import DriverAuth, EmailOTP, Preference, Student, Supervisor
 
-from authentication.models import EmailOTP, Preference, Student, Supervisor
 
-# Register your models here.
 admin.site.unregister(groups)
 
 
@@ -13,6 +12,10 @@ class SuperVisorAdmin(admin.ModelAdmin):
     search_fields = ["employee_id", "phone_number", "email"]
     list_filter = ["is_active", "is_staff", "is_admin", "is_superuser"]
 
+@admin.register(DriverAuth)
+class DriverAuthAdmin(admin.ModelAdmin):
+    list_display = ["username", "auth_token", "device_id", "created_at", "updated_at"]
+    search_fields = ["username", "auth_token", "device_id"]
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):

@@ -1,3 +1,4 @@
+import os
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.hashers import check_password, make_password
 
@@ -6,6 +7,8 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.utils.text import slugify
 from django.utils.timezone import now
 import uuid
+
+from transit_hub.models import Driver
 
 
 class SuperVisorManager(BaseUserManager):
@@ -123,3 +126,29 @@ class Preference(models.Model):
                 self.searched_locations.capitalize()
             )  # Make the first letter upper case
         super().save(*args, **kwargs)
+
+
+class DriverAuth(models.Model):
+    driver = models.OneToOneField(Driver, on_delete=models.CASCADE)
+    username = models.CharField(max_length=150, unique=True, null=True, blank=True)
+    password = models.CharField(max_length=128)
+    auth_token = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    device_id = models.CharField(max_length=255, null=True, blank=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Auth for {self.driver.name}"
+
+    def save(self, *args, **kwargs):
+        self.password = make_password(self.password)
+        if not self.username:
+            name=self.driver.name.lower().replace(" ","_")
+            self.username = f"{name}_{self.driver.id}"
+        if not self.auth_token:
+            self.auth_token = os.urandom(24).hex()
+        super(DriverAuth, self).save(*args, **kwargs)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)

@@ -1,4 +1,6 @@
 import datetime
+import os
+from django.contrib.auth.hashers import make_password
 from django.db import models
 from multiselectfield import MultiSelectField
 from transit_hub.models import Bus, Driver, Helper, Route
@@ -24,7 +26,7 @@ class Transportation_schedules(models.Model):
     ]
     TRIP_TYPES = [
         ("one_time", "One Time"),
-        ('fixed_route','Fixed Route'),
+        ("fixed_route", "Fixed Route"),
     ]
 
     schedule_id = models.AutoField(primary_key=True)
@@ -32,7 +34,9 @@ class Transportation_schedules(models.Model):
     trip_type = models.CharField(max_length=20, choices=TRIP_TYPES, default="one_time")
     bus = models.ForeignKey(Bus, on_delete=models.DO_NOTHING)
     driver = models.ForeignKey(Driver, on_delete=models.DO_NOTHING)
-    helper=models.ForeignKey(Helper,on_delete=models.DO_NOTHING,null=True,blank=True)
+    helper = models.ForeignKey(
+        Helper, on_delete=models.DO_NOTHING, null=True, blank=True
+    )
     audience = models.CharField(max_length=20, choices=audiences, default="student")
 
     # Changed from JSONField to MultiSelectField
@@ -68,3 +72,16 @@ class Transportation_schedules(models.Model):
             self.driver.bus_assigned = True
             self.driver.save()
         super(Transportation_schedules, self).save(*args, **kwargs)
+
+
+class LocationData(models.Model):
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, null=True, blank=True)
+    bus = models.ForeignKey(Bus, on_delete=models.CASCADE)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"LocationData for {self.bus.bus_name} at {self.timestamp}"
+
+
