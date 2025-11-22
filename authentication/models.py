@@ -100,6 +100,7 @@ class Student(models.Model):
     def __str__(self):
         return self.name
 
+
 class EmailOTP(models.Model):
     user = models.ForeignKey(Student, on_delete=models.CASCADE)
     otp = models.CharField(max_length=6)
@@ -109,7 +110,6 @@ class EmailOTP(models.Model):
     def is_expired(self):
         return now() > self.expires_at
 
-    
     def __str__(self):
         return f"EmailOTP for {self.user.email}"
 
@@ -142,13 +142,24 @@ class DriverAuth(models.Model):
         return f"Auth for {self.driver.name}"
 
     def save(self, *args, **kwargs):
-        self.password = make_password(self.password)
+        if self.pk is None or (
+            hasattr(self, "_password_changed") and self._password_changed
+        ):
+            # Check if password is already hashed
+            if not self.password.startswith(("pbkdf2_", "bcrypt", "argon2")):
+                self.password = make_password(self.password)
+
         if not self.username:
-            name=self.driver.name.lower().replace(" ","_")
+            name = self.driver.name.lower().replace(" ", "_")
             self.username = f"{name}_{self.driver.id}"
         if not self.auth_token:
             self.auth_token = os.urandom(24).hex()
         super(DriverAuth, self).save(*args, **kwargs)
+
+    def set_password(self, raw_password):
+        """Set password and mark it as changed"""
+        self.password = raw_password
+        self._password_changed = True
 
     def check_password(self, raw_password):
         return check_password(raw_password, self.password)

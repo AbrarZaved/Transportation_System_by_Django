@@ -302,37 +302,71 @@ def admin_logout(request):
 
 def driver_login(request):
     if request.method == "POST":
-        username = json.loads(request.body).get("username")
-        password = json.loads(request.body).get("password")
-        device_id = json.loads(request.body).get("device_id")
+        try:
+            data = json.loads(request.body)
+            username = data.get("username")
+            password = data.get("password")
+            device_id = data.get("device_id")
 
-        user = DriverAuth.objects.filter(username=username).first()
-        print(user)
-        if user and user.check_password(password):
-            if not user.device_id:
-                user.device_id = device_id
-            else:
-                if user.device_id != device_id:
+            # Validate required fields
+            if not username or not password or not device_id:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "message": "Username, password, and device_id are required.",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            user = DriverAuth.objects.filter(username=username).first()
+
+            if user:
+                password_valid = user.check_password(password)
+                if password_valid:
+                    if not user.device_id:
+                        user.device_id = device_id
+                    else:
+                        if user.device_id != device_id:
+                            return JsonResponse(
+                                {
+                                    "success": False,
+                                    "message": "Device not recognized. Please contact admin.",
+                                },
+                                status=status.HTTP_403_FORBIDDEN,
+                            )
+                    user.last_login = now()
+                    # Prevent re-hashing password on save
+                    user._password_changed = False
+                    user.save(update_fields=["device_id", "last_login"])
                     return JsonResponse(
                         {
-                            "success": False,
-                            "message": "Device not recognized. Please contact admin.",
-                        },
-                        status=status.HTTP_403_FORBIDDEN,
+                            "success": True,
+                            "auth_token": user.auth_token,
+                            "driver_id": user.driver.id,
+                        }
                     )
-            user.last_login = now()
-            user.save()
+                else:
+                    print("Password check failed")
+                    return JsonResponse(
+                        {"success": False, "message": "Invalid credentials."},
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
+            else:
+                print("User not found")
+                return JsonResponse(
+                    {"success": False, "message": "Invalid credentials."},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+        except json.JSONDecodeError:
             return JsonResponse(
-                {
-                    "success": True,
-                    "auth_token": user.auth_token,
-                    "driver_id": user.driver.id,
-                }
+                {"success": False, "message": "Invalid JSON data."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        else:
+        except Exception as e:
+            print(f"Login error: {str(e)}")
             return JsonResponse(
-                {"success": False, "message": "Invalid credentials."},
-                status=status.HTTP_401_UNAUTHORIZED,
+                {"success": False, "message": "Internal server error."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
     else:
         return JsonResponse(

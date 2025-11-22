@@ -196,9 +196,9 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST = "smtp-relay.brevo.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "bahon.transport@gmail.com"
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")  # Paste the 16-char app password here
-DEFAULT_FROM_EMAIL = "Bahon Transport <bahon.transport@gmail.com>"
+EMAIL_HOST_USER = env("BREVO_LOGIN")
+EMAIL_HOST_PASSWORD = env("BREVO_SMTP_KEY")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Bahon Transport <bahon.transport@gmail.com>")
