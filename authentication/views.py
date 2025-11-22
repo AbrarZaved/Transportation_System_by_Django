@@ -11,9 +11,15 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework import status
 from authentication.email import create_email_otp, send_otp_email
-from authentication.models import EmailOTP, Preference, Student
+from authentication.models import EmailOTP, Preference, Student, Review
 from threading import Thread
 from authentication.models import DriverAuth
+from transit_hub.models import Bus, Route
+from django.core.paginator import Paginator
+from django.db.models import Avg
+from transit_hub.models import Bus, Route
+from django.core.paginator import Paginator
+from django.db.models import Avg
 
 
 def student_wrapper(view_func):
@@ -373,3 +379,286 @@ def driver_login(request):
             {"success": False, "message": "Invalid request method."},
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
+
+
+def reviews_page(request):
+    """Display all reviews with filtering and pagination"""
+    username = request.session.get("username")
+
+    # Get filter parameters
+    filter_type = request.GET.get("filter", "all")  # all, bus, route
+    search_query = request.GET.get("search", "")
+
+    # Base queryset
+    reviews = Review.objects.select_related("student", "bus", "route").filter(
+        is_approved=True
+    )
+
+    # Apply filters
+    if filter_type == "bus":
+        reviews = reviews.filter(bus__isnull=False)
+    elif filter_type == "route":
+        reviews = reviews.filter(route__isnull=False)
+
+    # Apply search
+    if search_query:
+        reviews = reviews.filter(
+            models.Q(bus__bus_name__icontains=search_query)
+            | models.Q(route__route_name__icontains=search_query)
+            | models.Q(student__name__icontains=search_query)
+            | models.Q(comment__icontains=search_query)
+        )
+
+    # Calculate statistics
+    all_reviews = Review.objects.filter(is_approved=True)
+    total_reviews = all_reviews.count()
+    average_rating = (
+        all_reviews.aggregate(avg_rating=models.Avg("rating"))["avg_rating"] or 0
+    )
+
+    # Get current month's reviews
+    from datetime import datetime
+
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+    monthly_reviews = all_reviews.filter(
+        created_at__month=current_month, created_at__year=current_year
+    ).count()
+
+    # Pagination
+    paginator = Paginator(reviews, 12)  # 12 reviews per page
+    page_number = request.GET.get("page")
+    reviews_page_obj = paginator.get_page(page_number)
+
+    # Get user's reviews if logged in
+    user_reviews = []
+    if username:
+        try:
+            student = Student.objects.get(username=username)
+            user_reviews = Review.objects.filter(student=student).order_by(
+                "-created_at"
+            )[:5]
+        except Student.DoesNotExist:
+            pass
+
+    # Get available buses and routes for the review form
+    buses = Bus.objects.all().order_by("bus_name")
+    routes = Route.objects.filter(route_status=True).order_by("route_name")
+
+    # Serialize data for JavaScript
+    buses_data = [
+        {"id": bus.id, "bus_name": bus.bus_name, "bus_tag": bus.bus_tag}
+        for bus in buses
+    ]
+
+    routes_data = [{"id": route.id, "route_name": route.route_name} for route in routes]
+
+    context = {
+        "reviews": reviews_page_obj,
+        "user_reviews": user_reviews,
+        "buses": json.dumps(buses_data),
+        "routes": json.dumps(routes_data),
+        "filter_type": filter_type,
+        "search_query": search_query,
+        "is_authenticated": bool(username),
+        "total_reviews": total_reviews,
+        "average_rating": average_rating,
+        "monthly_reviews": monthly_reviews,
+    }
+
+    return render(request, "authentication/reviews.html", context)
+
+
+@csrf_exempt
+def submit_review(request):
+    """Submit a new review"""
+    if request.method != "POST":
+        return JsonResponse(
+            {"success": False, "message": "Invalid request method"}, status=405
+        )
+
+    username = request.session.get("username")
+    if not username:
+        return JsonResponse(
+            {"success": False, "message": "Please login to submit a review"}, status=401
+        )
+
+    try:
+        student = Student.objects.get(username=username)
+    except Student.DoesNotExist:
+        return JsonResponse(
+            {"success": False, "message": "Student not found"}, status=404
+        )
+
+    try:
+        data = json.loads(request.body)
+        review_type = data.get("review_type")  # 'bus', 'route', or 'both'
+        bus_id = data.get("bus_id")
+        route_id = data.get("route_id")
+        rating = data.get("rating")
+        comment = data.get("comment", "").strip()
+
+        # Validation
+        if not all([review_type, rating, comment]):
+            return JsonResponse(
+                {"success": False, "message": "All fields are required"}, status=400
+            )
+
+        if review_type not in ["bus", "route", "both"]:
+            return JsonResponse(
+                {"success": False, "message": "Invalid review type"}, status=400
+            )
+
+        # Validate IDs based on review type
+        if review_type == "bus" and not bus_id:
+            return JsonResponse(
+                {"success": False, "message": "Bus ID is required for bus review"},
+                status=400,
+            )
+        elif review_type == "route" and not route_id:
+            return JsonResponse(
+                {"success": False, "message": "Route ID is required for route review"},
+                status=400,
+            )
+        elif review_type == "both" and (not bus_id or not route_id):
+            return JsonResponse(
+                {"success": False, "message": "Both Bus ID and Route ID are required"},
+                status=400,
+            )
+
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                raise ValueError
+        except (ValueError, TypeError):
+            return JsonResponse(
+                {"success": False, "message": "Rating must be between 1 and 5"},
+                status=400,
+            )
+
+        if len(comment) < 10:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": "Comment must be at least 10 characters long",
+                },
+                status=400,
+            )
+
+        # Get target objects
+        bus = None
+        route = None
+
+        if review_type in ["bus", "both"] and bus_id:
+            try:
+                bus = Bus.objects.get(id=bus_id)
+            except Bus.DoesNotExist:
+                return JsonResponse(
+                    {"success": False, "message": "Bus not found"}, status=404
+                )
+
+        if review_type in ["route", "both"] and route_id:
+            try:
+                route = Route.objects.get(id=route_id)
+            except Route.DoesNotExist:
+                return JsonResponse(
+                    {"success": False, "message": "Route not found"}, status=404
+                )
+
+        # Check if review already exists
+        existing_review = Review.objects.filter(
+            student=student, bus=bus, route=route
+        ).first()
+
+        if existing_review:
+            # Update existing review
+            existing_review.rating = rating
+            existing_review.comment = comment
+            existing_review.save()
+            message = "Review updated successfully!"
+        else:
+            # Create new review
+            Review.objects.create(
+                student=student, bus=bus, route=route, rating=rating, comment=comment
+            )
+            message = "Review submitted successfully!"
+
+        return JsonResponse({"success": True, "message": message})
+
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"success": False, "message": "Invalid JSON data"}, status=400
+        )
+    except Exception as e:
+        return JsonResponse(
+            {"success": False, "message": "Internal server error"}, status=500
+        )
+
+
+@csrf_exempt
+def delete_review(request, review_id):
+    """Delete a user's review"""
+    if request.method != "DELETE":
+        return JsonResponse(
+            {"success": False, "message": "Invalid request method"}, status=405
+        )
+
+    username = request.session.get("username")
+    if not username:
+        return JsonResponse(
+            {"success": False, "message": "Please login to delete review"}, status=401
+        )
+
+    try:
+        student = Student.objects.get(username=username)
+        review = Review.objects.get(id=review_id, student=student)
+        review.delete()
+        return JsonResponse(
+            {"success": True, "message": "Review deleted successfully!"}
+        )
+    except Student.DoesNotExist:
+        return JsonResponse(
+            {"success": False, "message": "Student not found"}, status=404
+        )
+    except Review.DoesNotExist:
+        return JsonResponse(
+            {"success": False, "message": "Review not found"}, status=404
+        )
+    except Exception as e:
+        return JsonResponse(
+            {"success": False, "message": "Internal server error"}, status=500
+        )
+
+
+def get_reviews_for_carousel(request):
+    """Get recent reviews for the index page carousel"""
+    reviews = (
+        Review.objects.select_related("student", "bus", "route")
+        .filter(
+            is_approved=True, rating__gte=4  # Only show 4+ star reviews in carousel
+        )
+        .order_by("-created_at")[:6]
+    )
+
+    reviews_data = []
+    for review in reviews:
+        target_name = review.bus.bus_name if review.bus else review.route.route_name
+        target_type = "Bus" if review.bus else "Route"
+
+        reviews_data.append(
+            {
+                "id": review.id,
+                "student_name": review.student.name,
+                "target_name": target_name,
+                "target_type": target_type,
+                "rating": review.rating,
+                "comment": (
+                    review.comment[:100] + "..."
+                    if len(review.comment) > 100
+                    else review.comment
+                ),
+                "created_at": review.created_at.strftime("%B %d, %Y"),
+            }
+        )
+
+    return JsonResponse({"reviews": reviews_data})

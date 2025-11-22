@@ -4,7 +4,7 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from social_core.backends import username
-from authentication.models import Preference, Student
+from authentication.models import Preference, Student, Review
 from transit_hub.models import Route
 from django.http import JsonResponse
 import json
@@ -55,12 +55,45 @@ def index(request):
             ]
         )
 
+    # Get recent reviews for carousel (4+ star reviews)
+    try:
+        recent_reviews = (
+            Review.objects.select_related("student", "bus", "route")
+            .filter(is_approved=True, rating__gte=4)
+            .order_by("-created_at")[:6]
+        )
+
+        reviews_data = []
+        for review in recent_reviews:
+            target_name = review.bus.bus_name if review.bus else review.route.route_name
+            target_type = "Bus" if review.bus else "Route"
+
+            reviews_data.append(
+                {
+                    "id": review.id,
+                    "student_name": review.student.name,
+                    "target_name": target_name,
+                    "target_type": target_type,
+                    "rating": review.rating,
+                    "comment": (
+                        review.comment[:100] + "..."
+                        if len(review.comment) > 100
+                        else review.comment
+                    ),
+                    "created_at": review.created_at.strftime("%B %d, %Y"),
+                }
+            )
+    except Exception as e:
+        # Fallback if Review model doesn't exist or there's an error
+        reviews_data = []
+
     return render(
         request,
         "transit_hub/index.html",
         {
             "preferences": preferences,
             "popular_routes": data,
+            "recent_reviews": reviews_data,
             "google_maps_api_key": settings.GOOGLE_MAPS_API_KEY,
         },
     )

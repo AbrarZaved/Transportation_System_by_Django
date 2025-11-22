@@ -18,4 +18,10 @@ urlpatterns = [
     path("get_history", csrf_exempt(views.get_history), name="get_history"),
     path("delete_history/<int:id>/", views.delete_history, name="delete_history"),
     path("error/", views.social_auth_error, name="social_auth_error"),
+    path("reviews/", views.reviews_page, name="reviews"),
+    path("submit_review/", csrf_exempt(views.submit_review), name="submit_review"),
+    path("delete_review/<int:review_id>/", views.delete_review, name="delete_review"),
+    path(
+        "api/reviews_carousel/", views.get_reviews_for_carousel, name="reviews_carousel"
+    ),
 ]

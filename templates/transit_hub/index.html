@@ -1,253 +1,666 @@
-{% extends 'kits/main.html' %}
-{% load static %}
+{% extends 'kits/main.html' %} {% load static %} {% block content %}
+<!-- Hero Section -->
+<!-- Popular Routes Section -->
+<!-- Loading Screen -->
 
-{% block content %}
-  <!-- Hero Section -->
-  <!-- Popular Routes Section -->
-  <!-- Loading Screen -->
-
-  <section class="bg-white py-16">
-    <div id="loading-screen" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50 hidden">
-      <div class="flex flex-col items-center justify-center min-h-screen">
-        <img src="{% static 'img/bus_3.gif' %}" alt="Loading..." class="w-32 h-32 mb-4 mx-auto" />
-      </div>
+<section class="bg-white py-16">
+  <div
+    id="loading-screen"
+    class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50 hidden"
+  >
+    <div class="flex flex-col items-center justify-center min-h-screen">
+      <img
+        src="{% static 'img/bus_3.gif' %}"
+        alt="Loading..."
+        class="w-32 h-32 mb-4 mx-auto"
+      />
     </div>
-    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
-      <!-- 🔍 Search Area -->
-      <div class="bg-gray-100 rounded-xl p-8 shadow-lg">
-        <h2 class="text-3xl font-bold text-gray-800 mb-4">Where do you want to go?</h2>
-        <p class="text-gray-600 mb-6">Search your destination or browse popular routes</p>
-        {% if request.session.is_student_authenticated %}
-          <div class="mb-6">
-            <h3 class="mb-4 text-base font-medium text-gray-900">Select Departure Time</h3>
-            <div id="time-filter-group" class="flex flex-wrap gap-3">
-              <button type="button" data-time="all" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition focus:outline-none border-slate-500 text-slate-600 bg-slate-50">All</button>
-              <button type="button" data-time="11:00" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition">11:00 AM</button>
-              <button type="button" data-time="13:00" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition">1:00 PM</button>
-              <button type="button" data-time="16:00" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition">4:00 PM</button>
-              <button type="button" data-time="18:00" class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition">6:00 PM</button>
-            </div>
-          </div>
-        {% else %}
-          <div class="mb-6 px-4 py-3 bg-yellow-50 border border-yellow-200 text-yellow-700 text-sm rounded-md">
-            <button id="login-button" class="font-medium text-blue-700 hover:underline">Login</button> to filter by departure time
-          </div>
-        {% endif %}
-        <div class="mb-6">
-          
+  </div>
+  <div
+    class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10 items-start"
+  >
+    <!-- 🔍 Search Area -->
+    <div class="bg-gray-100 rounded-xl p-8 shadow-lg">
+      <h2 class="text-3xl font-bold text-gray-800 mb-4">
+        Where do you want to go?
+      </h2>
+      <p class="text-gray-600 mb-6">
+        Search your destination or browse popular routes
+      </p>
+      {% if request.session.is_student_authenticated %}
+      <div class="mb-6">
+        <h3 class="mb-4 text-base font-medium text-gray-900">
+          Select Departure Time
+        </h3>
+        <div id="time-filter-group" class="flex flex-wrap gap-3">
+          <button
+            type="button"
+            data-time="all"
+            class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition focus:outline-none border-slate-500 text-slate-600 bg-slate-50"
+          >
+            All
+          </button>
+          <button
+            type="button"
+            data-time="11:00"
+            class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition"
+          >
+            11:00 AM
+          </button>
+          <button
+            type="button"
+            data-time="13:00"
+            class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition"
+          >
+            1:00 PM
+          </button>
+          <button
+            type="button"
+            data-time="16:00"
+            class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition"
+          >
+            4:00 PM
+          </button>
+          <button
+            type="button"
+            data-time="18:00"
+            class="time-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-slate-600 transition"
+          >
+            6:00 PM
+          </button>
         </div>
-        <form id="searchForm" class="space-y-4">
-          <div>
-            <h3 class="mb-4 text-base font-medium text-gray-900">Select Trip Type</h3>
-            <ul class="grid grid-cols-2 gap-3 w-full">
-              <li>
-                <input type="radio" id="to-dsc" name="trip-type" value="To DSC" checked class="hidden peer" />
-                <label for="to-dsc" class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-slate-600 hover:bg-slate-50 peer-checked:border-pink-600 peer-checked:text-slate-600 transition text-sm">
-                  <div class="block">
-                    <div class="font-semibold">To DSC</div>
-                    <div class="text-xs text-gray-500">Ending your trip at DSC</div>
-                  </div>
-                  <svg class="w-4 h-4 ms-2 rtl:rotate-180 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10" aria-hidden="true">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
-                  </svg>
-                </label>
-              </li>
-              <li>
-                <input type="radio" id="from-dsc" name="trip-type" value="From DSC" class="hidden peer"  required />
-                <label for="from-dsc" class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-slate-600 hover:bg-slate-50 peer-checked:text-slate-600 peer-checked:border-pink-600 transition text-sm">
-                  <div class="block">
-                    <div class="font-semibold">From DSC</div>
-                    <div class="text-xs text-gray-500">Starting your trip from DSC</div>
-                  </div>
-                  <svg class="w-4 h-4 ms-2 rtl:rotate-180 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10" aria-hidden="true">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
-                  </svg>
-                </label>
-              </li>
-
-              
-            </ul>
-          </div>
-          {% if request.session.is_student_authenticated %}
-            {% if preferences %}
-              <h4 class="text-sm font-semibold text-gray-600 mb-2 border-blue-600">Recently Searched</h4>
-            {% endif %}
-            <div class="flex flex-wrap md:flex-nowrap md:space-x-2 overflow-x-auto space-x-2 scrollbar-hide" id="recent-searches">
-              <!-- Sample tags - replace with dynamic values if needed -->
-              {% for preference in preferences %}
-                <span name="recent_searches" class="bg-white border border-blue-600 text-slate-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-slate-50 transition">{{ preference.searched_locations|title }}</span>
-              {% endfor %}
-            </div>
-          {% endif %}
-          <div class="relative">
-            <input type="text" id="place" name="place" placeholder="From which place to DSC?" aria-label="Enter your destination" class="w-full px-4 py-3 pl-10 rounded-md border border-blue-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800" required autocomplete="off" />
-            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zM7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 2.2-2.5 5.67-5 8.5C9.5 14.67 7 11.2 7 9z" />
-              <circle cx="12" cy="9" r="2.5" />
-            </svg>
-            <!-- Dropdown container -->
-            <div id="autocomplete-dropdown" class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-50 max-h-60 overflow-y-auto hidden">
-              <!-- Loading indicator -->
-              <div id="autocomplete-loading" class="px-4 py-3 text-gray-500 text-sm hidden">
-                <div class="flex items-center">
-                  <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Searching...
-                </div>
-              </div>
-              <!-- No results message -->
-              <div id="autocomplete-no-results" class="px-4 py-3 text-gray-500 text-sm hidden">
-                No destinations found
-              </div>
-              <!-- Results list -->
-              <ul id="autocomplete-results" class="py-1">
-                <!-- Dynamic results will be inserted here -->
-              </ul>
-            </div>
-          </div>
-          <div>
-            <span id="place-error" class="block mt-2 text-sm font-medium text-red-500 transition-opacity duration-200"></span>
-          </div>
-
-          <button type="submit" id="search" class="w-full bg-blue-600 hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600 text-white font-semibold py-3 rounded-md transition">Search</button>
-        </form>
       </div>
-      <!-- 🚍 Popular Routes -->
-      <div>
-        <h3 class="text-2xl font-bold text-gray-800 mb-6">Popular Routes</h3>
-        <div class="space-y-4" id="route-list">
-          {% for place, buses in popular_routes.items %}
-            <div class="route-card bg-white border border-gray-200 rounded-xl shadow-sm p-5 hover:shadow-md transition cursor-pointer hover:scale-[1.02]">
-              <div class="flex justify-between items-center">
-                <div>
-                  <h4 class="text-lg font-semibold text-gray-700">DSC -> {{ place|title }}</h4>
-                  {% if buses %}
-                    {% if request.session.is_student_authenticated %}
-                      <p class="text-sm text-gray-500">
-                        Next Departure: {{ buses.0.1 }} · <!-- Optionally add time diff -->
-                      </p>
-                    {% else %}
-                      <p class="text-sm text-gray-500">Log in to see detailed information</p>
-                    {% endif %}
-                  {% else %}
-                    <p class="text-sm text-gray-500">No scheduled buses</p>
-                  {% endif %}
+      {% else %}
+      <div
+        class="mb-6 px-4 py-3 bg-yellow-50 border border-yellow-200 text-yellow-700 text-sm rounded-md"
+      >
+        <button
+          id="login-button"
+          class="font-medium text-blue-700 hover:underline"
+        >
+          Login
+        </button>
+        to filter by departure time
+      </div>
+      {% endif %}
+      <div class="mb-6"></div>
+      <form id="searchForm" class="space-y-4">
+        <div>
+          <h3 class="mb-4 text-base font-medium text-gray-900">
+            Select Trip Type
+          </h3>
+          <ul class="grid grid-cols-2 gap-3 w-full">
+            <li>
+              <input
+                type="radio"
+                id="to-dsc"
+                name="trip-type"
+                value="To DSC"
+                checked
+                class="hidden peer"
+              />
+              <label
+                for="to-dsc"
+                class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-slate-600 hover:bg-slate-50 peer-checked:border-pink-600 peer-checked:text-slate-600 transition text-sm"
+              >
+                <div class="block">
+                  <div class="font-semibold">To DSC</div>
+                  <div class="text-xs text-gray-500">
+                    Ending your trip at DSC
+                  </div>
                 </div>
-                <div>
-                  {% if buses %}
-                    <span class="inline-flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">Available</span>
-                  {% else %}
-                    <span class="inline-flex items-center bg-red-100 text-red-800 text-sm font-medium px-3 py-1 rounded-full" id="unavailable">Unavailable</span>
-                  {% endif %}
+                <svg
+                  class="w-4 h-4 ms-2 rtl:rotate-180 text-slate-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 14 10"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M1 5h12m0 0L9 1m4 4L9 9"
+                  />
+                </svg>
+              </label>
+            </li>
+            <li>
+              <input
+                type="radio"
+                id="from-dsc"
+                name="trip-type"
+                value="From DSC"
+                class="hidden peer"
+                required
+              />
+              <label
+                for="from-dsc"
+                class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-slate-600 hover:bg-slate-50 peer-checked:text-slate-600 peer-checked:border-pink-600 transition text-sm"
+              >
+                <div class="block">
+                  <div class="font-semibold">From DSC</div>
+                  <div class="text-xs text-gray-500">
+                    Starting your trip from DSC
+                  </div>
                 </div>
-              </div>
-              {% if buses %}
-                <div class="bus-details mt-4 border-t border-gray-100 pt-3 overflow-hidden transition-all duration-500 ease-in-out" style="height: 0;">
-                  <ul class="mt-2 space-y-2 text-sm text-gray-600">
-                  <ul>
-                    {% if buses %}
-                      {% for bus_name, departure in buses %}
-                        <li>
-                          <div class="flex justify-between text-sm text-gray-600">
-                            <span>🚌 {{ bus_name }}</span>
-                            {% if request.session.is_student_authenticated %}
-                              <span>{{ departure }}</span>
-                            {% endif %}
-                          </div>
-                        </li>
-                      {% endfor %}
-
-                      {% if not request.session.is_student_authenticated %}
-                        <li class="text-sm text-gray-500 italic mt-2">Log in to see departure time</li>
-                      {% endif %}
-                    {% else %}
-                      <li>No buses available.</li>
-                    {% endif %}
-                  </ul>
-
-                  </ul>
-                </div>
-              {% endif %}
-            </div>
+                <svg
+                  class="w-4 h-4 ms-2 rtl:rotate-180 text-slate-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 14 10"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M1 5h12m0 0L9 1m4 4L9 9"
+                  />
+                </svg>
+              </label>
+            </li>
+          </ul>
+        </div>
+        {% if request.session.is_student_authenticated %} {% if preferences %}
+        <h4 class="text-sm font-semibold text-gray-600 mb-2 border-blue-600">
+          Recently Searched
+        </h4>
+        {% endif %}
+        <div
+          class="flex flex-wrap md:flex-nowrap md:space-x-2 overflow-x-auto space-x-2 scrollbar-hide"
+          id="recent-searches"
+        >
+          <!-- Sample tags - replace with dynamic values if needed -->
+          {% for preference in preferences %}
+          <span
+            name="recent_searches"
+            class="bg-white border border-blue-600 text-slate-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-slate-50 transition"
+            >{{ preference.searched_locations|title }}</span
+          >
           {% endfor %}
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Results Section -->
-  <section id="results" class="search-results">
-    <!-- Dynamic results will be injected here -->
-  </section>
-
-  <!-- Scroll to Top Button -->
-  <button id="scrollToTopBtn" title="Top" class="fixed bottom-6 right-6 z-40 bg-slate-600 hover:bg-slate-700 text-white rounded-full p-2 shadow opacity-0 pointer-events-none">
-    <svg class="w-5 h-5" viewBox="0 0 20 20" fill="none">
-      <path d="M10 15V5M10 5l-5 5M10 5l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    </svg>
-  </button>
-  <!-- Toast Notification -->
-  
-  {% include "kits/message.html" %}
-
-  <!-- Hero Carousel Section -->
-  <section class="relative bg-gray-100 py-8">
-    <div class="max-w-7xl mx-auto px-6">
-      <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Our Transportation Services</h2>
-      <div id="hero-carousel" class="relative w-full overflow-hidden rounded-xl shadow-lg">
-        <!-- Carousel wrapper -->
-        <div class="relative h-64 md:h-96">
-          <!-- Item 1 -->
-          <div class="carousel-item absolute inset-0 transition-opacity duration-700 ease-in-out opacity-100">
-            <img src="{% static 'img/caraousal1.jpg' %}" class="block w-full h-full object-cover" alt="Transportation Service 1">
-            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-              <div class="text-center text-white px-4">
-                <h3 class="text-2xl md:text-4xl font-bold mb-2">Fast & Reliable Transportation</h3>
-                <p class="text-sm md:text-lg">Your journey starts here with our modern fleet</p>
+        {% endif %}
+        <div class="relative">
+          <input
+            type="text"
+            id="place"
+            name="place"
+            placeholder="From which place to DSC?"
+            aria-label="Enter your destination"
+            class="w-full px-4 py-3 pl-10 rounded-md border border-blue-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800"
+            required
+            autocomplete="off"
+          />
+          <svg
+            class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zM7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 2.2-2.5 5.67-5 8.5C9.5 14.67 7 11.2 7 9z"
+            />
+            <circle cx="12" cy="9" r="2.5" />
+          </svg>
+          <!-- Dropdown container -->
+          <div
+            id="autocomplete-dropdown"
+            class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-50 max-h-60 overflow-y-auto hidden"
+          >
+            <!-- Loading indicator -->
+            <div
+              id="autocomplete-loading"
+              class="px-4 py-3 text-gray-500 text-sm hidden"
+            >
+              <div class="flex items-center">
+                <svg
+                  class="animate-spin -ml-1 mr-3 h-4 w-4 text-gray-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Searching...
               </div>
             </div>
+            <!-- No results message -->
+            <div
+              id="autocomplete-no-results"
+              class="px-4 py-3 text-gray-500 text-sm hidden"
+            >
+              No destinations found
+            </div>
+            <!-- Results list -->
+            <ul id="autocomplete-results" class="py-1">
+              <!-- Dynamic results will be inserted here -->
+            </ul>
           </div>
-          <!-- Item 2 -->
-          <div class="carousel-item absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0">
-            <img src="{% static 'img/caraousal2.jpg' %}" class="block w-full h-full object-cover" alt="Transportation Service 2">
-            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-              <div class="text-center text-white px-4">
-                <h3 class="text-2xl md:text-4xl font-bold mb-2">Comfortable & Safe Travel</h3>
-                <p class="text-sm md:text-lg">Experience comfort and safety on every trip</p>
+        </div>
+        <div>
+          <span
+            id="place-error"
+            class="block mt-2 text-sm font-medium text-red-500 transition-opacity duration-200"
+          ></span>
+        </div>
+
+        <button
+          type="submit"
+          id="search"
+          class="w-full bg-blue-600 hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600 text-white font-semibold py-3 rounded-md transition"
+        >
+          Search
+        </button>
+      </form>
+    </div>
+    <!-- 🚍 Popular Routes -->
+    <div>
+      <h3 class="text-2xl font-bold text-gray-800 mb-6">Popular Routes</h3>
+      <div class="space-y-4" id="route-list">
+        {% for place, buses in popular_routes.items %}
+        <div
+          class="route-card bg-white border border-gray-200 rounded-xl shadow-sm p-5 hover:shadow-md transition cursor-pointer hover:scale-[1.02]"
+        >
+          <div class="flex justify-between items-center">
+            <div>
+              <h4 class="text-lg font-semibold text-gray-700">
+                DSC -> {{ place|title }}
+              </h4>
+              {% if buses %} {% if request.session.is_student_authenticated %}
+              <p class="text-sm text-gray-500">
+                Next Departure: {{ buses.0.1 }} ·
+                <!-- Optionally add time diff -->
+              </p>
+              {% else %}
+              <p class="text-sm text-gray-500">
+                Log in to see detailed information
+              </p>
+              {% endif %} {% else %}
+              <p class="text-sm text-gray-500">No scheduled buses</p>
+              {% endif %}
+            </div>
+            <div>
+              {% if buses %}
+              <span
+                class="inline-flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full"
+                >Available</span
+              >
+              {% else %}
+              <span
+                class="inline-flex items-center bg-red-100 text-red-800 text-sm font-medium px-3 py-1 rounded-full"
+                id="unavailable"
+                >Unavailable</span
+              >
+              {% endif %}
+            </div>
+          </div>
+          {% if buses %}
+          <div
+            class="bus-details mt-4 border-t border-gray-100 pt-3 overflow-hidden transition-all duration-500 ease-in-out"
+            style="height: 0"
+          >
+            <ul class="mt-2 space-y-2 text-sm text-gray-600">
+              <ul>
+                {% if buses %} {% for bus_name, departure in buses %}
+                <li>
+                  <div class="flex justify-between text-sm text-gray-600">
+                    <span>🚌 {{ bus_name }}</span>
+                    {% if request.session.is_student_authenticated %}
+                    <span>{{ departure }}</span>
+                    {% endif %}
+                  </div>
+                </li>
+                {% endfor %} {% if not request.session.is_student_authenticated %}
+                <li class="text-sm text-gray-500 italic mt-2">
+                  Log in to see departure time
+                </li>
+                {% endif %} {% else %}
+                <li>No buses available.</li>
+                {% endif %}
+              </ul>
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Results Section -->
+<section id="results" class="search-results">
+  <!-- Dynamic results will be injected here -->
+</section>
+
+<!-- Scroll to Top Button -->
+<button
+  id="scrollToTopBtn"
+  title="Top"
+  class="fixed bottom-6 right-6 z-40 bg-slate-600 hover:bg-slate-700 text-white rounded-full p-2 shadow opacity-0 pointer-events-none"
+>
+  <svg class="w-5 h-5" viewBox="0 0 20 20" fill="none">
+    <path
+      d="M10 15V5M10 5l-5 5M10 5l5 5"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+</button>
+<!-- Toast Notification -->
+
+{% include "kits/message.html" %}
+
+<!-- Student Reviews Section -->
+{% if recent_reviews %}
+<section class="bg-gray-50 py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-gray-800 mb-4">What Students Say</h2>
+      <p class="text-gray-600 max-w-2xl mx-auto">
+        Real experiences from our student community
+      </p>
+      <a
+        href="{% url 'reviews' %}"
+        class="inline-flex items-center mt-4 text-blue-600 hover:text-blue-800 font-medium"
+      >
+        View All Reviews
+        <svg
+          class="w-4 h-4 ml-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          ></path>
+        </svg>
+      </a>
+    </div>
+
+    <div id="reviews-carousel" class="relative overflow-hidden">
+      <div
+        class="reviews-wrapper flex transition-transform duration-500 ease-in-out"
+      >
+        {% for review in recent_reviews %}
+        <div class="review-slide flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-4">
+          <div
+            class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300 h-full"
+          >
+            <div class="flex items-center mb-4">
+              <div
+                class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4"
+              >
+                <span class="text-blue-600 font-semibold text-lg"
+                  >{{ review.student_name|first|upper }}</span
+                >
               </div>
+              <div class="flex-1">
+                <h4 class="font-semibold text-gray-800">
+                  {{ review.student_name }}
+                </h4>
+                <div class="flex items-center mt-1">
+                  {% for star in "12345" %} {% if forloop.counter <= review.rating %}
+                  <svg
+                    class="w-4 h-4 text-yellow-400 fill-current"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"
+                    />
+                  </svg>
+                  {% else %}
+                  <svg
+                    class="w-4 h-4 text-gray-300 fill-current"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"
+                    />
+                  </svg>
+                  {% endif %} {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <span
+                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {% if review.target_type == 'Bus' %}bg-blue-100 text-blue-800{% else %}bg-green-100 text-green-800{% endif %}"
+              >
+                {% if review.target_type == 'Bus' %}
+                <svg
+                  class="w-3 h-3 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M4 4a2 2 0 00-2 2v6h16V6a2 2 0 00-2-2H4zM2 14a2 2 0 002 2h12a2 2 0 002-2v-2H2v2z"
+                  />
+                </svg>
+                {% else %}
+                <svg
+                  class="w-3 h-3 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                {% endif %} {{ review.target_name }}
+              </span>
+            </div>
+
+            <p class="text-gray-600 text-sm leading-relaxed mb-3">
+              {{ review.comment }}
+            </p>
+
+            <div class="text-xs text-gray-500">{{ review.created_at }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Navigation buttons -->
+      {% if recent_reviews|length > 3 %}
+      <button
+        id="reviews-prev"
+        class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-all duration-300 z-10"
+      >
+        <svg
+          class="w-5 h-5 text-gray-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+      </button>
+      <button
+        id="reviews-next"
+        class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-all duration-300 z-10"
+      >
+        <svg
+          class="w-5 h-5 text-gray-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          ></path>
+        </svg>
+      </button>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Hero Carousel Section -->
+<section class="relative bg-gray-100 py-8">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">
+      Our Transportation Services
+    </h2>
+    <div
+      id="hero-carousel"
+      class="relative w-full overflow-hidden rounded-xl shadow-lg"
+    >
+      <!-- Carousel wrapper -->
+      <div class="relative h-64 md:h-96">
+        <!-- Item 1 -->
+        <div
+          class="carousel-item absolute inset-0 transition-opacity duration-700 ease-in-out opacity-100"
+        >
+          <img
+            src="{% static 'img/caraousal1.jpg' %}"
+            class="block w-full h-full object-cover"
+            alt="Transportation Service 1"
+          />
+          <div
+            class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center"
+          >
+            <div class="text-center text-white px-4">
+              <h3 class="text-2xl md:text-4xl font-bold mb-2">
+                Fast & Reliable Transportation
+              </h3>
+              <p class="text-sm md:text-lg">
+                Your journey starts here with our modern fleet
+              </p>
             </div>
           </div>
         </div>
-        
-        <!-- Slider indicators -->
-        <div class="absolute z-30 flex space-x-3 -translate-x-1/2 bottom-5 left-1/2">
-          <button type="button" class="carousel-indicator w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all duration-300 active" aria-current="true" aria-label="Slide 1" data-slide="0"></button>
-          <button type="button" class="carousel-indicator w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all duration-300" aria-current="false" aria-label="Slide 2" data-slide="1"></button>
+        <!-- Item 2 -->
+        <div
+          class="carousel-item absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0"
+        >
+          <img
+            src="{% static 'img/caraousal2.jpg' %}"
+            class="block w-full h-full object-cover"
+            alt="Transportation Service 2"
+          />
+          <div
+            class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center"
+          >
+            <div class="text-center text-white px-4">
+              <h3 class="text-2xl md:text-4xl font-bold mb-2">
+                Comfortable & Safe Travel
+              </h3>
+              <p class="text-sm md:text-lg">
+                Experience comfort and safety on every trip
+              </p>
+            </div>
+          </div>
         </div>
-        
-        <!-- Slider controls -->
-        <button type="button" class="carousel-prev absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-direction="prev">
-          <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none transition-all duration-300">
-            <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
-            </svg>
-            <span class="sr-only">Previous</span>
-          </span>
-        </button>
-        <button type="button" class="carousel-next absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-direction="next">
-          <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none transition-all duration-300">
-            <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-            </svg>
-            <span class="sr-only">Next</span>
-          </span>
-        </button>
       </div>
-    </div>
-  </section>
 
-  {% include 'kits/footer.html' %}
-  <script type="module" src="{% static 'js/main.js' %}"></script>
+      <!-- Slider indicators -->
+      <div
+        class="absolute z-30 flex space-x-3 -translate-x-1/2 bottom-5 left-1/2"
+      >
+        <button
+          type="button"
+          class="carousel-indicator w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all duration-300 active"
+          aria-current="true"
+          aria-label="Slide 1"
+          data-slide="0"
+        ></button>
+        <button
+          type="button"
+          class="carousel-indicator w-3 h-3 rounded-full bg-white bg-opacity-50 hover:bg-opacity-100 transition-all duration-300"
+          aria-current="false"
+          aria-label="Slide 2"
+          data-slide="1"
+        ></button>
+      </div>
+
+      <!-- Slider controls -->
+      <button
+        type="button"
+        class="carousel-prev absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+        data-direction="prev"
+      >
+        <span
+          class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none transition-all duration-300"
+        >
+          <svg
+            class="w-4 h-4 text-white"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 6 10"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 1 1 5l4 4"
+            />
+          </svg>
+          <span class="sr-only">Previous</span>
+        </span>
+      </button>
+      <button
+        type="button"
+        class="carousel-next absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+        data-direction="next"
+      >
+        <span
+          class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none transition-all duration-300"
+        >
+          <svg
+            class="w-4 h-4 text-white"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 6 10"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m1 9 4-4-4-4"
+            />
+          </svg>
+          <span class="sr-only">Next</span>
+        </span>
+      </button>
+    </div>
+  </div>
+</section>
+
+{% include 'kits/footer.html' %}
+<script type="module" src="{% static 'js/main.js' %}"></script>
 {% endblock %}

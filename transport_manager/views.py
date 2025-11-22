@@ -735,7 +735,7 @@ def trip_complete(request):
     
     # Authenticate driver
     try:
-        driver_auth = DriverAuth.objects.select_related('user').get(auth_token=auth_token)
+        driver_auth = DriverAuth.objects.select_related('driver').get(auth_token=auth_token)
     except DriverAuth.DoesNotExist:
         return JsonResponse(
             {"error": "Invalid authentication token"}, status=status.HTTP_401_UNAUTHORIZED

@@ -68,6 +68,12 @@
             Contact Us
           </a>
         </li>
+        <li>
+          <a href="{% url 'reviews' %}"
+            class="{% if request.resolver_match.url_name == 'reviews' %} hover:text-white border-b-2 border-white {% else %} hover:text-white  {% endif %} focus:outline-none active:outline-none">
+            Reviews
+          </a>
+        </li>
         {% if request.session.is_student_authenticated %}
           <li>
             <a href="{% url 'my_account' %}"
@@ -99,6 +105,7 @@
       <li><a href="{% url 'subscription' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">Subscription</a></li>
       <li><a href="{% url 'about_us' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">About Us</a></li>
       <li><a href="{% url 'contact_us' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">Contact Us</a></li>
+      <li><a href="{% url 'reviews' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">Reviews</a></li>
       {% if request.session.is_student_authenticated %}
         <li><a href="{% url 'my_account' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">My Account</a></li>
       {% else %}

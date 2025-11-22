@@ -27,7 +27,7 @@ async function fetchRoutes(place, tripType, timeFilter = "all") {
   const recentSearchContainer = document.getElementById("recent-searches");
   const loadingSpinner = document.getElementById("loading-screen");
   const results = document.getElementById("results");
-  
+
   let recentSearches = [];
   if (recentSearchContainer) {
     recentSearches = Array.from(recentSearchContainer.children).map((child) =>
@@ -182,17 +182,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (messages) {
     console.log(messages.dataset.message, messages.dataset.messageUsername);
   }
-  
+
   if (messages) {
-    showToast(messages.dataset.message, messages.dataset.messageUsername || null);
+    showToast(
+      messages.dataset.message,
+      messages.dataset.messageUsername || null
+    );
     // Clear stoppages cache on logout
     clearStoppagesCache();
   }
   const studentId = localStorage.getItem("student_id");
   const results = document.getElementById("results");
   results.style.display = "none";
-
-
 
   setupScrollToTop();
   setupTimeFilterButtons();
@@ -508,4 +509,127 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initialize autocomplete
   setupAutocomplete();
+
+  // Initialize reviews carousel
+  initializeReviewsCarousel();
 });
+
+/**
+ * Initialize reviews carousel functionality
+ */
+function initializeReviewsCarousel() {
+  const reviewsCarousel = document.getElementById("reviews-carousel");
+  const reviewsWrapper = reviewsCarousel?.querySelector(".reviews-wrapper");
+  const prevBtn = document.getElementById("reviews-prev");
+  const nextBtn = document.getElementById("reviews-next");
+
+  if (!reviewsCarousel || !reviewsWrapper) return;
+
+  const slides = reviewsWrapper.querySelectorAll(".review-slide");
+  const totalSlides = slides.length;
+  let currentSlide = 0;
+  let slidesToShow = getSlidesToShow();
+
+  // Auto-slide functionality
+  let autoSlideInterval;
+  const autoSlideDelay = 5000; // 5 seconds
+
+  function getSlidesToShow() {
+    if (window.innerWidth >= 1024) return 3; // lg: show 3
+    if (window.innerWidth >= 768) return 2; // md: show 2
+    return 1; // sm: show 1
+  }
+
+  function updateCarousel() {
+    const slideWidth = 100 / slidesToShow;
+    const translateX = -(currentSlide * slideWidth);
+    reviewsWrapper.style.transform = `translateX(${translateX}%)`;
+
+    // Update button states
+    if (prevBtn) {
+      prevBtn.style.opacity = currentSlide === 0 ? "0.5" : "1";
+      prevBtn.disabled = currentSlide === 0;
+    }
+
+    if (nextBtn) {
+      const maxSlide = totalSlides - slidesToShow;
+      nextBtn.style.opacity = currentSlide >= maxSlide ? "0.5" : "1";
+      nextBtn.disabled = currentSlide >= maxSlide;
+    }
+  }
+
+  function nextSlide() {
+    const maxSlide = totalSlides - slidesToShow;
+    if (currentSlide < maxSlide) {
+      currentSlide++;
+      updateCarousel();
+    } else {
+      // Loop back to beginning
+      currentSlide = 0;
+      updateCarousel();
+    }
+  }
+
+  function prevSlide() {
+    if (currentSlide > 0) {
+      currentSlide--;
+      updateCarousel();
+    } else {
+      // Loop to end
+      currentSlide = Math.max(0, totalSlides - slidesToShow);
+      updateCarousel();
+    }
+  }
+
+  function startAutoSlide() {
+    stopAutoSlide();
+    if (totalSlides > slidesToShow) {
+      autoSlideInterval = setInterval(nextSlide, autoSlideDelay);
+    }
+  }
+
+  function stopAutoSlide() {
+    if (autoSlideInterval) {
+      clearInterval(autoSlideInterval);
+      autoSlideInterval = null;
+    }
+  }
+
+  // Event listeners
+  nextBtn?.addEventListener("click", () => {
+    nextSlide();
+    stopAutoSlide();
+    startAutoSlide(); // Restart auto-slide after interaction
+  });
+
+  prevBtn?.addEventListener("click", () => {
+    prevSlide();
+    stopAutoSlide();
+    startAutoSlide(); // Restart auto-slide after interaction
+  });
+
+  // Pause auto-slide on hover
+  reviewsCarousel.addEventListener("mouseenter", stopAutoSlide);
+  reviewsCarousel.addEventListener("mouseleave", startAutoSlide);
+
+  // Handle window resize
+  window.addEventListener("resize", () => {
+    const newSlidesToShow = getSlidesToShow();
+    if (newSlidesToShow !== slidesToShow) {
+      slidesToShow = newSlidesToShow;
+      currentSlide = Math.min(
+        currentSlide,
+        Math.max(0, totalSlides - slidesToShow)
+      );
+      updateCarousel();
+    }
+  });
+
+  // Initialize carousel
+  updateCarousel();
+
+  // Start auto-slide if there are enough slides
+  if (totalSlides > slidesToShow) {
+    startAutoSlide();
+  }
+}
