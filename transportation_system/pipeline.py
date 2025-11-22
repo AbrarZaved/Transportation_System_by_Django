@@ -26,6 +26,7 @@ def create_or_update_student(backend, user, details, *args, **kwargs):
         email=email, defaults={"name": full_name}
     )
     if created:
+        request.session["username"] = student.username
         otp = create_email_otp(student)
         email_thread = Thread(target=send_otp_email, args=(student, otp))
         email_thread.daemon = True  # Thread will die when main program exits
