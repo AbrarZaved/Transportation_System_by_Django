@@ -312,18 +312,17 @@ window.openTrackModal = function (busName, routeName) {
       </div>
       
       <div class="p-4">
-        <div class="mb-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <div class="flex items-center gap-2 mb-2">
-            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-            <span class="text-green-800 font-semibold">Bus is currently moving</span>
+        <div class="mb-3 p-3 border rounded-lg">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-gray-800 font-semibold">Status:</span>
+            <span id="busStatus" class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+              <i class="fas fa-spinner fa-spin mr-2"></i>Checking...
+            </span>
           </div>
           <div class="text-sm text-gray-700">
-            <p class="mb-2"><span class="font-medium">Current Location:</span> <span id="currentLocation">Loading...</span></p>
             <div class="grid grid-cols-2 gap-x-4 gap-y-1">
-              <p><span class="font-medium">Latitude:</span> <span id="currentLat">0.000000</span></p>
-              <p><span class="font-medium">Longitude:</span> <span id="currentLng">0.000000</span></p>
-              <p><span class="font-medium">Speed:</span> <span id="currentSpeed">0</span> km/h</p>
-              <p><span class="font-medium">Last Updated:</span> <span id="lastUpdated">--</span></p>
+              <p><span class="font-medium">Coordinates:</span> <span id="busCoordinates">Loading...</span></p>
+              <p><span class="font-medium">Last Updated:</span> <span id="lastUpdate">--</span></p>
             </div>
           </div>
         </div>
@@ -345,19 +344,18 @@ window.openTrackModal = function (busName, routeName) {
             </div>
         </div>
         
-        <div class="grid grid-cols-2 gap-4 mt-3">
-          <div class="bg-blue-50 p-3 rounded-lg text-center">
-            <p class="text-2xl font-bold text-blue-600" id="etaMinutes">--</p>
-            <p class="text-sm text-gray-600">ETA (minutes)</p>
-          </div>
-          <div class="bg-green-50 p-3 rounded-lg text-center">
-            <p class="text-2xl font-bold text-green-600" id="distanceKm">--</p>
-            <p class="text-sm text-gray-600">Distance (km)</p>
-          </div>
+        <div class="mt-3 p-3 bg-blue-50 rounded-lg">
+          <p class="text-sm text-blue-800 text-center">
+            <i class="fas fa-satellite-dish mr-1"></i>
+            Real GPS tracking updates every 5 seconds
+          </p>
         </div>
       </div>
       
-      <div class="bg-gray-50 px-4 py-3 flex justify-end">
+      <div class="bg-gray-50 px-4 py-3 flex justify-between items-center">
+        <button onclick="refreshBusLocation('${busName}')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+          <i class="fas fa-sync-alt mr-2"></i>Refresh
+        </button>
         <button onclick="closeTrackModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition">
           Close Tracking
         </button>
@@ -368,9 +366,12 @@ window.openTrackModal = function (busName, routeName) {
   document.body.appendChild(modal);
   document.body.style.overflow = "hidden";
 
-  // Initialize map with dynamic API loading
+  // Store bus name for tracking
+  window.currentTrackingBus = busName;
+
+  // Initialize real GPS tracking
   setTimeout(() => {
-    initializeTrackingMapWithApiLoad();
+    initializeRealBusTracking(busName);
   }, 100);
 };
 
@@ -379,51 +380,219 @@ window.closeTrackModal = function () {
   if (modal) {
     modal.remove();
     document.body.style.overflow = "";
-    // Stop tracking
-    if (window.trackingInterval) {
-      clearInterval(window.trackingInterval);
-      window.trackingInterval = null;
+    // Stop real GPS tracking
+    if (window.busTrackingInterval) {
+      clearInterval(window.busTrackingInterval);
+      window.busTrackingInterval = null;
     }
     // Reset tracking variables
-    trackingMap = null;
-    busMarker = null;
-    currentIndex = 0;
-    progress = 0;
+    window.currentTrackingBus = null;
+    if (window.busTrackingMap) {
+      window.busTrackingMap = null;
+    }
+    if (window.busMarker) {
+      window.busMarker = null;
+    }
   }
 };
 
-// Demo route coordinates (simulating a bus route in Dhaka with more realistic stops)
-const demoRoute = [
-  {
-    lat: 23.8103,
-    lng: 90.4125,
-    location: "Daffodil Smart City",
-    isOrigin: true,
-  },
-  { lat: 23.815, lng: 90.42, location: "Kalabagan", estimatedTime: "2 min" },
-  { lat: 23.82, lng: 90.425, location: "Green Road", estimatedTime: "5 min" },
-  { lat: 23.825, lng: 90.43, location: "Panthapath", estimatedTime: "8 min" },
-  {
-    lat: 23.83,
-    lng: 90.435,
-    location: "Karwan Bazar",
-    estimatedTime: "12 min",
-  },
-  { lat: 23.835, lng: 90.44, location: "Tejgaon", estimatedTime: "15 min" },
-  { lat: 23.84, lng: 90.445, location: "Farmgate", estimatedTime: "18 min" },
-  {
-    lat: 23.845,
-    lng: 90.45,
-    location: "Bijoy Sarani",
-    estimatedTime: "22 min",
-    isDestination: true,
-  },
-];
+// Real GPS tracking variables
+window.busTrackingMap = null;
+window.busMarker = null;
+window.busTrackingInterval = null;
+window.currentTrackingBus = null;
+window.lastKnownPosition = null;
 
-let trackingMap = null;
-let busMarker = null;
-let currentIndex = 0;
-let progress = 0;
+// Initialize real bus tracking
+function initializeRealBusTracking(busName) {
+  // Set up map first
+  initializeTrackingMapWithApiLoad();
+
+  // Start fetching real GPS data immediately
+  fetchBusLocation(busName);
+
+  // Set up interval to fetch GPS data every 5 seconds
+  if (window.busTrackingInterval) {
+    clearInterval(window.busTrackingInterval);
+  }
+
+  window.busTrackingInterval = setInterval(() => {
+    fetchBusLocation(busName);
+  }, 5000);
+}
+
+// Function to fetch real bus location from API
+async function fetchBusLocation(busName) {
+  try {
+    const response = await fetch(`/api/bus_location/${busName}/`);
+    const result = await response.json();
+    console.log(result);
+
+    if (result.success && result.data) {
+      const data = result.data;
+      updateBusLocationOnMap(
+        data.latitude,
+        data.longitude,
+        data.is_moving,
+        data.last_updated
+      );
+      updateTrackingUI({
+        status: "success",
+        latitude: data.latitude,
+        longitude: data.longitude,
+        is_moving: data.is_moving,
+        last_updated: data.last_updated,
+        timestamp: data.timestamp,
+      });
+    } else {
+      // No location data available
+      updateTrackingUI({
+        status: "error",
+        message: "No location data available",
+        is_moving: false,
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching bus location:", error);
+    updateTrackingUI({
+      status: "error",
+      message: "Error fetching location data",
+      is_moving: false,
+    });
+  }
+}
+
+// Update bus location on map
+function updateBusLocationOnMap(lat, lng, isMoving, lastUpdated) {
+  if (window.busTrackingMap && window.googleMapsLoaded) {
+    const position = { lat: parseFloat(lat), lng: parseFloat(lng) };
+
+    // Create or update bus marker
+    if (window.busMarker) {
+      window.busMarker.setPosition(position);
+    } else {
+      window.busMarker = new google.maps.Marker({
+        position: position,
+        map: window.busTrackingMap,
+        title: `Bus: ${window.currentTrackingBus}`,
+        icon: {
+          url:
+            "data:image/svg+xml;charset=UTF-8," +
+            encodeURIComponent(`
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="16" cy="16" r="14" fill="${
+                isMoving ? "#22C55E" : "#EF4444"
+              }" stroke="white" stroke-width="2"/>
+              <path d="M8 12h16v8H8v-8zm2 2v4h12v-4H10zm-2-4h16v2H8V10zm4 12h8v2h-8v-2z" fill="white"/>
+            </svg>
+          `),
+          scaledSize: new google.maps.Size(32, 32),
+          anchor: new google.maps.Point(16, 16),
+        },
+      });
+    }
+
+    // Center map on bus location
+    window.busTrackingMap.setCenter(position);
+    window.busTrackingMap.setZoom(15);
+  }
+
+  // Store last known position
+  window.lastKnownPosition = { lat, lng, isMoving, lastUpdated };
+}
+
+// Update tracking UI with status information
+function updateTrackingUI(data) {
+  const statusElement = document.getElementById("busStatus");
+  const coordinatesElement = document.getElementById("busCoordinates");
+  const lastUpdateElement = document.getElementById("lastUpdate");
+
+  if (statusElement) {
+    if (data.status === "success" && data.latitude && data.longitude) {
+      statusElement.innerHTML = `
+        <i class="fas fa-circle ${
+          data.is_moving ? "text-green-500" : "text-red-500"
+        } mr-2"></i>
+        ${data.is_moving ? "Moving" : "Stationary"}
+      `;
+      statusElement.className = `px-3 py-1 rounded-full text-sm font-medium ${
+        data.is_moving
+          ? "bg-green-100 text-green-800"
+          : "bg-red-100 text-red-800"
+      }`;
+    } else {
+      statusElement.innerHTML = `
+        <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+        No GPS Data
+      `;
+      statusElement.className =
+        "px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800";
+    }
+  }
+
+  if (coordinatesElement && data.latitude && data.longitude) {
+    coordinatesElement.textContent = `${parseFloat(data.latitude).toFixed(
+      6
+    )}, ${parseFloat(data.longitude).toFixed(6)}`;
+  } else if (coordinatesElement) {
+    coordinatesElement.textContent = "No coordinates available";
+  }
+
+  if (lastUpdateElement) {
+    if (data.timestamp) {
+      const updateTime = new Date(data.timestamp).toLocaleString();
+      lastUpdateElement.textContent = updateTime;
+    } else if (data.last_updated) {
+      // Fallback to last_updated if timestamp is not available
+      lastUpdateElement.textContent = data.last_updated;
+    } else {
+      lastUpdateElement.textContent = "Never";
+    }
+  }
+
+  // Update demo coordinates if in demo mode
+  const demoCoordinatesElement = document.getElementById("demoCoordinates");
+  if (demoCoordinatesElement) {
+    if (data.latitude && data.longitude) {
+      demoCoordinatesElement.innerHTML = `
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-xs text-gray-500">Lat:</span>
+          <span class="font-medium">${parseFloat(data.latitude).toFixed(
+            6
+          )}</span>
+        </div>
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-xs text-gray-500">Lng:</span>
+          <span class="font-medium">${parseFloat(data.longitude).toFixed(
+            6
+          )}</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-500">Status:</span>
+          <span class="font-medium ${
+            data.is_moving ? "text-green-600" : "text-red-600"
+          }">
+            ${data.is_moving ? "Moving" : "Stationary"}
+          </span>
+        </div>
+      `;
+    } else {
+      demoCoordinatesElement.innerHTML = `
+        <div class="text-center text-yellow-600">
+          <i class="fas fa-exclamation-triangle mb-1"></i>
+          <div>No GPS data available</div>
+        </div>
+      `;
+    }
+  }
+}
+
+// Refresh bus location manually
+window.refreshBusLocation = function (busName) {
+  if (busName && typeof fetchBusLocation === "function") {
+    fetchBusLocation(busName);
+  }
+};
 
 // Function to dynamically load Google Maps API if not already loaded
 function initializeTrackingMapWithApiLoad() {
@@ -515,20 +684,20 @@ function initializeTrackingMap() {
             <div id="demoCoordinates" class="text-sm font-mono text-gray-700 bg-gray-50 p-2 rounded"></div>
           </div>
           <div class="mt-4 text-xs text-gray-500">
-            <p>🚌 Simulating real-time bus movement</p>
+            <p>🚌 Real-time GPS tracking (API fallback mode)</p>
           </div>
         </div>
       </div>
     `;
-    // Start the demo tracking without map
-    startDemoTracking();
     return;
   }
 
-  // Initialize the map centered on first route point
-  trackingMap = new google.maps.Map(mapContainer, {
+  // Initialize the map with default center (Dhaka, Bangladesh)
+  const defaultCenter = { lat: 23.8103, lng: 90.4125 };
+
+  window.busTrackingMap = new google.maps.Map(mapContainer, {
     zoom: 13,
-    center: demoRoute[0],
+    center: defaultCenter,
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     styles: [
       {
@@ -542,195 +711,10 @@ function initializeTrackingMap() {
     ],
   });
 
-  // Create custom bus marker with enhanced styling
-  busMarker = new google.maps.Marker({
-    position: demoRoute[0],
-    map: trackingMap,
-    title: "Bus Location",
-    icon: {
-      path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
-      scale: 1.5,
-      fillColor: "#1e40af",
-      fillOpacity: 1,
-      strokeColor: "#ffffff",
-      strokeWeight: 2,
-      anchor: new google.maps.Point(12, 24),
-    },
-    zIndex: 1000,
-  });
-
-  // Draw the route path with enhanced styling
-  const routePath = new google.maps.Polyline({
-    path: demoRoute,
-    geodesic: true,
-    strokeColor: "#3b82f6",
-    strokeOpacity: 0.8,
-    strokeWeight: 6,
-  });
-  routePath.setMap(trackingMap);
-
-  // Add enhanced markers for each stop
-  demoRoute.forEach((stop, index) => {
-    const isOrigin = stop.isOrigin;
-    const isDestination = stop.isDestination;
-
-    const marker = new google.maps.Marker({
-      position: stop,
-      map: trackingMap,
-      title:
-        stop.location +
-        (stop.estimatedTime ? ` (ETA: ${stop.estimatedTime})` : ""),
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: isOrigin || isDestination ? 8 : 6,
-        fillColor: isOrigin ? "#10b981" : isDestination ? "#ef4444" : "#6b7280",
-        fillOpacity: 0.9,
-        strokeColor: "#ffffff",
-        strokeWeight: 2,
-      },
-    });
-
-    // Add info windows for stops
-    const infoWindow = new google.maps.InfoWindow({
-      content: `
-        <div class="p-2">
-          <h3 class="font-semibold text-gray-800">${stop.location}</h3>
-          ${
-            stop.estimatedTime
-              ? `<p class="text-sm text-gray-600">ETA: ${stop.estimatedTime}</p>`
-              : ""
-          }
-          ${
-            isOrigin
-              ? '<p class="text-xs text-green-600">Starting Point</p>'
-              : ""
-          }
-          ${
-            isDestination
-              ? '<p class="text-xs text-red-600">Final Destination</p>'
-              : ""
-          }
-        </div>
-      `,
-    });
-
-    marker.addListener("click", () => {
-      infoWindow.open(trackingMap, marker);
-    });
-  });
-
-  // Start the tracking animation
-  startDemoTracking();
+  console.log("Google Maps initialized successfully for tracking");
 }
 
-function startDemoTracking() {
-  let startTime = Date.now();
-
-  window.trackingInterval = setInterval(() => {
-    const current = demoRoute[currentIndex];
-    const next = demoRoute[(currentIndex + 1) % demoRoute.length];
-
-    // Interpolate between current and next point
-    const lat = current.lat + (next.lat - current.lat) * progress;
-    const lng = current.lng + (next.lng - current.lng) * progress;
-
-    // Calculate more realistic speed and timing
-    const elapsedMinutes = (Date.now() - startTime) / 60000;
-    const currentSpeed =
-      15 + Math.sin(elapsedMinutes * 0.5) * 10 + Math.random() * 8; // Variable speed 15-33 km/h
-    const remainingStops = demoRoute.length - currentIndex - 1;
-    const estimatedETA = remainingStops * 2.5 + (1 - progress) * 2.5; // ~2.5 min per stop
-    const totalDistance = 8.5 - (currentIndex + progress) * 1.1; // Decreasing distance
-
-    // Update UI elements
-    const latElement = document.getElementById("currentLat");
-    const lngElement = document.getElementById("currentLng");
-    const locationElement = document.getElementById("currentLocation");
-    const speedElement = document.getElementById("currentSpeed");
-    const lastUpdatedElement = document.getElementById("lastUpdated");
-    const etaElement = document.getElementById("etaMinutes");
-    const distanceElement = document.getElementById("distanceKm");
-
-    if (latElement) latElement.textContent = lat.toFixed(6);
-    if (lngElement) lngElement.textContent = lng.toFixed(6);
-    if (locationElement) {
-      const locationText =
-        progress > 0.7
-          ? `Approaching ${next.location}`
-          : `At ${current.location}`;
-      locationElement.textContent = locationText;
-    }
-    if (speedElement) speedElement.textContent = currentSpeed.toFixed(1);
-    if (lastUpdatedElement)
-      lastUpdatedElement.textContent = new Date().toLocaleTimeString();
-    if (etaElement)
-      etaElement.textContent = Math.max(0, estimatedETA).toFixed(0);
-    if (distanceElement)
-      distanceElement.textContent = Math.max(0, totalDistance).toFixed(1);
-
-    // Update demo coordinates display for non-map mode
-    const demoCoordinatesElement = document.getElementById("demoCoordinates");
-    if (demoCoordinatesElement) {
-      const nextStopInfo = next.estimatedTime
-        ? ` (ETA: ${next.estimatedTime})`
-        : "";
-      demoCoordinatesElement.innerHTML = `
-        <div class="space-y-2">
-          <div><span class="text-green-600">Current:</span> ${
-            current.location
-          }</div>
-          <div><span class="text-purple-600">Next Stop:</span> ${
-            next.location
-          }${nextStopInfo}</div>
-          <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
-            <div><span class="text-blue-600">Lat:</span> ${lat.toFixed(6)}</div>
-            <div><span class="text-blue-600">Lng:</span> ${lng.toFixed(6)}</div>
-            <div><span class="text-orange-600">Speed:</span> ${currentSpeed.toFixed(
-              1
-            )} km/h</div>
-            <div><span class="text-indigo-600">ETA:</span> ${Math.max(
-              0,
-              estimatedETA
-            ).toFixed(0)} min</div>
-          </div>
-          <div class="text-xs text-gray-500">Updated: ${new Date().toLocaleTimeString()}</div>
-        </div>
-      `;
-    }
-
-    // Update marker position on map if available
-    if (busMarker) {
-      const newPosition = { lat, lng };
-      busMarker.setPosition(newPosition);
-
-      // Smooth pan to bus location
-      if (trackingMap) {
-        trackingMap.panTo(newPosition);
-      }
-
-      // Update marker title with current info
-      busMarker.setTitle(
-        `Bus Location - Speed: ${currentSpeed.toFixed(
-          1
-        )} km/h - ETA: ${Math.max(0, estimatedETA).toFixed(0)} min`
-      );
-    }
-
-    // Update progress with variable speed
-    const progressIncrement = 0.08 + Math.random() * 0.04; // Variable progress 0.08-0.12
-    progress += progressIncrement;
-
-    if (progress >= 1) {
-      progress = 0;
-      currentIndex = (currentIndex + 1) % demoRoute.length;
-
-      // Reset start time when completing full route
-      if (currentIndex === 0) {
-        startTime = Date.now();
-      }
-    }
-  }, 2500); // Update every 2.5 seconds for more realistic tracking
-}
+// Real GPS tracking functions are now implemented above
 
 export function renderNoRoutesFound(text) {
   const modalId = "noRoutesModal";

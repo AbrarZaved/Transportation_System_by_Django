@@ -3,23 +3,27 @@ from django.core.cache import cache
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 from social_core.backends import username
 from authentication.models import Preference, Student, Review
-from transit_hub.models import Route
+from transit_hub.models import Route, Bus
 from django.http import JsonResponse
 import json
 from transit_hub.serializer import RouteSerializer, RouteStoppageSerializer
-from transport_manager.models import Transportation_schedules
+from transport_manager.models import Transportation_schedules, LocationData
 from .models import RouteStoppage as RouteStoppageModel
 from django.db.models import F
 from django.shortcuts import render
+from datetime import datetime, timedelta
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import localtime
 from django.db.models import Q
 from .models import Stoppage
 from django.conf import settings
 
 
-  # e.g., 08:30 AM
+# e.g., 08:30 AM
 
 
 def index(request):
@@ -30,7 +34,7 @@ def index(request):
 
     data = cache.get("popular_routes")
     if data is None:
-        places = ["dhanmondi", "mirpur", "uttara","tongi"]
+        places = ["dhanmondi", "mirpur", "uttara", "tongi"]
         data = {}
         for place in places:
             schedules = (
@@ -43,7 +47,9 @@ def index(request):
                 .values_list("bus__bus_name", "departure_time")
                 .distinct()
             )
-            formatted = [(bus, (departure.strftime("%I:%M %p"))) for bus, departure in schedules]
+            formatted = [
+                (bus, (departure.strftime("%I:%M %p"))) for bus, departure in schedules
+            ]
             data[place] = formatted
 
         cache.set("popular_routes", data, timeout=60)
@@ -291,6 +297,76 @@ def view_bus(request):
     }
 
     return render(request, "transit_hub/view_bus.html", context)
+
+
+@csrf_exempt
+def get_bus_location(request, bus_name):
+    """Get real-time location data for a specific bus"""
+    if request.method != "GET":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+    try:
+        # Get the bus
+        bus = Bus.objects.get(bus_name=bus_name)
+
+        # Get the most recent location data
+        location_data = (
+            LocationData.objects.filter(bus=bus).order_by("-timestamp").first()
+        )
+        if not location_data:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": "No location data found for this bus",
+                    "is_moving": False,
+                }
+            )
+
+        # Check if data is recent (within last 2 minutes)
+        time_threshold = timezone.now() - timedelta(minutes=2)
+        is_recent = location_data.timestamp > time_threshold
+
+        # Check if bus is moving by comparing with previous location
+        is_moving = False
+        previous_location = (
+            LocationData.objects.filter(bus=bus, timestamp__lt=location_data.timestamp)
+            .order_by("-timestamp")
+            .first()
+        )
+
+        if previous_location and is_recent:
+            # Calculate distance between current and previous location
+            lat_diff = abs(location_data.latitude - previous_location.latitude)
+            lng_diff = abs(location_data.longitude - previous_location.longitude)
+            # If coordinates changed by more than 0.0001 degrees (~10 meters), consider it moving
+            is_moving = (lat_diff > 0.0001) or (lng_diff > 0.0001)
+
+        return JsonResponse(
+            {
+                "success": True,
+                "data": {
+                    "latitude": location_data.latitude,
+                    "longitude": location_data.longitude,
+                    "timestamp": location_data.timestamp.isoformat(),
+                    "last_updated": location_data.timestamp.strftime("%I:%M %p"),
+                    "is_recent": is_recent,
+                    "is_moving": is_moving,
+                    "bus_name": bus.bus_name,
+                    "driver_name": (
+                        location_data.driver.name if location_data.driver else "Unknown"
+                    ),
+                },
+            }
+        )
+
+    except Bus.DoesNotExist:
+        return JsonResponse(
+            {"success": False, "message": "Bus not found", "is_moving": False}
+        )
+    except Exception as e:
+        return JsonResponse(
+            {"success": False, "message": "Internal server error", "is_moving": False}
+        )
 
 
 def get_all_stoppages(request):

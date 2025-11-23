@@ -17,11 +17,16 @@ urlpatterns = [
         views.RouteStoppage.as_view(),
         name="route_stoppage",
     ),
-    path("api/route_details/", views.RouteDetails.as_view(), name="route_stoppage"),
+    path("api/route_details/", views.RouteDetails.as_view(), name="route_details"),
     path(
         "api/route_details/<int:id>",
         views.RouteDetails.as_view(),
-        name="route_stoppage",
+        name="route_details_id",
+    ),
+    path(
+        "api/bus_location/<str:bus_name>/",
+        csrf_exempt(views.get_bus_location),
+        name="get_bus_location",
     ),
 ]
 if settings.DEBUG:
