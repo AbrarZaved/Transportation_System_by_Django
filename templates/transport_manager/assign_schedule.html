@@ -53,6 +53,7 @@
             type="radio"
             name="direction"
             value="from_dsc"
+            checked
             class="w-5 h-5 mr-2 accent-indigo-600"
           />
           <span class="text-indigo-800 font-medium">From DSC</span>
@@ -147,20 +148,7 @@
           </div>
 
           <div id="time-list" class="space-y-2 max-h-48 overflow-y-auto">
-            {% for time in times %}
-            <label
-              class="flex items-center p-2 bg-gray-50 rounded border hover:bg-indigo-50 cursor-pointer text-sm"
-            >
-              <input
-                type="checkbox"
-                name="times"
-                value="{{ time }}"
-                class="mr-2 accent-indigo-600"
-                onchange="limitTimeSelection(this)"
-              />
-              <span class="text-gray-700 font-medium">{{ time }}</span>
-            </label>
-            {% endfor %}
+            <!-- Times will be populated dynamically based on direction -->
           </div>
         </div>
 
@@ -288,8 +276,8 @@
   <!-- Simple Client-Side Filtering -->
 </body>
 <script>
-  // Store route data in JavaScript variables for initial caching
-  const routeData = {
+  // Initialize data and pass to assign_schedule.js
+  const templateRouteData = {
     from_dsc: [
       {% for route in from_dsc_routes %}
       {
@@ -308,11 +296,24 @@
     ]
   };
 
-  // Clear any existing route cache when page loads to ensure fresh data
-  if (typeof Storage !== "undefined") {
-    localStorage.removeItem('from_dsc_routes_cache');
-    localStorage.removeItem('to_dsc_routes_cache');
-  }
+  const templateTimeData = {
+    from_dsc: [
+      {% for time in times %}
+      "{{ time }}"{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ],
+    to_dsc: [
+      "07:00 AM",
+      "10:00 AM"
+    ]
+  };
+
+  // Initialize data when page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.initializeData) {
+      window.initializeData(templateRouteData, templateTimeData);
+    }
+  });
 </script>
 <script src="{% static 'js/assign_schedule.js' %}" type="module"></script>
 {% endblock %}

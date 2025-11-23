@@ -1,0 +1,409 @@
+{% extends 'admin_kits/base.html' %} {% block title %}Add Notice - DIU
+Transportation Admin{% endblock %} {% block content %}
+<div class="max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Notice Management</h1>
+        <p class="mt-2 text-gray-600">Create and manage notices for students</p>
+      </div>
+      <a
+        href="{% url 'view_notices' %}"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4 inline mr-1"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        View All Notices
+      </a>
+    </div>
+  </div>
+
+  <!-- Add Notice Form -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <form method="post" id="noticeForm">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Title -->
+        <div class="md:col-span-2">
+          <label
+            for="title"
+            class="block text-sm font-medium text-gray-700 mb-2"
+            >Notice Title *</label
+          >
+          <input
+            type="text"
+            id="title"
+            name="title"
+            required
+            maxlength="200"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+            placeholder="Enter notice title..."
+          />
+        </div>
+
+        <!-- Notice Type -->
+        <div>
+          <label
+            for="notice_type"
+            class="block text-sm font-medium text-gray-700 mb-2"
+            >Notice Type *</label
+          >
+          <select
+            id="notice_type"
+            name="notice_type"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+          >
+            <option value="">Select Type</option>
+            <option value="info">Information</option>
+            <option value="warning">Warning</option>
+            <option value="urgent">Urgent</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+
+        <!-- Route Selection -->
+        <div>
+          <label
+            for="route"
+            class="block text-sm font-medium text-gray-700 mb-2"
+            >Target Route</label
+          >
+          <div class="relative">
+            <input
+              type="text"
+              id="routeSearch"
+              placeholder="Search routes or leave empty for global notice..."
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              autocomplete="off"
+            />
+            <select id="route" name="route" class="hidden">
+              <option value="">Global Notice (All Routes)</option>
+              {% for route in routes %}
+              <option
+                value="{{ route.id }}"
+                data-name="{{ route.route_name|lower }}"
+              >
+                {{ route.route_name }}
+              </option>
+              {% endfor %}
+            </select>
+            <div
+              id="routeDropdown"
+              class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 hidden max-h-48 overflow-y-auto"
+            >
+              <div
+                class="p-2 border-b border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer"
+                data-value=""
+              >
+                <div class="text-sm font-medium text-gray-900">
+                  Global Notice
+                </div>
+                <div class="text-xs text-gray-500">Visible to all routes</div>
+              </div>
+              {% for route in routes %}
+              <div
+                class="p-2 border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                data-value="{{ route.id }}"
+                data-name="{{ route.route_name|lower }}"
+              >
+                <div class="text-sm font-medium text-gray-900">
+                  {{ route.route_name }}
+                </div>
+                <div class="text-xs text-gray-500">Route specific notice</div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">
+            Search and select a route or leave empty for global notice
+          </p>
+        </div>
+
+        <!-- Message -->
+        <div class="md:col-span-2">
+          <label
+            for="message"
+            class="block text-sm font-medium text-gray-700 mb-2"
+            >Message *</label
+          >
+          <textarea
+            id="message"
+            name="message"
+            required
+            rows="4"
+            maxlength="500"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"
+            placeholder="Enter detailed message..."
+          ></textarea>
+          <div class="flex justify-between items-center mt-1">
+            <p class="text-xs text-gray-500">Maximum 500 characters</p>
+            <span id="charCount" class="text-xs text-gray-500">0/500</span>
+          </div>
+        </div>
+
+        <!-- Expires At -->
+        <div>
+          <label
+            for="expires_at"
+            class="block text-sm font-medium text-gray-700 mb-2"
+            >Expiration Date</label
+          >
+          <input
+            type="datetime-local"
+            id="expires_at"
+            name="expires_at"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+          />
+          <p class="text-xs text-gray-500 mt-1">
+            Leave blank for permanent notice
+          </p>
+        </div>
+
+        <!-- Is Active -->
+        <div class="flex items-center">
+          <div class="flex items-center h-full">
+            <input
+              type="checkbox"
+              id="is_active"
+              name="is_active"
+              checked
+              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+            />
+            <label
+              for="is_active"
+              class="ml-2 text-sm font-medium text-gray-700"
+            >
+              Active Notice
+            </label>
+          </div>
+          <p class="text-xs text-gray-500 ml-6">
+            Notice will be visible to students when active
+          </p>
+        </div>
+      </div>
+
+      <!-- Preview Section -->
+      <div
+        id="noticePreview"
+        class="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50 hidden"
+      >
+        <h3 class="text-sm font-medium text-gray-700 mb-2">Preview:</h3>
+        <div id="previewContent" class="border rounded-lg p-3 bg-white">
+          <!-- Preview content will be inserted here -->
+        </div>
+      </div>
+
+      <!-- Submit Buttons -->
+      <div
+        class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200"
+      >
+        <button
+          type="button"
+          id="previewBtn"
+          class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition"
+        >
+          Preview
+        </button>
+        <button
+          type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition"
+        >
+          Create Notice
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Recent Notices -->
+  {% if recent_notices %}
+  <div class="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Notices</h2>
+    <div class="space-y-3">
+      {% for notice in recent_notices %}
+      <div
+        class="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
+      >
+        <div class="flex items-center space-x-3">
+          <div class="flex-shrink-0">
+            {% if notice.notice_type == 'urgent' %}
+            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+            {% elif notice.notice_type == 'warning' %}
+            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+            {% elif notice.notice_type == 'maintenance' %}
+            <div class="w-3 h-3 bg-gray-500 rounded-full"></div>
+            {% else %}
+            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+            {% endif %}
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-900">
+              {{ notice.title }}
+            </h3>
+            <p class="text-xs text-gray-500">
+              {{ notice.route.route_name|default:"Global" }} • {{
+              notice.created_at|date:"M d, Y" }}
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          {% if notice.is_active %}
+          <span
+            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+            >Active</span
+          >
+          {% else %}
+          <span
+            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+            >Inactive</span
+          >
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const messageTextarea = document.getElementById("message");
+    const charCount = document.getElementById("charCount");
+    const previewBtn = document.getElementById("previewBtn");
+    const noticePreview = document.getElementById("noticePreview");
+    const previewContent = document.getElementById("previewContent");
+    const routeSearch = document.getElementById("routeSearch");
+    const routeSelect = document.getElementById("route");
+    const routeDropdown = document.getElementById("routeDropdown");
+
+    // Route search functionality
+    let selectedRoute = "";
+
+    routeSearch.addEventListener("input", function () {
+      const query = this.value.toLowerCase();
+      const dropdown = routeDropdown;
+      const items = dropdown.querySelectorAll("[data-value]");
+
+      dropdown.classList.remove("hidden");
+
+      items.forEach((item) => {
+        const routeName = item.getAttribute("data-name");
+        if (
+          !query ||
+          (routeName && routeName.includes(query)) ||
+          item.getAttribute("data-value") === ""
+        ) {
+          item.style.display = "block";
+        } else {
+          item.style.display = "none";
+        }
+      });
+    });
+
+    routeSearch.addEventListener("focus", function () {
+      routeDropdown.classList.remove("hidden");
+    });
+
+    // Route selection
+    routeDropdown.addEventListener("click", function (e) {
+      const item = e.target.closest("[data-value]");
+      if (item) {
+        const value = item.getAttribute("data-value");
+        const text = item.querySelector(".text-sm").textContent;
+
+        routeSearch.value = value ? text : "";
+        routeSelect.value = value;
+        routeDropdown.classList.add("hidden");
+        selectedRoute = text;
+      }
+    });
+
+    // Hide dropdown when clicking outside
+    document.addEventListener("click", function (e) {
+      if (
+        !routeSearch.contains(e.target) &&
+        !routeDropdown.contains(e.target)
+      ) {
+        routeDropdown.classList.add("hidden");
+      }
+    });
+
+    // Character count
+    messageTextarea.addEventListener("input", function () {
+      const count = this.value.length;
+      charCount.textContent = `${count}/500`;
+      if (count > 450) {
+        charCount.classList.add("text-red-500");
+      } else {
+        charCount.classList.remove("text-red-500");
+      }
+    });
+
+    // Preview functionality
+    previewBtn.addEventListener("click", function () {
+      const title = document.getElementById("title").value;
+      const noticeType = document.getElementById("notice_type").value;
+      const message = document.getElementById("message").value;
+      const routeText = selectedRoute || "Global Notice";
+
+      if (!title || !noticeType || !message) {
+        alert("Please fill in all required fields to preview");
+        return;
+      }
+
+      const typeColors = {
+        info: "border-blue-200 bg-blue-50",
+        warning: "border-yellow-200 bg-yellow-50",
+        urgent: "border-red-200 bg-red-50",
+        maintenance: "border-gray-200 bg-gray-50",
+      };
+
+      const typeLabels = {
+        info: "Information",
+        warning: "Warning",
+        urgent: "Urgent",
+        maintenance: "Maintenance",
+      };
+
+      previewContent.innerHTML = `
+      <div class="border ${typeColors[noticeType]} rounded-lg p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <div class="w-3 h-3 bg-blue-500 rounded-full mt-1"></div>
+          </div>
+          <div class="ml-3">
+            <div class="flex items-center space-x-2 mb-1">
+              <h4 class="text-sm font-semibold text-gray-800">${title}</h4>
+              <span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">${typeLabels[noticeType]}</span>
+            </div>
+            <p class="text-sm text-gray-600">${message}</p>
+            <p class="text-xs text-gray-500 mt-2">Target: ${routeText}</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+      noticePreview.classList.remove("hidden");
+      noticePreview.scrollIntoView({ behavior: "smooth" });
+    });
+
+    // Set minimum datetime to current time
+    const now = new Date();
+    const currentDateTime = now.toISOString().slice(0, 16);
+    document.getElementById("expires_at").min = currentDateTime;
+  });
+</script>
+{% endblock %}

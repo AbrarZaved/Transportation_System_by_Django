@@ -1,6 +1,14 @@
 from django.contrib import admin
 
-from transit_hub.models import Bus, Driver, Helper, Route, RouteStoppage, Stoppage
+from transit_hub.models import (
+    Bus,
+    Driver,
+    Helper,
+    Route,
+    RouteStoppage,
+    Stoppage,
+    Notice,
+)
 
 # Register your models here.
 
@@ -29,6 +37,7 @@ class DriverAdmin(admin.ModelAdmin):
     ]
     list_per_page = 100
 
+
 @admin.register(Helper)
 class HelperAdmin(admin.ModelAdmin):
     list_display = [
@@ -44,6 +53,7 @@ class HelperAdmin(admin.ModelAdmin):
         "phone_number",
     ]
     list_per_page = 100
+
 
 @admin.register(Bus)
 class BusAdmin(admin.ModelAdmin):
@@ -93,3 +103,36 @@ class RouteAdmin(admin.ModelAdmin):
 class StoppageAdmin(admin.ModelAdmin):
     list_display = ["stoppage_name", "stoppage_status", "created_at", "updated_at"]
     search_fields = ["stoppage_name"]
+
+
+@admin.register(Notice)
+class NoticeAdmin(admin.ModelAdmin):
+    list_display = [
+        "title",
+        "notice_type",
+        "route",
+        "is_active",
+        "created_at",
+        "expires_at",
+    ]
+    list_filter = ["notice_type", "is_active", "created_at", "route"]
+    search_fields = ["title", "message"]
+    readonly_fields = ["created_at", "updated_at"]
+    fieldsets = (
+        ("Notice Information", {"fields": ("title", "message", "notice_type")}),
+        (
+            "Targeting",
+            {
+                "fields": ("route",),
+                "description": "Leave route empty for global notice that shows on all routes",
+            },
+        ),
+        ("Status & Timing", {"fields": ("is_active", "expires_at")}),
+        (
+            "Timestamps",
+            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
+        ),
+    )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("route")

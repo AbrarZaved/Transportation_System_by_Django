@@ -572,14 +572,14 @@ def send_location(request):
         return JsonResponse(
             {"error": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED
         )
-    
+
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
         return JsonResponse(
             {"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST
         )
-    
+
     # Validate required fields
     required_fields = ["lat", "lon", "bus_name", "auth_token", "driver_id"]
     missing_fields = [field for field in required_fields if not data.get(field)]
@@ -588,13 +588,13 @@ def send_location(request):
             {"error": f"Missing required fields: {', '.join(missing_fields)}"},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    
+
     lat = data.get("lat")
     lon = data.get("lon")
     bus_name = data.get("bus_name")
     auth_token = data.get("auth_token")
     driver_id = data.get("driver_id")
-    
+
     # Validate latitude and longitude
     try:
         lat = float(lat)
@@ -603,33 +603,37 @@ def send_location(request):
             raise ValueError("Invalid coordinates")
     except (ValueError, TypeError):
         return JsonResponse(
-            {"error": "Invalid latitude or longitude"}, status=status.HTTP_400_BAD_REQUEST
+            {"error": "Invalid latitude or longitude"},
+            status=status.HTTP_400_BAD_REQUEST,
         )
-    
+
     # Authenticate driver
     try:
-        driver_auth = DriverAuth.objects.select_related('driver').get(auth_token=auth_token)
+        driver_auth = DriverAuth.objects.select_related("driver").get(
+            auth_token=auth_token
+        )
     except DriverAuth.DoesNotExist:
         return JsonResponse(
-            {"error": "Invalid authentication token"}, status=status.HTTP_401_UNAUTHORIZED
+            {"error": "Invalid authentication token"},
+            status=status.HTTP_401_UNAUTHORIZED,
         )
-    
+
     try:
         bus = Bus.objects.get(bus_name=bus_name)
         driver = Driver.objects.get(id=driver_id)
-        
+
         # Update or create location data
         LocationData.objects.update_or_create(
             bus=bus,
             driver=driver,
             defaults={"latitude": lat, "longitude": lon, "timestamp": datetime.now()},
         )
-        
+
         return JsonResponse(
             {"status": "success", "message": "Location updated successfully"},
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
-        
+
     except Bus.DoesNotExist:
         return JsonResponse(
             {"error": "Bus not found"}, status=status.HTTP_404_NOT_FOUND
@@ -640,7 +644,8 @@ def send_location(request):
         )
     except Exception as e:
         return JsonResponse(
-            {"error": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            {"error": "Internal server error"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 
@@ -649,7 +654,7 @@ def trips(request, driver_id, auth_token):
         return JsonResponse(
             {"error": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED
         )
-    
+
     # Validate driver_id
     try:
         driver_id = int(driver_id)
@@ -657,55 +662,63 @@ def trips(request, driver_id, auth_token):
         return JsonResponse(
             {"error": "Invalid driver ID"}, status=status.HTTP_400_BAD_REQUEST
         )
-    
+
     # Authenticate driver
     if not auth_token:
         return JsonResponse(
-            {"error": "Authentication token required"}, status=status.HTTP_400_BAD_REQUEST
+            {"error": "Authentication token required"},
+            status=status.HTTP_400_BAD_REQUEST,
         )
-    
+
     try:
-        driver_auth = DriverAuth.objects.select_related('driver').get(auth_token=auth_token)
+        driver_auth = DriverAuth.objects.select_related("driver").get(
+            auth_token=auth_token
+        )
     except DriverAuth.DoesNotExist:
         return JsonResponse(
-            {"error": "Invalid authentication token"}, status=status.HTTP_401_UNAUTHORIZED
+            {"error": "Invalid authentication token"},
+            status=status.HTTP_401_UNAUTHORIZED,
         )
-    
+
     try:
         current_day = localtime().strftime("%A").lower()
         current_time = localtime().time()
-        
+
         # Optimized query with select_related to reduce database hits
-        trips_queryset = Transportation_schedules.objects.select_related(
-            'route', 'bus', 'driver'
-        ).filter(
-            driver_id=driver_id,
-            days__contains=current_day,
-            schedule_status=True,
-            departure_time__gte=current_time  # Only future trips
-        ).order_by('departure_time')
-        
+        trips_queryset = (
+            Transportation_schedules.objects.select_related("route", "bus", "driver")
+            .filter(
+                driver_id=driver_id,
+                days__contains=current_day,
+                schedule_status=True,
+                departure_time__gte=current_time,  # Only future trips
+            )
+            .order_by("departure_time")
+        )
+
         trips_data = []
         for trip in trips_queryset:
-            trips_data.append({
-                "schedule_id": trip.schedule_id,
-                "route_name": trip.route.route_name,
-                "bus_name": trip.bus.bus_name,
-                "bus_tag": trip.bus.bus_tag,
-                "driver_name": trip.driver.name,
-                "departure_time": trip.departure_time.strftime("%H:%M"),
-                "from_dsc": trip.from_dsc,
-                "to_dsc": trip.to_dsc
-            })
-        
+            trips_data.append(
+                {
+                    "schedule_id": trip.schedule_id,
+                    "route_name": trip.route.route_name,
+                    "bus_name": trip.bus.bus_name,
+                    "bus_tag": trip.bus.bus_tag,
+                    "driver_name": trip.driver.name,
+                    "departure_time": trip.departure_time.strftime("%H:%M"),
+                    "from_dsc": trip.from_dsc,
+                    "to_dsc": trip.to_dsc,
+                }
+            )
+
         return JsonResponse(
-            {"trips": trips_data, "count": len(trips_data)}, 
-            status=status.HTTP_200_OK
+            {"trips": trips_data, "count": len(trips_data)}, status=status.HTTP_200_OK
         )
-        
+
     except Exception as e:
         return JsonResponse(
-            {"error": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            {"error": "Internal server error"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 
@@ -715,63 +728,66 @@ def trip_complete(request):
         return JsonResponse(
             {"error": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED
         )
-    
+
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
         return JsonResponse(
             {"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST
         )
-    
+
     schedule_id = data.get("schedule_id")
     auth_token = data.get("auth_token")
-    
+
     # Validate required fields
     if not schedule_id or not auth_token:
         return JsonResponse(
             {"error": "Missing required fields: schedule_id and auth_token"},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    
+
     # Authenticate driver
     try:
-        driver_auth = DriverAuth.objects.select_related('driver').get(auth_token=auth_token)
+        driver_auth = DriverAuth.objects.select_related("driver").get(
+            auth_token=auth_token
+        )
     except DriverAuth.DoesNotExist:
         return JsonResponse(
-            {"error": "Invalid authentication token"}, status=status.HTTP_401_UNAUTHORIZED
+            {"error": "Invalid authentication token"},
+            status=status.HTTP_401_UNAUTHORIZED,
         )
-    
+
     try:
         # Use select_related to optimize the query
         schedule = Transportation_schedules.objects.select_related(
-            'driver', 'route', 'bus'
+            "driver", "route", "bus"
         ).get(schedule_id=schedule_id)
-        
+
         # Verify the authenticated driver owns this trip
         if schedule.driver.id != driver_auth.user.id:
             return JsonResponse(
                 {"error": "Unauthorized: You can only complete your own trips"},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        
+
         # Check if trip is already completed
         if not schedule.schedule_status:
             return JsonResponse(
                 {"error": "Trip already completed"}, status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Use atomic operation to ensure data consistency
 
         with transaction.atomic():
             driver = schedule.driver
             driver.total_trip_completed = F("total_trip_completed") + 1
             driver.total_trip_assigned = F("total_trip_assigned") - 1
-            driver.save(update_fields=['total_trip_completed', 'total_trip_assigned'])
-            
+            driver.save(update_fields=["total_trip_completed", "total_trip_assigned"])
+
             # Mark schedule as completed
             schedule.schedule_status = False
-            schedule.save(update_fields=['schedule_status'])
-        
+            schedule.save(update_fields=["schedule_status"])
+
         return JsonResponse(
             {
                 "status": "success",
@@ -779,17 +795,108 @@ def trip_complete(request):
                 "trip_info": {
                     "route_name": schedule.route.route_name,
                     "bus_tag": schedule.bus.bus_tag,
-                    "departure_time": schedule.departure_time.strftime("%H:%M")
-                }
+                    "departure_time": schedule.departure_time.strftime("%H:%M"),
+                },
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
-        
+
     except Transportation_schedules.DoesNotExist:
         return JsonResponse(
             {"error": "Schedule not found"}, status=status.HTTP_404_NOT_FOUND
         )
     except Exception as e:
         return JsonResponse(
-            {"error": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            {"error": "Internal server error"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+
+@login_required
+def add_notice(request):
+    """Add notice page for admin"""
+    from transit_hub.models import Notice
+    from datetime import datetime
+    from django.utils import timezone
+
+    if request.method == "POST":
+        title = request.POST.get("title")
+        notice_type = request.POST.get("notice_type")
+        message = request.POST.get("message")
+        route_id = request.POST.get("route")
+        expires_at = request.POST.get("expires_at")
+        is_active = request.POST.get("is_active") == "on"
+
+        try:
+            # Get route if specified
+            route = None
+            if route_id:
+                route = Route.objects.get(id=route_id)
+
+            # Parse expiration date
+            expires_at_parsed = None
+            if expires_at:
+                expires_at_parsed = datetime.fromisoformat(expires_at.replace("T", " "))
+                expires_at_parsed = timezone.make_aware(expires_at_parsed)
+
+            # Create notice
+            notice = Notice.objects.create(
+                title=title,
+                message=message,
+                notice_type=notice_type,
+                route=route,
+                expires_at=expires_at_parsed,
+                is_active=is_active,
+            )
+
+            route_name = route.route_name if route else "Global"
+            messages.success(
+                request, f"Notice '{title}' created successfully for {route_name}!"
+            )
+            return redirect("add_notice")
+
+        except Route.DoesNotExist:
+            messages.error(request, "Selected route not found.")
+        except Exception as e:
+            messages.error(request, f"Error creating notice: {str(e)}")
+
+    # Get all routes for dropdown
+    routes = Route.objects.all().order_by("route_name")
+
+    # Get recent notices
+    recent_notices = Notice.objects.all().order_by("-created_at")[:5]
+
+    context = {
+        "routes": routes,
+        "recent_notices": recent_notices,
+    }
+
+    return render(request, "transport_manager/add_notice.html", context)
+
+
+@login_required
+def view_notices(request):
+    """View all notices page"""
+    from transit_hub.models import Notice
+
+    notices = Notice.objects.select_related("route").order_by("-created_at")
+
+    # Get unique routes for filter
+    unique_routes = (
+        Notice.objects.select_related("route")
+        .exclude(route__isnull=True)
+        .values_list("route__route_name", flat=True)
+        .distinct()
+    )
+
+    # Pagination
+    paginator = Paginator(notices, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "notices": page_obj,
+        "unique_routes": unique_routes,
+    }
+
+    return render(request, "transport_manager/view_notices.html", context)

@@ -2,11 +2,80 @@
 import { csrfFetch } from "./api.js";
 import { showToast } from "./utils.js";
 
+// Global variables to store data from template
+let routeData = {};
+let timeData = {};
+
 // Cache keys for localStorage
 const CACHE_KEYS = {
   FROM_DSC_ROUTES: "from_dsc_routes_cache",
   TO_DSC_ROUTES: "to_dsc_routes_cache",
 };
+
+// Initialize data from template
+function initializeData(templateRouteData, templateTimeData) {
+  routeData = templateRouteData;
+  timeData = templateTimeData;
+
+  // Clear any existing caches when page loads to ensure fresh data
+  if (typeof Storage !== "undefined") {
+    localStorage.removeItem("from_dsc_routes_cache");
+    localStorage.removeItem("to_dsc_routes_cache");
+  }
+}
+
+// Function to update times based on direction
+function updateTimesForDirection(direction) {
+  const timeList = document.getElementById("time-list");
+  const times = timeData[direction] || [];
+
+  timeList.innerHTML = "";
+
+  times.forEach((time) => {
+    const label = document.createElement("label");
+    label.className =
+      "flex items-center p-2 bg-gray-50 rounded border hover:bg-indigo-50 cursor-pointer text-sm";
+
+    label.innerHTML = `
+      <input
+        type="checkbox"
+        name="times"
+        value="${time}"
+        class="mr-2 accent-indigo-600"
+        onchange="limitTimeSelection(this)"
+      />
+      <span class="text-gray-700 font-medium">${time}</span>
+    `;
+
+    timeList.appendChild(label);
+  });
+}
+
+// Initialize direction change listeners and default times
+function initializeDirectionHandlers() {
+  const directionInputs = document.querySelectorAll('input[name="direction"]');
+
+  directionInputs.forEach((input) => {
+    input.addEventListener("change", function () {
+      updateTimesForDirection(this.value);
+    });
+  });
+
+  // Initialize times on page load - show from_dsc times by default
+  const selectedDirection = document.querySelector(
+    'input[name="direction"]:checked'
+  );
+  if (selectedDirection) {
+    updateTimesForDirection(selectedDirection.value);
+  } else {
+    // Show from_dsc times by default when no direction is selected
+    updateTimesForDirection("from_dsc");
+  }
+}
+
+// Make functions globally available for HTML onclick attributes
+window.updateTimesForDirection = updateTimesForDirection;
+window.initializeData = initializeData;
 
 // Utility: Clear route cache from localStorage
 function clearRouteCache() {
@@ -30,8 +99,8 @@ async function getRoutesForDirection(direction) {
   }
 
   // If no cache, check if routeData from template is available
-  if (typeof window.routeData !== "undefined" && window.routeData[direction]) {
-    const routes = window.routeData[direction];
+  if (typeof routeData !== "undefined" && routeData[direction]) {
+    const routes = routeData[direction];
     // Store in cache for future use
     localStorage.setItem(cacheKey, JSON.stringify(routes));
     console.log(`Cached routes for ${direction} from template data`);
@@ -273,3 +342,8 @@ window.filterItems = filterItems;
 window.addCustomTime = addCustomTime;
 window.removeCustomTime = removeCustomTime;
 window.limitTimeSelection = limitTimeSelection;
+
+// Initialize everything when DOM is loaded
+document.addEventListener("DOMContentLoaded", function () {
+  initializeDirectionHandlers();
+});

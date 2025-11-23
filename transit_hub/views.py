@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from social_core.backends import username
 from authentication.models import Preference, Student, Review
-from transit_hub.models import Route, Bus
+from transit_hub.models import Route, Bus, Notice
 from django.http import JsonResponse
 import json
 from transit_hub.serializer import RouteSerializer, RouteStoppageSerializer
@@ -32,27 +32,71 @@ def index(request):
     current_time = localtime().time()
     current_day = localtime().strftime("%A").lower()
 
-    data = cache.get("popular_routes")
-    if data is None:
-        places = ["dhanmondi", "mirpur", "uttara", "tongi"]
-        data = {}
-        for place in places:
-            schedules = (
-                Transportation_schedules.objects.filter(
-                    from_dsc=True,
-                    route__route_name__icontains=place,
-                    departure_time__gte=current_time,
-                    days__contains=current_day,
-                )
-                .values_list("bus__bus_name", "departure_time")
-                .distinct()
-            )
-            formatted = [
-                (bus, (departure.strftime("%I:%M %p"))) for bus, departure in schedules
-            ]
-            data[place] = formatted
+    # Get upcoming buses data (all routes within next 1 hour)
+    upcoming_buses_data = cache.get("upcoming_buses")
+    if upcoming_buses_data is None:
+        # Calculate time range (current time to 1 hour from now)
+        current_datetime = localtime()
+        one_hour_later = (current_datetime + timedelta(hours=1)).time()
 
-        cache.set("popular_routes", data, timeout=60)
+        # Get all upcoming schedules for today within next hour
+        all_schedules = (
+            Transportation_schedules.objects.select_related("bus", "driver", "route")
+            .filter(
+                departure_time__gte=current_time,
+                departure_time__lte=one_hour_later,
+                days__contains=current_day,
+            )
+            .order_by("departure_time")
+        )
+
+        # Group by route and direction, get the next departure for each
+        upcoming_buses_data = []
+        processed_routes = set()
+
+        for schedule in all_schedules:
+            route_direction_key = f"{schedule.route.id}_{schedule.from_dsc}"
+
+            if route_direction_key not in processed_routes:
+                processed_routes.add(route_direction_key)
+
+                upcoming_buses_data.append(
+                    {
+                        "route_name": schedule.route.route_name,
+                        "direction": "From DSC" if schedule.from_dsc else "To DSC",
+                        "departure_time": schedule.departure_time.strftime("%I:%M %p"),
+                        "route_id": schedule.route.id,
+                        "from_dsc": schedule.from_dsc,
+                    }
+                )
+
+        cache.set(
+            "upcoming_buses", upcoming_buses_data, timeout=60
+        )  # 1 minute cache for hourly data
+
+    # Get active and visible notices
+
+    now = timezone.now()
+
+    active_notices = (
+        Notice.objects.filter(is_active=True, created_at__lte=now)
+        .filter(Q(expires_at__isnull=True) | Q(expires_at__gt=now))
+        .select_related("route")
+    )
+
+    # Organize notices by route
+    notices_by_route = {}
+    global_notices = []
+
+    for notice in active_notices:
+        if notice.route:
+            route_id = notice.route.id
+            if route_id not in notices_by_route:
+                notices_by_route[route_id] = []
+            notices_by_route[route_id].append(notice)
+        else:
+            global_notices.append(notice)
+
     if user:
         preferences = list(
             Preference.objects.filter(student__username=user).order_by("-created_at")[
@@ -91,13 +135,14 @@ def index(request):
     except Exception as e:
         # Fallback if Review model doesn't exist or there's an error
         reviews_data = []
-
     return render(
         request,
         "transit_hub/index.html",
         {
             "preferences": preferences,
-            "popular_routes": data,
+            "upcoming_buses": upcoming_buses_data,
+            "notices_by_route": notices_by_route,
+            "global_notices": global_notices,
             "recent_reviews": reviews_data,
             "google_maps_api_key": settings.GOOGLE_MAPS_API_KEY,
         },

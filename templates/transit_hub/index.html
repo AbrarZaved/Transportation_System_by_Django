@@ -267,76 +267,300 @@
         </button>
       </form>
     </div>
-    <!-- 🚍 Popular Routes -->
+    <!-- 🚍 Upcoming Buses -->
     <div>
-      <h3 class="text-2xl font-bold text-gray-800 mb-6">Popular Routes</h3>
-      <div class="space-y-4" id="route-list">
-        {% for place, buses in popular_routes.items %}
-        <div
-          class="route-card bg-white border border-gray-200 rounded-xl shadow-sm p-5 hover:shadow-md transition cursor-pointer hover:scale-[1.02]"
-        >
-          <div class="flex justify-between items-center">
-            <div>
-              <h4 class="text-lg font-semibold text-gray-700">
-                DSC -> {{ place|title }}
-              </h4>
-              {% if buses %} {% if request.session.is_student_authenticated %}
-              <p class="text-sm text-gray-500">
-                Next Departure: {{ buses.0.1 }} ·
-                <!-- Optionally add time diff -->
-              </p>
-              {% else %}
-              <p class="text-sm text-gray-500">
-                Log in to see detailed information
-              </p>
-              {% endif %} {% else %}
-              <p class="text-sm text-gray-500">No scheduled buses</p>
-              {% endif %}
-            </div>
-            <div>
-              {% if buses %}
-              <span
-                class="inline-flex items-center bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full"
-                >Available</span
-              >
-              {% else %}
-              <span
-                class="inline-flex items-center bg-red-100 text-red-800 text-sm font-medium px-3 py-1 rounded-full"
-                id="unavailable"
-                >Unavailable</span
-              >
-              {% endif %}
-            </div>
-          </div>
-          {% if buses %}
-          <div
-            class="bus-details mt-4 border-t border-gray-100 pt-3 overflow-hidden transition-all duration-500 ease-in-out"
-            style="height: 0"
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-gray-800">Upcoming Buses</h3>
+        <div class="flex items-center text-sm text-gray-500">
+          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+          Next Hour
+        </div>
+      </div>
+
+      <!-- Direction Filter -->
+      <div class="mb-6">
+        <div class="flex gap-2">
+          <button
+            type="button"
+            data-filter="all"
+            class="direction-filter-btn bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
           >
-            <ul class="mt-2 space-y-2 text-sm text-gray-600">
-              <ul>
-                {% if buses %} {% for bus_name, departure in buses %}
-                <li>
-                  <div class="flex justify-between text-sm text-gray-600">
-                    <span>🚌 {{ bus_name }}</span>
-                    {% if request.session.is_student_authenticated %}
-                    <span>{{ departure }}</span>
-                    {% endif %}
-                  </div>
-                </li>
-                {% endfor %} {% if not request.session.is_student_authenticated %}
-                <li class="text-sm text-gray-500 italic mt-2">
-                  Log in to see departure time
-                </li>
-                {% endif %} {% else %}
-                <li>No buses available.</li>
-                {% endif %}
-              </ul>
-            </ul>
+            All (Next Hour)
+          </button>
+          <button
+            type="button"
+            data-filter="To DSC"
+            class="direction-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
+          >
+            To DSC
+          </button>
+          <button
+            type="button"
+            data-filter="From DSC"
+            class="direction-filter-btn bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
+          >
+            From DSC
+          </button>
+        </div>
+      </div>
+
+      <!-- Global Notices -->
+      {% if global_notices %}
+      <div class="mb-6">
+        {% for notice in global_notices %}
+        <div
+          class="border border-{{ notice.notice_type }}-200 bg-{{ notice.notice_type }}-50 rounded-lg p-4 mb-3"
+        >
+          <div class="flex">
+            <div class="flex-shrink-0">
+              {% if notice.notice_type == 'urgent' %}
+              <svg
+                class="w-5 h-5 text-red-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+              {% elif notice.notice_type == 'warning' %}
+              <svg
+                class="w-5 h-5 text-yellow-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+              {% elif notice.notice_type == 'maintenance' %}
+              <svg
+                class="w-5 h-5 text-gray-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+              {% else %}
+              <svg
+                class="w-5 h-5 text-blue-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+              {% endif %}
+            </div>
+            <div class="ml-3">
+              <h4 class="text-sm font-semibold text-gray-800">
+                {{ notice.title }}
+              </h4>
+              <p class="text-sm text-gray-600">{{ notice.message }}</p>
+            </div>
           </div>
-          {% endif %}
         </div>
         {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Upcoming Buses Table -->
+      <div
+        class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+      >
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th
+                  class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                >
+                  Route
+                </th>
+                <th
+                  class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                >
+                  Departure
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              {% for bus in upcoming_buses %}
+              <tr
+                class="hover:bg-gray-50 transition-colors bus-row"
+                data-direction="{{ bus.direction }}"
+              >
+                <td class="px-6 py-4">
+                  <div class="flex items-center">
+                    <div
+                      class="flex-shrink-0 w-3 h-3 {% if bus.direction == 'From DSC' %}bg-green-500{% else %}bg-blue-500{% endif %} rounded-full mr-3"
+                    ></div>
+                    <div>
+                      <div class="text-sm font-semibold text-gray-900">
+                        {{ bus.route_name }}
+                      </div>
+                      <div class="text-xs text-gray-500">
+                        {{ bus.direction }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  {% if request.session.is_student_authenticated %}
+                  <div
+                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800"
+                  >
+                    <svg
+                      class="w-4 h-4 mr-1"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                        clip-rule="evenodd"
+                      ></path>
+                    </svg>
+                    {{ bus.departure_time }}
+                  </div>
+                  {% else %}
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800"
+                  >
+                    <svg
+                      class="w-4 h-4 mr-1"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                        clip-rule="evenodd"
+                      ></path>
+                    </svg>
+                    Login Required
+                  </span>
+                  {% endif %}
+                </td>
+              </tr>
+
+              <!-- Route-specific notices -->
+              {% if notices_by_route %} {% for route_id, route_notices in
+              notices_by_route.items %} {% if route_id == bus.route_id %}
+              <tr class="bg-yellow-50">
+                <td colspan="2" class="px-6 py-3">
+                  {% for notice in route_notices %}
+                  <div
+                    class="border border-{{ notice.notice_type }}-200 bg-{{ notice.notice_type }}-50 rounded-lg p-3 mb-2 last:mb-0"
+                  >
+                    <div class="flex">
+                      <div class="flex-shrink-0">
+                        {% if notice.notice_type == 'urgent' %}
+                        <svg
+                          class="w-4 h-4 text-red-600"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                        {% elif notice.notice_type == 'warning' %}
+                        <svg
+                          class="w-4 h-4 text-yellow-600"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                        {% elif notice.notice_type == 'maintenance' %}
+                        <svg
+                          class="w-4 h-4 text-gray-600"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                        {% else %}
+                        <svg
+                          class="w-4 h-4 text-blue-600"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                        {% endif %}
+                      </div>
+                      <div class="ml-2">
+                        <h5 class="text-xs font-semibold text-gray-800">
+                          {{ notice.title }}
+                        </h5>
+                        <p class="text-xs text-gray-600">
+                          {{ notice.message }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </td>
+              </tr>
+              {% endif %} {% endfor %} {% endif %} {% empty %}
+              <tr>
+                <td colspan="3" class="px-6 py-8 text-center text-gray-500">
+                  <svg
+                    class="w-12 h-12 mx-auto mb-4 text-gray-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                  <h3 class="text-lg font-medium text-gray-900 mb-1">
+                    No buses available
+                  </h3>
+                  <p class="text-gray-500">
+                    There are no upcoming buses scheduled at this time.
+                  </p>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -419,7 +643,8 @@
                   {{ review.student_name }}
                 </h4>
                 <div class="flex items-center mt-1">
-                  {% for star in "12345" %} {% if forloop.counter <= review.rating %}
+                  {% for star in "12345" %} {% if forloop.counter <=
+                  review.rating %}
                   <svg
                     class="w-4 h-4 text-yellow-400 fill-current"
                     viewBox="0 0 20 20"
@@ -663,4 +888,48 @@
 
 {% include 'kits/footer.html' %}
 <script type="module" src="{% static 'js/main.js' %}"></script>
+
+<script>
+  // Direction filter functionality
+  document.addEventListener("DOMContentLoaded", function () {
+    const filterButtons = document.querySelectorAll(".direction-filter-btn");
+    const busRows = document.querySelectorAll(".bus-row");
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const filter = this.getAttribute("data-filter");
+
+        // Update button styles
+        filterButtons.forEach((btn) => {
+          btn.classList.remove("bg-blue-600", "text-white");
+          btn.classList.add(
+            "bg-white",
+            "border",
+            "border-gray-300",
+            "text-gray-700"
+          );
+        });
+
+        this.classList.remove(
+          "bg-white",
+          "border",
+          "border-gray-300",
+          "text-gray-700"
+        );
+        this.classList.add("bg-blue-600", "text-white");
+
+        // Filter rows
+        busRows.forEach((row) => {
+          const rowDirection = row.getAttribute("data-direction");
+          if (filter === "all" || rowDirection === filter) {
+            row.style.display = "";
+          } else {
+            row.style.display = "none";
+          }
+        });
+      });
+    });
+  });
+</script>
+
 {% endblock %}
