@@ -128,7 +128,7 @@ class Preference(models.Model):
         super().save(*args, **kwargs)
 
 
-class Review(models.Model):
+class StudentReview(models.Model):
     RATING_CHOICES = [
         (1, "1 Star"),
         (2, "2 Stars"),
@@ -141,8 +141,8 @@ class Review(models.Model):
     bus = models.ForeignKey(
         "transit_hub.Bus", on_delete=models.CASCADE, null=True, blank=True
     )
-    route = models.ForeignKey(
-        "transit_hub.Route", on_delete=models.CASCADE, null=True, blank=True
+    driver = models.ForeignKey(
+        "transit_hub.Driver", on_delete=models.CASCADE, null=True, blank=True
     )
     rating = models.IntegerField(choices=RATING_CHOICES)
     comment = models.TextField(max_length=500)
@@ -154,23 +154,24 @@ class Review(models.Model):
         unique_together = [
             "student",
             "bus",
-            "route",
-        ]  # One review per student per bus-route combination
+            "driver",
+        ]  # One review per student per bus-driver combination
         ordering = ["-created_at"]
+        db_table = "authentication_studentreview"
 
     def __str__(self):
         targets = []
         if self.bus:
             targets.append(f"Bus: {self.bus.bus_name}")
-        if self.route:
-            targets.append(f"Route: {self.route.route_name}")
+        if self.driver:
+            targets.append(f"Driver: {self.driver.name}")
         target = " & ".join(targets) if targets else "No target"
         return f"{self.student.name} - {target} - {self.rating} stars"
 
     def save(self, *args, **kwargs):
-        # Ensure at least bus or route is provided
-        if not self.bus and not self.route:
-            raise ValueError("At least bus or route must be provided")
+        # Ensure at least bus or driver is provided
+        if not self.bus and not self.driver:
+            raise ValueError("At least bus or driver must be provided")
         super().save(*args, **kwargs)
 
 

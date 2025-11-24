@@ -5,12 +5,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from social_core.backends import username
-from authentication.models import Preference, Student, Review
+from authentication.models import Preference, Student, StudentReview
 from transit_hub.models import Route, Bus, Notice
 from django.http import JsonResponse
 import json
 from transit_hub.serializer import RouteSerializer, RouteStoppageSerializer
-from transport_manager.models import Transportation_schedules, LocationData
+from transport_manager.models import (
+    Transportation_schedules,
+    LocationData,
+    TripInstance,
+)
 from .models import RouteStoppage as RouteStoppageModel
 from django.db.models import F
 from django.shortcuts import render
@@ -53,7 +57,6 @@ def index(request):
         # Group by route and direction, get the next departure for each
         upcoming_buses_data = []
         processed_routes = set()
-
         for schedule in all_schedules:
             route_direction_key = f"{schedule.route.id}_{schedule.from_dsc}"
 
@@ -69,7 +72,6 @@ def index(request):
                         "from_dsc": schedule.from_dsc,
                     }
                 )
-
         cache.set(
             "upcoming_buses", upcoming_buses_data, timeout=60
         )  # 1 minute cache for hourly data
@@ -107,15 +109,15 @@ def index(request):
     # Get recent reviews for carousel (4+ star reviews)
     try:
         recent_reviews = (
-            Review.objects.select_related("student", "bus", "route")
+            StudentReview.objects.select_related("student", "bus", "driver")
             .filter(is_approved=True, rating__gte=4)
             .order_by("-created_at")[:6]
         )
 
         reviews_data = []
         for review in recent_reviews:
-            target_name = review.bus.bus_name if review.bus else review.route.route_name
-            target_type = "Bus" if review.bus else "Route"
+            target_name = review.bus.bus_name if review.bus else review.driver.name
+            target_type = "Bus" if review.bus else "Driver"
 
             reviews_data.append(
                 {
@@ -133,7 +135,7 @@ def index(request):
                 }
             )
     except Exception as e:
-        # Fallback if Review model doesn't exist or there's an error
+        # Fallback if StudentReview model doesn't exist or there's an error
         reviews_data = []
     return render(
         request,
@@ -151,20 +153,38 @@ def index(request):
 
 @sync_to_async
 def get_schedules(trip_type, place, username=None):
+    from datetime import date
 
-    # Search for routes by both route name and stoppage name
-    schedules = (
-        Transportation_schedules.objects.select_related("bus", "driver", "route")
+    today = date.today()
+    current_time = localtime().time()
+    current_day = localtime().strftime("%A").lower()
+    # Search for trip instances that are available today
+    trip_instances = (
+        TripInstance.objects.select_related(
+            "schedule__bus", "schedule__driver", "schedule__route"
+        )
         .filter(
-            Q(route__route_name__icontains=place)
-            | Q(route__routestoppage__stoppage__stoppage_name__icontains=place),
-            from_dsc=(trip_type == "From DSC"),
-            departure_time__gte=localtime().time(),
-            days__contains=localtime().strftime("%A").lower(),
+            # Filter by route name or stoppage name
+            Q(schedule__route__route_name__icontains=place)
+            | Q(
+                schedule__route__routestoppage__stoppage__stoppage_name__icontains=place
+            ),
+            # Filter by direction
+            schedule__from_dsc=(trip_type == "From DSC"),
+            # Only today's trips
+            date=today,
+            # Only future departures
+            schedule__departure_time__gte=current_time,
+            # Only pending or in_progress trips (available trips)
+            status__in=["pending", "in_progress"],
+            # Ensure the schedule is active
+            schedule__schedule_status=True,
         )
         .distinct()
-    )  # Add distinct to avoid duplicates from JOIN
-    route_ids = schedules.values_list("route__id", flat=True).distinct()
+        .order_by("schedule__departure_time")
+    )
+
+    route_ids = trip_instances.values_list("schedule__route__id", flat=True).distinct()
     route_details = RouteStoppageModel.objects.filter(route_id__in=route_ids)
 
     stoppages_by_route = {}
@@ -172,20 +192,31 @@ def get_schedules(trip_type, place, username=None):
         stoppages_by_route.setdefault(stop.route_id, []).append(stop)
 
     data = []
-    for schedule in schedules:
+    for trip_instance in trip_instances:
+        schedule = trip_instance.schedule
         route_obj = schedule.route
         route_id = route_obj.id
 
+        # Determine status display
+        status_display = ""
+        if trip_instance.status == "pending":
+            status_display = "Available"
+        elif trip_instance.status == "in_progress":
+            status_display = "Departing Soon"
+
         data.append(
             {
+                "trip_id": trip_instance.id,
                 "route": RouteSerializer(route_obj).data,
                 "route_name": route_obj.route_name,
                 "audience": schedule.get_audience_display(),
                 "departure_time": (
                     schedule.departure_time.strftime("%I:%M %p")
                     if username
-                    else "Available"
+                    else status_display
                 ),
+                "status": trip_instance.status,
+                "status_display": status_display,
                 "stoppage_names": [
                     stoppage.stoppage.stoppage_name
                     for stoppage in stoppages_by_route.get(route_id, [])

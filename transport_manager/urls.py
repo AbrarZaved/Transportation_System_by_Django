@@ -21,10 +21,12 @@ urlpatterns = [
     path("add_notice/", views.add_notice, name="add_notice"),
     path("view_notices/", views.view_notices, name="view_notices"),
     path("send_location/", csrf_exempt(views.send_location), name="send_location"),
+    # Legacy API endpoints (maintained for backward compatibility)
     path(
         "trips/<int:driver_id>/<str:auth_token>/",
         csrf_exempt(views.trips),
         name="trips",
     ),
     path("trip_complete/", csrf_exempt(views.trip_complete), name="trip_complete"),
+    path("api/trips/today/", views.trips_today, name="api_trips_today"),
 ]

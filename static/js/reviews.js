@@ -1,14 +1,14 @@
 // Reviews Page JavaScript
 // Global data arrays
 const BUSES_DATA = [];
-const ROUTES_DATA = [];
+const DRIVERS_DATA = [];
 
-// Global function to set buses and routes data from template
-window.setReviewsData = function (buses, routes) {
+// Global function to set buses and drivers data from template
+window.setReviewsData = function (buses, drivers) {
   BUSES_DATA.length = 0; // Clear existing data
-  ROUTES_DATA.length = 0;
+  DRIVERS_DATA.length = 0;
   BUSES_DATA.push(...buses);
-  ROUTES_DATA.push(...routes);
+  DRIVERS_DATA.push(...drivers);
 
   // If DOM is already loaded, populate selects immediately
   if (document.readyState === "loading") {
@@ -25,8 +25,8 @@ function populateSelects() {
   if (document.getElementById("busSelect")) {
     window.populateBusSelect();
   }
-  if (document.getElementById("routeSelect")) {
-    window.populateRouteSelect();
+  if (document.getElementById("driverSelect")) {
+    window.populateDriverSelect();
   }
 }
 
@@ -44,16 +44,16 @@ window.populateBusSelect = function () {
   });
 };
 
-window.populateRouteSelect = function () {
-  const routeSelect = document.getElementById("routeSelect");
-  if (!routeSelect || ROUTES_DATA.length === 0) return;
+window.populateDriverSelect = function () {
+  const driverSelect = document.getElementById("driverSelect");
+  if (!driverSelect || DRIVERS_DATA.length === 0) return;
 
-  routeSelect.innerHTML = '<option value="">Choose a route...</option>';
-  ROUTES_DATA.forEach((route) => {
+  driverSelect.innerHTML = '<option value="">Choose a driver...</option>';
+  DRIVERS_DATA.forEach((driver) => {
     const option = document.createElement("option");
-    option.value = route.id;
-    option.textContent = route.route_name;
-    routeSelect.appendChild(option);
+    option.value = driver.id;
+    option.textContent = driver.driver_name;
+    driverSelect.appendChild(option);
   });
 };
 
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (
     window.reviewsDataReady &&
     BUSES_DATA.length > 0 &&
-    ROUTES_DATA.length > 0
+    DRIVERS_DATA.length > 0
   ) {
     populateSelects();
   }
@@ -81,9 +81,9 @@ document.addEventListener("DOMContentLoaded", function () {
       'input[name="review_type"]'
     );
     const busSelectDiv = document.getElementById("busSelectDiv");
-    const routeSelectDiv = document.getElementById("routeSelectDiv");
+    const driverSelectDiv = document.getElementById("driverSelectDiv");
     const busSelect = document.getElementById("busSelect");
-    const routeSelect = document.getElementById("routeSelect");
+    const driverSelect = document.getElementById("driverSelect");
 
     if (!reviewForm) return;
 
@@ -107,21 +107,15 @@ document.addEventListener("DOMContentLoaded", function () {
       switch (reviewType) {
         case "bus":
           busSelectDiv.style.display = "block";
-          routeSelectDiv.style.display = "none";
+          driverSelectDiv.style.display = "none";
           busSelect.required = true;
-          routeSelect.required = false;
+          driverSelect.required = false;
           break;
-        case "route":
+        case "driver":
           busSelectDiv.style.display = "none";
-          routeSelectDiv.style.display = "block";
+          driverSelectDiv.style.display = "block";
           busSelect.required = false;
-          routeSelect.required = true;
-          break;
-        case "both":
-          busSelectDiv.style.display = "block";
-          routeSelectDiv.style.display = "block";
-          busSelect.required = true;
-          routeSelect.required = true;
+          driverSelect.required = true;
           break;
       }
     }
@@ -133,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function loadSelectOptions() {
     // Data should already be loaded via window.setReviewsData
     // This is just a fallback for any additional loading needed
-    if (BUSES_DATA.length === 0 || ROUTES_DATA.length === 0) {
+    if (BUSES_DATA.length === 0 || DRIVERS_DATA.length === 0) {
       // Try loading from embedded JSON (fallback)
       const busesScript = document.querySelector(
         'script[type="application/json"][data-buses]'
@@ -146,21 +140,21 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
 
-      const routesScript = document.querySelector(
-        'script[type="application/json"][data-routes]'
+      const driversScript = document.querySelector(
+        'script[type="application/json"][data-drivers]'
       );
-      if (routesScript) {
+      if (driversScript) {
         try {
-          ROUTES_DATA.push(...JSON.parse(routesScript.textContent));
+          DRIVERS_DATA.push(...JSON.parse(driversScript.textContent));
         } catch (e) {
-          console.error("Error parsing routes data:", e);
+          console.error("Error parsing drivers data:", e);
         }
       }
     }
 
     // Populate select options
     window.populateBusSelect();
-    window.populateRouteSelect();
+    window.populateDriverSelect();
   }
 
   /**
@@ -181,9 +175,9 @@ document.addEventListener("DOMContentLoaded", function () {
       placeholder = "Select a bus";
       targetSelect.setAttribute("data-type", "bus");
     } else {
-      data = ROUTES_DATA;
-      placeholder = "Select a route";
-      targetSelect.setAttribute("data-type", "route");
+      data = DRIVERS_DATA;
+      placeholder = "Select a driver";
+      targetSelect.setAttribute("data-type", "driver");
     }
 
     // Add options
@@ -193,7 +187,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (reviewType === "bus") {
         option.textContent = `${item.bus_name} (${item.bus_tag || ""})`;
       } else {
-        option.textContent = item.route_name;
+        option.textContent = item.driver_name;
       }
       targetSelect.appendChild(option);
     });
@@ -215,7 +209,7 @@ document.addEventListener("DOMContentLoaded", function () {
       'input[name="review_type"]:checked'
     )?.value;
     const busId = form.querySelector("#busSelect").value;
-    const routeId = form.querySelector("#routeSelect").value;
+    const driverId = form.querySelector("#driverSelect").value;
     const rating = form.querySelector('input[name="rating"]:checked')?.value;
     const comment = form.querySelector("#comment").value.trim();
 
@@ -229,11 +223,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (reviewType === "bus" && !busId) {
       showToast("error", "Please select a bus to review.");
       return;
-    } else if (reviewType === "route" && !routeId) {
-      showToast("error", "Please select a route to review.");
-      return;
-    } else if (reviewType === "both" && (!busId || !routeId)) {
-      showToast("error", "Please select both a bus and a route to review.");
+    } else if (reviewType === "driver" && !driverId) {
+      showToast("error", "Please select a driver to review.");
       return;
     }
 
@@ -248,7 +239,7 @@ document.addEventListener("DOMContentLoaded", function () {
     submitBtn.disabled = true;
 
     try {
-      const response = await fetch("/auth/submit_review/", {
+      const response = await fetch("/submit_review/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -257,7 +248,7 @@ document.addEventListener("DOMContentLoaded", function () {
         body: JSON.stringify({
           review_type: reviewType,
           bus_id: busId ? parseInt(busId) : null,
-          route_id: routeId ? parseInt(routeId) : null,
+          driver_id: driverId ? parseInt(driverId) : null,
           rating: parseInt(rating),
           comment: comment,
         }),
@@ -269,7 +260,7 @@ document.addEventListener("DOMContentLoaded", function () {
         showToast("success", result.message);
         form.reset();
         window.populateBusSelect();
-        window.populateRouteSelect();
+        window.populateDriverSelect();
 
         // Refresh page after short delay
         setTimeout(() => {
@@ -317,7 +308,7 @@ document.addEventListener("DOMContentLoaded", function () {
     button.disabled = true;
 
     try {
-      const response = await fetch(`/auth/delete_review/${reviewId}/`, {
+      const response = await fetch(`/delete_review/${reviewId}/`, {
         method: "DELETE",
         headers: {
           "X-CSRFToken": getCSRFToken(),

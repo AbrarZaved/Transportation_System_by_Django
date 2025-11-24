@@ -5,13 +5,23 @@ from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.timezone import localtime
-from redis import auth
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import csrf_exempt
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from authentication.models import DriverAuth
 from transit_hub.forms import BusForm, DriverForm
 from transit_hub.models import Bus, Driver, Helper, Route, Stoppage, RouteStoppage
-from transport_manager.models import LocationData, Transportation_schedules
+from transport_manager.models import (
+    LocationData,
+    Transportation_schedules,
+    TripInstance,
+)
+from transport_manager.serializers import (
+    TodayTripsSerializer,
+    DriverTripSerializer,
+)
 from transport_manager.sms import (
     send_sms,
     send_helper_sms,
@@ -20,8 +30,7 @@ from transport_manager.sms import (
     send_helper_change_sms,
     send_helper_cancellation_sms,
 )
-from datetime import datetime
-from django.db import transaction
+from datetime import datetime, date
 from django.core.paginator import Paginator
 
 
@@ -137,7 +146,8 @@ def assign_schedule(request):
                 ).first()
 
                 if not existing_schedule:
-                    Transportation_schedules.objects.create(
+                    # Create the schedule
+                    new_schedule = Transportation_schedules.objects.create(
                         route=route_instance,
                         bus=bus_instance,
                         driver=driver_instance,
@@ -154,6 +164,30 @@ def assign_schedule(request):
                     driver_instance.total_trip_assigned += 1
                     driver_instance.save()
                     created_schedules += 1
+
+                    # Create trip instance for today if the schedule should run today
+                    today = datetime.now().date()
+                    current_day = localtime().strftime("%A").lower()
+
+                    # Check if this schedule should run today and if it's a future departure
+                    current_time = localtime().time()
+                    schedule_departure_time = datetime.strptime(
+                        selected_time, "%I:%M %p"
+                    ).time()
+
+                    if (
+                        current_day in new_schedule.days
+                        and schedule_departure_time >= current_time
+                    ):
+                        try:
+                            # Create trip instance for today
+                            TripInstance.objects.get_or_create(
+                                schedule=new_schedule,
+                                date=today,
+                                defaults={"status": "pending"},
+                            )
+                        except Exception as e:
+                            print(f"Error creating trip instance: {e}")
 
                     # Send SMS notifications
                     send_sms(
@@ -594,6 +628,9 @@ def send_location(request):
     bus_name = data.get("bus_name")
     auth_token = data.get("auth_token")
     driver_id = data.get("driver_id")
+    is_trip_ending = data.get(
+        "is_trip_ending", False
+    )  # New parameter to indicate trip end
 
     # Validate latitude and longitude
     try:
@@ -622,17 +659,71 @@ def send_location(request):
         bus = Bus.objects.get(bus_name=bus_name)
         driver = Driver.objects.get(id=driver_id)
 
-        # Update or create location data
+        # Auto-manage trip lifecycle based on location updates
+        today = date.today()
+        current_time = timezone.now().time()
+        response_data = {
+            "status": "success",
+            "message": "Location updated successfully",
+        }
+
+        # Find current pending or in-progress trip for this driver
+        current_trip = TripInstance.objects.filter(
+            schedule__driver=driver, date=today, status__in=["pending", "in_progress"]
+        ).first()
+
+        if current_trip:
+            # If trip is pending and driver sends location, auto-start the trip
+            if current_trip.status == "pending" and not is_trip_ending:
+                try:
+                    current_trip.start_trip()
+                    response_data["trip_started"] = True
+                    response_data["message"] = (
+                        "Location updated and trip started automatically"
+                    )
+                    response_data["trip_info"] = {
+                        "trip_id": current_trip.id,
+                        "route_name": current_trip.schedule.route.route_name,
+                        "departure_time": current_trip.schedule.departure_time.strftime(
+                            "%H:%M"
+                        ),
+                        "status": current_trip.status,
+                    }
+                except ValueError as e:
+                    response_data["warning"] = f"Could not start trip: {str(e)}"
+
+            # If driver indicates trip is ending and trip is in progress, complete it
+            elif current_trip.status == "in_progress" and is_trip_ending:
+                try:
+                    current_trip.complete_trip()
+                    response_data["trip_completed"] = True
+                    response_data["message"] = (
+                        "Location updated and trip completed automatically"
+                    )
+                    response_data["trip_info"] = {
+                        "trip_id": current_trip.id,
+                        "route_name": current_trip.schedule.route.route_name,
+                        "actual_duration": (
+                            str(
+                                current_trip.actual_end_time
+                                - current_trip.actual_start_time
+                            )
+                            if current_trip.actual_start_time
+                            else None
+                        ),
+                        "status": current_trip.status,
+                    }
+                except ValueError as e:
+                    response_data["warning"] = f"Could not complete trip: {str(e)}"
+
+        # Update or create location data regardless of trip status
         LocationData.objects.update_or_create(
             bus=bus,
             driver=driver,
             defaults={"latitude": lat, "longitude": lon, "timestamp": datetime.now()},
         )
 
-        return JsonResponse(
-            {"status": "success", "message": "Location updated successfully"},
-            status=status.HTTP_200_OK,
-        )
+        return JsonResponse(response_data, status=status.HTTP_200_OK)
 
     except Bus.DoesNotExist:
         return JsonResponse(
@@ -649,23 +740,21 @@ def send_location(request):
         )
 
 
+@api_view(["GET"])
 def trips(request, driver_id, auth_token):
-    if request.method != "GET":
-        return JsonResponse(
-            {"error": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
+    """Get today's trip instances for a specific driver"""
 
     # Validate driver_id
     try:
         driver_id = int(driver_id)
     except (ValueError, TypeError):
-        return JsonResponse(
+        return Response(
             {"error": "Invalid driver ID"}, status=status.HTTP_400_BAD_REQUEST
         )
 
     # Authenticate driver
     if not auth_token:
-        return JsonResponse(
+        return Response(
             {"error": "Authentication token required"},
             status=status.HTTP_400_BAD_REQUEST,
         )
@@ -675,74 +764,58 @@ def trips(request, driver_id, auth_token):
             auth_token=auth_token
         )
     except DriverAuth.DoesNotExist:
-        return JsonResponse(
+        return Response(
             {"error": "Invalid authentication token"},
             status=status.HTTP_401_UNAUTHORIZED,
         )
 
     try:
-        current_day = localtime().strftime("%A").lower()
+        today = date.today()
         current_time = localtime().time()
+        print(today)
+        print(current_time)
 
-        # Optimized query with select_related to reduce database hits
+        # Get today's trip instances for this driver
         trips_queryset = (
-            Transportation_schedules.objects.select_related("route", "bus", "driver")
-            .filter(
-                driver_id=driver_id,
-                days__contains=current_day,
-                schedule_status=True,
-                departure_time__gte=current_time,  # Only future trips
+            TripInstance.objects.select_related(
+                "schedule__route", "schedule__bus", "schedule__driver"
             )
-            .order_by("departure_time")
+            .filter(
+                schedule__driver_id=driver_id,
+                date=today,
+                schedule__departure_time__gte=current_time,  # Only future trips
+                status__in=["pending", "in_progress"],  # Exclude completed/cancelled
+            )
+            .order_by("schedule__departure_time")
         )
 
-        trips_data = []
-        for trip in trips_queryset:
-            trips_data.append(
-                {
-                    "schedule_id": trip.schedule_id,
-                    "route_name": trip.route.route_name,
-                    "bus_name": trip.bus.bus_name,
-                    "bus_tag": trip.bus.bus_tag,
-                    "driver_name": trip.driver.name,
-                    "departure_time": trip.departure_time.strftime("%H:%M"),
-                    "from_dsc": trip.from_dsc,
-                    "to_dsc": trip.to_dsc,
-                }
-            )
+        serializer = DriverTripSerializer(trips_queryset, many=True)
 
-        return JsonResponse(
-            {"trips": trips_data, "count": len(trips_data)}, status=status.HTTP_200_OK
+        return Response(
+            {"trips": serializer.data, "count": len(serializer.data)},
+            status=status.HTTP_200_OK,
         )
 
     except Exception as e:
-        return JsonResponse(
+        return Response(
             {"error": "Internal server error"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 
-@csrf_exempt
+@api_view(["POST"])
 def trip_complete(request):
-    if request.method != "POST":
-        return JsonResponse(
-            {"error": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
+    """Complete a trip instance"""
 
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse(
-            {"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST
-        )
-
-    schedule_id = data.get("schedule_id")
-    auth_token = data.get("auth_token")
+    trip_id = request.data.get("trip_id") or request.data.get(
+        "schedule_id"
+    )  # Support legacy
+    auth_token = request.data.get("auth_token")
 
     # Validate required fields
-    if not schedule_id or not auth_token:
-        return JsonResponse(
-            {"error": "Missing required fields: schedule_id and auth_token"},
+    if not trip_id or not auth_token:
+        return Response(
+            {"error": "Missing required fields: trip_id and auth_token"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -752,61 +825,62 @@ def trip_complete(request):
             auth_token=auth_token
         )
     except DriverAuth.DoesNotExist:
-        return JsonResponse(
+        return Response(
             {"error": "Invalid authentication token"},
             status=status.HTTP_401_UNAUTHORIZED,
         )
 
     try:
-        # Use select_related to optimize the query
-        schedule = Transportation_schedules.objects.select_related(
-            "driver", "route", "bus"
-        ).get(schedule_id=schedule_id)
+        # Try to get trip instance by ID first, then by schedule_id for legacy support
+        try:
+            trip = TripInstance.objects.select_related(
+                "schedule__driver", "schedule__route", "schedule__bus"
+            ).get(id=trip_id)
+        except (TripInstance.DoesNotExist, ValueError):
+            # Legacy support: try to find today's trip instance for this schedule
+            trip = TripInstance.objects.select_related(
+                "schedule__driver", "schedule__route", "schedule__bus"
+            ).get(schedule_id=trip_id, date=date.today())
 
         # Verify the authenticated driver owns this trip
-        if schedule.driver.id != driver_auth.user.id:
-            return JsonResponse(
+        if trip.schedule.driver.id != driver_auth.user.id:
+            return Response(
                 {"error": "Unauthorized: You can only complete your own trips"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Check if trip is already completed
-        if not schedule.schedule_status:
-            return JsonResponse(
-                {"error": "Trip already completed"}, status=status.HTTP_400_BAD_REQUEST
-            )
+        # Complete the trip using the model method
+        trip.complete_trip()
 
-        # Use atomic operation to ensure data consistency
-
-        with transaction.atomic():
-            driver = schedule.driver
-            driver.total_trip_completed = F("total_trip_completed") + 1
-            driver.total_trip_assigned = F("total_trip_assigned") - 1
-            driver.save(update_fields=["total_trip_completed", "total_trip_assigned"])
-
-            # Mark schedule as completed
-            schedule.schedule_status = False
-            schedule.save(update_fields=["schedule_status"])
-
-        return JsonResponse(
+        return Response(
             {
                 "status": "success",
                 "message": "Trip completed successfully",
                 "trip_info": {
-                    "route_name": schedule.route.route_name,
-                    "bus_tag": schedule.bus.bus_tag,
-                    "departure_time": schedule.departure_time.strftime("%H:%M"),
+                    "route_name": trip.schedule.route.route_name,
+                    "bus_tag": trip.schedule.bus.bus_tag,
+                    "departure_time": trip.schedule.departure_time.strftime("%H:%M"),
+                    "actual_start_time": (
+                        trip.actual_start_time.isoformat()
+                        if trip.actual_start_time
+                        else None
+                    ),
+                    "actual_end_time": (
+                        trip.actual_end_time.isoformat()
+                        if trip.actual_end_time
+                        else None
+                    ),
                 },
             },
             status=status.HTTP_200_OK,
         )
 
-    except Transportation_schedules.DoesNotExist:
-        return JsonResponse(
-            {"error": "Schedule not found"}, status=status.HTTP_404_NOT_FOUND
-        )
+    except TripInstance.DoesNotExist:
+        return Response({"error": "Trip not found"}, status=status.HTTP_404_NOT_FOUND)
+    except ValueError as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return JsonResponse(
+        return Response(
             {"error": "Internal server error"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
@@ -900,3 +974,40 @@ def view_notices(request):
     }
 
     return render(request, "transport_manager/view_notices.html", context)
+
+
+# ============ TRIP INSTANCE API ENDPOINTS ============
+# Note: trip_start and trip_end functionality is now handled automatically
+# by the enhanced send_location endpoint
+
+
+@api_view(["GET"])
+def trips_today(request):
+    """Get all trip instances for today with optional filtering"""
+
+    today = date.today()
+    driver_id = request.query_params.get("driver_id")
+    status_filter = request.query_params.get("status")
+
+    queryset = TripInstance.objects.select_related(
+        "schedule__route", "schedule__bus", "schedule__driver"
+    ).filter(date=today)
+
+    if driver_id:
+        queryset = queryset.filter(schedule__driver_id=driver_id)
+
+    if status_filter:
+        queryset = queryset.filter(status=status_filter)
+
+    queryset = queryset.order_by("schedule__departure_time")
+
+    serializer = TodayTripsSerializer(queryset, many=True)
+
+    return Response(
+        {
+            "date": today.isoformat(),
+            "trips": serializer.data,
+            "count": len(serializer.data),
+        },
+        status=status.HTTP_200_OK,
+    )

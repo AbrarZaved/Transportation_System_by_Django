@@ -11,10 +11,10 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework import status
 from authentication.email import create_email_otp, send_otp_email
-from authentication.models import EmailOTP, Preference, Student, Review
+from authentication.models import EmailOTP, Preference, Student, StudentReview
 from threading import Thread
 from authentication.models import DriverAuth
-from transit_hub.models import Bus, Route
+from transit_hub.models import Bus, Route, Driver
 from django.core.paginator import Paginator
 from django.db.models import Avg
 from transit_hub.models import Bus, Route
@@ -386,31 +386,31 @@ def reviews_page(request):
     username = request.session.get("username")
 
     # Get filter parameters
-    filter_type = request.GET.get("filter", "all")  # all, bus, route
+    filter_type = request.GET.get("filter", "all")  # all, bus, driver
     search_query = request.GET.get("search", "")
 
     # Base queryset
-    reviews = Review.objects.select_related("student", "bus", "route").filter(
+    reviews = StudentReview.objects.select_related("student", "bus", "driver").filter(
         is_approved=True
     )
 
     # Apply filters
     if filter_type == "bus":
         reviews = reviews.filter(bus__isnull=False)
-    elif filter_type == "route":
-        reviews = reviews.filter(route__isnull=False)
+    elif filter_type == "driver":
+        reviews = reviews.filter(driver__isnull=False)
 
     # Apply search
     if search_query:
         reviews = reviews.filter(
             models.Q(bus__bus_name__icontains=search_query)
-            | models.Q(route__route_name__icontains=search_query)
+            | models.Q(driver__name__icontains=search_query)
             | models.Q(student__name__icontains=search_query)
             | models.Q(comment__icontains=search_query)
         )
 
     # Calculate statistics
-    all_reviews = Review.objects.filter(is_approved=True)
+    all_reviews = StudentReview.objects.filter(is_approved=True)
     total_reviews = all_reviews.count()
     average_rating = (
         all_reviews.aggregate(avg_rating=models.Avg("rating"))["avg_rating"] or 0
@@ -430,20 +430,9 @@ def reviews_page(request):
     page_number = request.GET.get("page")
     reviews_page_obj = paginator.get_page(page_number)
 
-    # Get user's reviews if logged in
-    user_reviews = []
-    if username:
-        try:
-            student = Student.objects.get(username=username)
-            user_reviews = Review.objects.filter(student=student).order_by(
-                "-created_at"
-            )[:5]
-        except Student.DoesNotExist:
-            pass
-
-    # Get available buses and routes for the review form
+    # Get available buses and drivers for the review form
     buses = Bus.objects.all().order_by("bus_name")
-    routes = Route.objects.filter(route_status=True).order_by("route_name")
+    drivers = Driver.objects.filter(driver_status=True).order_by("name")
 
     # Serialize data for JavaScript
     buses_data = [
@@ -451,13 +440,12 @@ def reviews_page(request):
         for bus in buses
     ]
 
-    routes_data = [{"id": route.id, "route_name": route.route_name} for route in routes]
+    drivers_data = [{"id": driver.id, "driver_name": driver.name} for driver in drivers]
 
     context = {
         "reviews": reviews_page_obj,
-        "user_reviews": user_reviews,
         "buses": json.dumps(buses_data),
-        "routes": json.dumps(routes_data),
+        "drivers": json.dumps(drivers_data),
         "filter_type": filter_type,
         "search_query": search_query,
         "is_authenticated": bool(username),
@@ -492,9 +480,9 @@ def submit_review(request):
 
     try:
         data = json.loads(request.body)
-        review_type = data.get("review_type")  # 'bus', 'route', or 'both'
+        review_type = data.get("review_type")  # 'bus' or 'driver'
         bus_id = data.get("bus_id")
-        route_id = data.get("route_id")
+        driver_id = data.get("driver_id")
         rating = data.get("rating")
         comment = data.get("comment", "").strip()
 
@@ -504,7 +492,7 @@ def submit_review(request):
                 {"success": False, "message": "All fields are required"}, status=400
             )
 
-        if review_type not in ["bus", "route", "both"]:
+        if review_type not in ["bus", "driver"]:
             return JsonResponse(
                 {"success": False, "message": "Invalid review type"}, status=400
             )
@@ -515,14 +503,12 @@ def submit_review(request):
                 {"success": False, "message": "Bus ID is required for bus review"},
                 status=400,
             )
-        elif review_type == "route" and not route_id:
+        elif review_type == "driver" and not driver_id:
             return JsonResponse(
-                {"success": False, "message": "Route ID is required for route review"},
-                status=400,
-            )
-        elif review_type == "both" and (not bus_id or not route_id):
-            return JsonResponse(
-                {"success": False, "message": "Both Bus ID and Route ID are required"},
+                {
+                    "success": False,
+                    "message": "Driver ID is required for driver review",
+                },
                 status=400,
             )
 
@@ -547,9 +533,9 @@ def submit_review(request):
 
         # Get target objects
         bus = None
-        route = None
+        driver = None
 
-        if review_type in ["bus", "both"] and bus_id:
+        if review_type == "bus" and bus_id:
             try:
                 bus = Bus.objects.get(id=bus_id)
             except Bus.DoesNotExist:
@@ -557,17 +543,17 @@ def submit_review(request):
                     {"success": False, "message": "Bus not found"}, status=404
                 )
 
-        if review_type in ["route", "both"] and route_id:
+        if review_type == "driver" and driver_id:
             try:
-                route = Route.objects.get(id=route_id)
-            except Route.DoesNotExist:
+                driver = Driver.objects.get(id=driver_id)
+            except Driver.DoesNotExist:
                 return JsonResponse(
-                    {"success": False, "message": "Route not found"}, status=404
+                    {"success": False, "message": "Driver not found"}, status=404
                 )
 
         # Check if review already exists
-        existing_review = Review.objects.filter(
-            student=student, bus=bus, route=route
+        existing_review = StudentReview.objects.filter(
+            student=student, bus=bus, driver=driver
         ).first()
 
         if existing_review:
@@ -578,8 +564,8 @@ def submit_review(request):
             message = "Review updated successfully!"
         else:
             # Create new review
-            Review.objects.create(
-                student=student, bus=bus, route=route, rating=rating, comment=comment
+            StudentReview.objects.create(
+                student=student, bus=bus, driver=driver, rating=rating, comment=comment
             )
             message = "Review submitted successfully!"
 
@@ -611,7 +597,7 @@ def delete_review(request, review_id):
 
     try:
         student = Student.objects.get(username=username)
-        review = Review.objects.get(id=review_id, student=student)
+        review = StudentReview.objects.get(id=review_id, student=student)
         review.delete()
         return JsonResponse(
             {"success": True, "message": "Review deleted successfully!"}
@@ -633,7 +619,7 @@ def delete_review(request, review_id):
 def get_reviews_for_carousel(request):
     """Get recent reviews for the index page carousel"""
     reviews = (
-        Review.objects.select_related("student", "bus", "route")
+        StudentReview.objects.select_related("student", "bus", "driver")
         .filter(
             is_approved=True, rating__gte=4  # Only show 4+ star reviews in carousel
         )
@@ -642,8 +628,8 @@ def get_reviews_for_carousel(request):
 
     reviews_data = []
     for review in reviews:
-        target_name = review.bus.bus_name if review.bus else review.route.route_name
-        target_type = "Bus" if review.bus else "Route"
+        target_name = review.bus.bus_name if review.bus else review.driver.name
+        target_type = "Bus" if review.bus else "Driver"
 
         reviews_data.append(
             {

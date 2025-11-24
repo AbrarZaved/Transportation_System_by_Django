@@ -45,11 +45,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_celery_results",
+    "django_celery_beat",
+    "celery",
     "rest_framework",
     "authentication",
     "transit_hub",
     "transport_manager",
-    "django_celery_beat",
     "social_django",
 ]
 
@@ -175,13 +177,40 @@ MEDIAFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Celery Configuration
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Dhaka"
+
+# Windows-specific Celery configuration to avoid permission issues
+CELERY_POOL = "solo"  # Use solo pool for Windows compatibility
+CELERY_TASK_ALWAYS_EAGER = False
+CELERY_TASK_EAGER_PROPAGATES = False
+
+# Alternative: Use eventlet or gevent for better Windows support
+# Uncomment the line below if you have eventlet installed
+# CELERY_POOL = "eventlet"
 
 # Celery Beat for periodic tasks
-
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+# Task routing and execution settings
+CELERY_TASK_ROUTES = {
+    "transport_manager.tasks.*": {"queue": "celery"},
+}
+
+# Result backend for task results
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_CACHE_BACKEND = "redis://localhost:6379/0"
+
+# Task execution settings
+CELERY_TASK_ACKS_LATE = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+CELERY_WORKER_LOG_COLOR = False
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"

@@ -6,7 +6,7 @@ from authentication.models import (
     Preference,
     Student,
     Supervisor,
-    Review,
+    StudentReview,
 )
 
 
@@ -56,8 +56,8 @@ class EmailOTPAdmin(admin.ModelAdmin):
         return qs.order_by("user__email")
 
 
-@admin.register(Review)
-class ReviewAdmin(admin.ModelAdmin):
+@admin.register(StudentReview)
+class StudentReviewAdmin(admin.ModelAdmin):
     list_display = ["student", "get_target", "rating", "is_approved", "created_at"]
     list_filter = ["rating", "is_approved", "created_at"]
     search_fields = [
@@ -65,7 +65,7 @@ class ReviewAdmin(admin.ModelAdmin):
         "student__student_id",
         "comment",
         "bus__bus_name",
-        "route__route_name",
+        "driver__name",
     ]
     readonly_fields = ["created_at", "updated_at"]
     list_editable = ["is_approved"]
@@ -73,12 +73,12 @@ class ReviewAdmin(admin.ModelAdmin):
     def get_target(self, obj):
         if obj.bus:
             return f"Bus: {obj.bus.bus_name}"
-        elif obj.route:
-            return f"Route: {obj.route.route_name}"
+        elif obj.driver:
+            return f"Driver: {obj.driver.name}"
         return "No target"
 
     get_target.short_description = "Target"
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.select_related("student", "bus", "route").order_by("-created_at")
+        return qs.select_related("student", "bus", "driver").order_by("-created_at")
