@@ -462,8 +462,7 @@
               </tr>
 
               <!-- Route-specific notices -->
-              {% if notices_by_route %} {% for route_id, route_notices in
-              notices_by_route.items %} {% if route_id == bus.route_id %}
+              {% if notices_by_route %} {% for route_id, route_notices in notices_by_route.items %} {% if route_id == bus.route_id %}
               <tr class="bg-yellow-50">
                 <td colspan="2" class="px-6 py-3">
                   {% for notice in route_notices %}
@@ -643,8 +642,7 @@
                   {{ review.student_name }}
                 </h4>
                 <div class="flex items-center mt-1">
-                  {% for star in "12345" %} {% if forloop.counter <=
-                  review.rating %}
+                  {% for star in "12345" %} {% if forloop.counter <= review.rating %}
                   <svg
                     class="w-4 h-4 text-yellow-400 fill-current"
                     viewBox="0 0 20 20"
