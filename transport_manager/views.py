@@ -187,7 +187,9 @@ def assign_schedule(request):
                         days=localtime().strftime("%A").lower(),
                     )
                     driver_instance.total_trip_assigned += 1
-                    driver_instance.save()
+                    bus_instance.route_assigned = True
+                    bus_instance.save(update_fields=["route_assigned"])
+                    driver_instance.save(update_fields=["total_trip_assigned"])
                     created_schedules += 1
 
                     # Create trip instance for today if the schedule should run today
@@ -860,8 +862,7 @@ def trips(request, driver_id, auth_token):
     try:
         today = date.today()
         current_time = localtime().time()
-        print(today)
-        print(current_time)
+
 
         # Get today's trip instances for this driver
         trips_queryset = (

@@ -57,6 +57,7 @@ class Transportation_schedules(models.Model):
 
     def __str__(self):
         return f"Schedule {self.route.route_name}"
+
     class Meta:
         unique_together = ["schedule_id", "route", "bus", "driver"]
         verbose_name_plural = "Transportation Schedules"
@@ -177,8 +178,14 @@ class TripInstance(models.Model):
             self.save()
 
             # Free up resources
-            self.schedule.bus.route_assigned = False
-            self.schedule.bus.save(update_fields=["route_assigned"])
+            other_trips = TripInstance.objects.filter(
+                schedule__bus=self.schedule.bus,
+            )
+            if not other_trips.filter(
+                models.Q(status="in_progress") | models.Q(status="pending")
+            ).exists():
+                self.schedule.bus.route_assigned = False
+                self.schedule.bus.save(update_fields=["route_assigned"])
 
             # Update driver statistics
             driver = self.schedule.driver
