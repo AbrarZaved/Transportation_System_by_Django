@@ -898,6 +898,7 @@ def trip_complete(request):
 
     trip_id = json.loads(request.body).get("trip_id")
     auth_token = json.loads(request.body).get("auth_token")
+    print(f"Received trip completion request for trip_id: {trip_id}")
     # Validate required fields
     if not trip_id or not auth_token:
         return Response(
@@ -941,6 +942,7 @@ def trip_complete(request):
                 trip.start_trip()
                 print("Trip auto-started before completion")
             except ValueError as e:
+                print(f"Error auto-starting trip: {str(e)}")
                 return Response(
                     {"error": f"Cannot start trip: {str(e)}"},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -974,6 +976,7 @@ def trip_complete(request):
     except TripInstance.DoesNotExist:
         return Response({"error": "Trip not found"}, status=status.HTTP_404_NOT_FOUND)
     except ValueError as e:
+        print(f"ValueError: {str(e)}")
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response(
