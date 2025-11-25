@@ -253,8 +253,7 @@ Transportation Admin{% endblock %} {% block content %}
               {{ notice.title }}
             </h3>
             <p class="text-xs text-gray-500">
-              {{ notice.route.route_name|default:"Global" }} • {{
-              notice.created_at|date:"M d, Y" }}
+              {{ notice.route.route_name|default:"Global" }} • {{ notice.created_at|date:"M d, Y" }}
             </p>
           </div>
         </div>
