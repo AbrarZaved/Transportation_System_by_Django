@@ -102,6 +102,27 @@
           </a>
           {% if request.user.is_superuser %}
           <a
+            href="{% url 'trip_reports' %}"
+            class="px-4 py-2 rounded hover:bg-slate-800 flex items-center gap-2"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            Trip Reports
+          </a>
+          {% endif %} {% if request.user.is_superuser %}
+          <a
             href="{% url 'manage_drivers_buses' %}"
             class="px-4 py-2 rounded hover:bg-slate-800 flex items-center gap-2"
           >
@@ -214,6 +235,9 @@
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
       defer
     ></script>
+
+    <!-- Secure Google Maps loading without exposing API key -->
+    <script src="{% url 'load_google_maps_script' %}" defer></script>
 
     <script>
       setTimeout(() => {

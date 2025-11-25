@@ -108,6 +108,142 @@ document.addEventListener("DOMContentLoaded", function () {
   signInBtn.addEventListener("click", () => switchTo("signin"));
   signUpBtn.addEventListener("click", () => switchTo("signup"));
 
+  /* --- Password Toggle Functionality --- */
+  const toggleLoginPassword = document.getElementById("toggleLoginPassword");
+  const loginPassword = document.getElementById("loginPassword");
+  const showLoginIcon = document.getElementById("showLoginIcon");
+  const hideLoginIcon = document.getElementById("hideLoginIcon");
+
+  const toggleRegisterPassword = document.getElementById(
+    "toggleRegisterPassword"
+  );
+  const registerPassword = document.getElementById("registerPassword");
+  const showRegisterIcon = document.getElementById("showRegisterIcon");
+  const hideRegisterIcon = document.getElementById("hideRegisterIcon");
+
+  // Login password toggle
+  if (toggleLoginPassword) {
+    toggleLoginPassword.addEventListener("click", function () {
+      const type =
+        loginPassword.getAttribute("type") === "password" ? "text" : "password";
+      loginPassword.setAttribute("type", type);
+
+      if (type === "text") {
+        showLoginIcon.classList.add("hidden");
+        hideLoginIcon.classList.remove("hidden");
+      } else {
+        showLoginIcon.classList.remove("hidden");
+        hideLoginIcon.classList.add("hidden");
+      }
+    });
+  }
+
+  // Register password toggle
+  if (toggleRegisterPassword) {
+    toggleRegisterPassword.addEventListener("click", function () {
+      const type =
+        registerPassword.getAttribute("type") === "password"
+          ? "text"
+          : "password";
+      registerPassword.setAttribute("type", type);
+
+      if (type === "text") {
+        showRegisterIcon.classList.add("hidden");
+        hideRegisterIcon.classList.remove("hidden");
+      } else {
+        showRegisterIcon.classList.remove("hidden");
+        hideRegisterIcon.classList.add("hidden");
+      }
+    });
+  }
+
+  /* --- Password Strength Validation --- */
+  if (registerPassword) {
+    const passwordStrength = document.getElementById("passwordStrength");
+
+    registerPassword.addEventListener("input", function () {
+      const password = this.value;
+      const submitBtn = document.querySelector(
+        '#signUpForm button[type="submit"]'
+      );
+
+      if (password.length > 0 && password.length < 6) {
+        this.classList.add("border-red-500");
+        this.classList.remove("border-green-500");
+        passwordStrength.classList.remove("hidden");
+        passwordStrength.innerHTML =
+          '<span class="text-red-500">Password must be at least 6 characters long</span>';
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.classList.add("opacity-50", "cursor-not-allowed");
+        }
+      } else if (password.length >= 6) {
+        this.classList.remove("border-red-500");
+        this.classList.add("border-green-500");
+        passwordStrength.innerHTML =
+          '<span class="text-green-500">Password strength: Good</span>';
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        }
+      } else {
+        this.classList.remove("border-red-500", "border-green-500");
+        passwordStrength.classList.add("hidden");
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        }
+      }
+    });
+  }
+
+  /* --- Form Validation --- */
+  if (signInForm) {
+    signInForm.addEventListener("submit", function (e) {
+      const studentId = this.querySelector(
+        'input[name="student_id"]'
+      ).value.trim();
+      const password = this.querySelector(
+        'input[name="password"]'
+      ).value.trim();
+
+      if (!studentId || !password) {
+        e.preventDefault();
+        alert("Please fill in all fields");
+        return false;
+      }
+    });
+  }
+
+  if (signUpForm) {
+    signUpForm.addEventListener("submit", function (e) {
+      const inputs = this.querySelectorAll("input[required]");
+      let isValid = true;
+
+      inputs.forEach((input) => {
+        if (!input.value.trim()) {
+          isValid = false;
+          input.classList.add("border-red-500");
+        } else {
+          input.classList.remove("border-red-500");
+        }
+      });
+
+      if (!isValid) {
+        e.preventDefault();
+        alert("Please fill in all required fields");
+        return false;
+      }
+
+      const password = this.querySelector('input[name="password"]').value;
+      if (password.length < 6) {
+        e.preventDefault();
+        alert("Password must be at least 6 characters long");
+        return false;
+      }
+    });
+  }
+
   /* --- Hide Error Messages When Typing --- */
   ["student_id", "password", "name", "email", "phone_number"].forEach((id) => {
     document.querySelectorAll(`[name="${id}"]`).forEach((input) => {

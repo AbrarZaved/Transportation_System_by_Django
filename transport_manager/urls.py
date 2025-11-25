@@ -20,6 +20,13 @@ urlpatterns = [
     path("update_route/<int:id>", views.update_route, name="update_route"),
     path("add_notice/", views.add_notice, name="add_notice"),
     path("view_notices/", views.view_notices, name="view_notices"),
+    path("toggle_notice/", csrf_exempt(views.toggle_notice), name="toggle_notice"),
+    path("trip_reports/", views.trip_reports, name="trip_reports"),
+    path(
+        "load_google_maps.js",
+        views.load_google_maps_script,
+        name="load_google_maps_script",
+    ),
     path("send_location/", csrf_exempt(views.send_location), name="send_location"),
     # Legacy API endpoints (maintained for backward compatibility)
     path(

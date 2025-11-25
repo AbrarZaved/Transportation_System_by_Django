@@ -329,7 +329,7 @@
           {{ driver_form.driver_photo }}
         </div>
         <div class="col-span-full flex items-center mt-2">
-           {{ driver_form.driver_status }}
+          {{ driver_form.driver_status }}
           <label
             for="{{ driver_form.driver_status.id_for_label }}"
             class="ml-2 text-sm font-medium text-gray-700"
@@ -531,6 +531,174 @@
           class="px-3 py-1.5 bg-green-600 text-white rounded-md font-medium hover:bg-green-700 text-sm transition-colors"
         >
           Update Driver
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Helper Modal -->
+<div
+  id="helperModal"
+  class="modal hidden fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center animate-fade-in"
+>
+  <div
+    class="bg-white w-11/12 max-w-sm p-5 rounded-lg shadow-xl transform scale-90 opacity-0 animate-slide-up"
+    id="helperModalContent"
+  >
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="text-lg font-bold text-gray-800">Add New Helper</h3>
+      <button
+        onclick="toggleModal('helperModal')"
+        class="text-gray-500 hover:text-red-600 text-xl font-bold"
+      >
+        &times;
+      </button>
+    </div>
+    <form
+      method="POST"
+      action="{% url 'manage_drivers_buses' %}"
+      enctype="multipart/form-data"
+    >
+      {% csrf_token %}
+      <div class="grid grid-cols-1 gap-y-3">
+        <div class="col-span-1">
+          <label
+            for="{{ helper_form.name.id_for_label }}"
+            class="block text-sm font-medium text-gray-700 mb-1"
+            >Helper Name</label
+          >
+          {{ helper_form.name }}
+        </div>
+        <div class="col-span-1">
+          <label
+            for="{{ helper_form.phone_number.id_for_label }}"
+            class="block text-sm font-medium text-gray-700 mb-1"
+            >Phone Number</label
+          >
+          {{ helper_form.phone_number }}
+        </div>
+        <div class="col-span-1">
+          <label
+            for="{{ helper_form.helper_photo.id_for_label }}"
+            class="block text-sm font-medium text-gray-700 mb-1"
+            >Helper Photo</label
+          >
+          {{ helper_form.helper_photo }}
+        </div>
+        <div class="col-span-1 flex items-center mt-2">
+          {{ helper_form.helper_status }}
+          <label
+            for="{{ helper_form.helper_status.id_for_label }}"
+            class="ml-2 text-sm font-medium text-gray-700"
+            >Helper Active</label
+          >
+        </div>
+      </div>
+
+      <div class="flex justify-end mt-4">
+        <button
+          type="submit"
+          name="add_helper"
+          class="px-3 py-1.5 bg-purple-600 text-white rounded-md font-medium hover:bg-purple-700 text-sm transition-colors"
+        >
+          Add Helper
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Helper Modal -->
+<div
+  id="editHelperModal"
+  class="modal hidden fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center animate-fade-in"
+>
+  <div
+    class="bg-white w-11/12 max-w-sm p-5 rounded-lg shadow-xl transform scale-90 opacity-0 animate-slide-up"
+    id="editHelperModalContent"
+  >
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="text-lg font-bold text-gray-800">Edit Helper</h3>
+      <button
+        onclick="toggleModal('editHelperModal')"
+        class="text-gray-500 hover:text-red-600 text-xl font-bold"
+      >
+        &times;
+      </button>
+    </div>
+    <form
+      method="POST"
+      action="{% url 'manage_drivers_buses' %}"
+      enctype="multipart/form-data"
+    >
+      {% csrf_token %}
+      <input type="hidden" id="editHelperId" name="helper_id" />
+      <div class="grid grid-cols-1 gap-y-3">
+        <div class="col-span-1">
+          <label
+            for="editHelperName"
+            class="block text-sm font-medium text-gray-700 mb-1"
+            >Helper Name</label
+          >
+          <input
+            type="text"
+            id="editHelperName"
+            name="name"
+            class="w-full px-2 py-1.5 border border-gray-300 rounded-sm focus:ring-purple-400 focus:border-purple-400 text-sm"
+            required
+          />
+        </div>
+        <div class="col-span-1">
+          <label
+            for="editHelperPhone"
+            class="block text-sm font-medium text-gray-700 mb-1"
+            >Phone Number</label
+          >
+          <input
+            type="tel"
+            id="editHelperPhone"
+            name="phone_number"
+            class="w-full px-2 py-1.5 border border-gray-300 rounded-sm focus:ring-purple-400 focus:border-purple-400 text-sm"
+            required
+          />
+        </div>
+        <div class="col-span-1">
+          <label
+            for="editHelperPhoto"
+            class="block text-sm font-medium text-gray-700 mb-1"
+            >Helper Photo</label
+          >
+          <input
+            type="file"
+            id="editHelperPhoto"
+            name="helper_photo"
+            accept="image/*"
+            class="w-full px-2 py-1.5 border border-gray-300 rounded-sm focus:ring-purple-400 focus:border-purple-400 text-sm"
+          />
+        </div>
+        <div class="col-span-1 flex items-center mt-2">
+          <input
+            type="checkbox"
+            id="editHelperStatus"
+            name="helper_status"
+            class="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+          />
+          <label
+            for="editHelperStatus"
+            class="ml-2 text-sm font-medium text-gray-700"
+            >Helper Active</label
+          >
+        </div>
+      </div>
+
+      <div class="flex justify-end mt-4">
+        <button
+          type="submit"
+          name="edit_helper"
+          class="px-3 py-1.5 bg-purple-600 text-white rounded-md font-medium hover:bg-purple-700 text-sm transition-colors"
+        >
+          Update Helper
         </button>
       </div>
     </form>

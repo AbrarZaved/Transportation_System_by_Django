@@ -1,5 +1,5 @@
 from django import forms
-from .models import Driver, Bus  # Make sure to import Bus model
+from .models import Driver, Bus, Helper  # Make sure to import Bus and Helper model
 
 
 class DriverForm(forms.ModelForm):
@@ -132,6 +132,42 @@ class BusForm(forms.ModelForm):
             "bus_status": forms.CheckboxInput(
                 attrs={
                     "class": "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded",  # Basic Tailwind for checkbox
+                }
+            ),
+        }
+
+
+class HelperForm(forms.ModelForm):
+    class Meta:
+        model = Helper
+        fields = [
+            "name",
+            "phone_number",
+            "helper_photo",
+            "helper_status",
+        ]
+        widgets = {
+            "name": forms.TextInput(
+                attrs={
+                    "class": "mt-1 w-full border border-gray-300 rounded-md px-2 py-1.5 text-gray-800 focus:ring-yellow-500 focus:border-yellow-500 text-sm",
+                    "placeholder": "e.g., Md. Rahim Uddin",
+                }
+            ),
+            "phone_number": forms.TextInput(
+                attrs={
+                    "class": "mt-1 w-full border border-gray-300 rounded-md px-2 py-1.5 text-gray-800 focus:ring-yellow-500 focus:border-yellow-500 text-sm",
+                    "placeholder": "e.g., +88017XXXXXXXX",
+                }
+            ),
+            "helper_photo": forms.ClearableFileInput(
+                attrs={
+                    "class": "mt-1 w-full text-gray-800 text-sm file:mr-2 file:py-1.5 file:px-2 file:rounded-md file:border-0 file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100 cursor-pointer",
+                    "accept": "image/*",  # Ensures only image files can be selected
+                }
+            ),
+            "helper_status": forms.CheckboxInput(
+                attrs={
+                    "class": "h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded",  # Basic Tailwind for checkbox
                 }
             ),
         }

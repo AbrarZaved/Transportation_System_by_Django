@@ -4,15 +4,23 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.utils.timezone import localtime
+from django.utils.timezone import localtime, timedelta
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from authentication.models import DriverAuth
-from transit_hub.forms import BusForm, DriverForm
-from transit_hub.models import Bus, Driver, Helper, Route, Stoppage, RouteStoppage
+from transit_hub.forms import BusForm, DriverForm, HelperForm
+from transit_hub.models import (
+    Bus,
+    Driver,
+    Helper,
+    Notice,
+    Route,
+    Stoppage,
+    RouteStoppage,
+)
 from transport_manager.models import (
     LocationData,
     Transportation_schedules,
@@ -46,21 +54,38 @@ def dashboard(request):
 
 @login_required(login_url="diu_admin")
 def today_schedules(request):
+    from datetime import date
+
     current_time = datetime.now().replace(second=0, microsecond=0)
     current_day = localtime().strftime("%A").lower()
+    today = date.today()
+
+    # Get all active schedules for today
     schedules = (
         Transportation_schedules.objects.select_related(
             "bus", "driver", "route", "helper"
         )
-        .filter(departure_time__gte=current_time, days__contains=current_day)
+        .filter(
+            departure_time__gte=current_time.time(),
+            days__contains=current_day,
+            schedule_status=True,
+        )
         .order_by("departure_time")
     )
 
+    # Create or get trip instances for today's schedules and add to schedules
+    for schedule in schedules:
+        trip_instance, created = TripInstance.objects.get_or_create(
+            schedule=schedule, date=today, defaults={"status": "pending"}
+        )
+        # Add trip instance to schedule object for easy access in template
+        schedule.today_trip = trip_instance
+
     # Get all data for dropdowns
     routes = Route.objects.filter(route_status=True).order_by("route_name")
-    buses = Bus.objects.filter(route_assigned=False).order_by("bus_tag")
-    drivers = Driver.objects.filter(bus_assigned=False).order_by("name")
-    helpers = Helper.objects.all().order_by("name")
+    buses = Bus.objects.filter(bus_status=True).order_by("bus_tag")
+    drivers = Driver.objects.filter(driver_status=True).order_by("name")
+    helpers = Helper.objects.filter(helper_status=True).order_by("name")
 
     return render(
         request,
@@ -235,19 +260,24 @@ def assign_schedule(request):
 def manage_drivers_buses(request):
     drivers_list = Driver.objects.all()
     buses_list = Bus.objects.all()
+    helpers_list = Helper.objects.all()
 
     driver_paginator = Paginator(drivers_list, 10)
     bus_paginator = Paginator(buses_list, 10)
+    helper_paginator = Paginator(helpers_list, 10)
 
     driver_page_number = request.GET.get("driver_page")
     bus_page_number = request.GET.get("bus_page")
+    helper_page_number = request.GET.get("helper_page")
 
     drivers = driver_paginator.get_page(driver_page_number)
     buses = bus_paginator.get_page(bus_page_number)
+    helpers = helper_paginator.get_page(helper_page_number)
 
     # --- Form Handling ---
     driver_form = DriverForm()
     bus_form = BusForm()
+    helper_form = HelperForm()
 
     if request.method == "POST":
         if "add_driver" in request.POST:
@@ -261,6 +291,12 @@ def manage_drivers_buses(request):
             if bus_form.is_valid():
                 bus_form.save()
                 messages.success(request, "Bus added successfully!")
+                return redirect("manage_drivers_buses")
+        elif "add_helper" in request.POST:
+            helper_form = HelperForm(request.POST, request.FILES)
+            if helper_form.is_valid():
+                helper_form.save()
+                messages.success(request, "Helper added successfully!")
                 return redirect("manage_drivers_buses")
         elif "edit_driver" in request.POST:
             driver_id = request.POST.get("driver_id")
@@ -286,12 +322,27 @@ def manage_drivers_buses(request):
                     return redirect("manage_drivers_buses")
             except Bus.DoesNotExist:
                 messages.error(request, "Bus not found!")
+        elif "edit_helper" in request.POST:
+            helper_id = request.POST.get("helper_id")
+            try:
+                helper_instance = Helper.objects.get(id=helper_id)
+                helper_form = HelperForm(
+                    request.POST, request.FILES, instance=helper_instance
+                )
+                if helper_form.is_valid():
+                    helper_form.save()
+                    messages.success(request, "Helper updated successfully!")
+                    return redirect("manage_drivers_buses")
+            except Helper.DoesNotExist:
+                messages.error(request, "Helper not found!")
 
     context = {
         "drivers": drivers,
         "buses": buses,
+        "helpers": helpers,
         "driver_form": driver_form,
         "bus_form": bus_form,
+        "helper_form": helper_form,
     }
     return render(request, "transport_manager/manage_drivers_buses.html", context)
 
@@ -379,6 +430,8 @@ def update_route(request, id):
 def edit_schedule(request):
     if request.method == "POST":
         try:
+            from datetime import date
+
             schedule_id = request.POST.get("schedule_id")
             schedule = Transportation_schedules.objects.get(schedule_id=schedule_id)
             create_new_trip = request.POST.get("create_new_trip") == "on"
@@ -413,7 +466,7 @@ def edit_schedule(request):
                 )
                 helper = Helper.objects.get(id=helper_id) if helper_id else None
 
-                Transportation_schedules.objects.create(
+                new_schedule = Transportation_schedules.objects.create(
                     route=route,
                     bus=bus,
                     driver=driver,
@@ -423,6 +476,13 @@ def edit_schedule(request):
                     from_dsc=from_dsc,
                     to_dsc=not from_dsc,
                     schedule_status=schedule_status,
+                    audience=schedule.audience,
+                    days=schedule.days,
+                )
+
+                # Create trip instance for new schedule
+                TripInstance.objects.create(
+                    schedule=new_schedule, date=date.today(), status="pending"
                 )
 
                 # Send SMS for new trip
@@ -445,8 +505,18 @@ def edit_schedule(request):
             if bus_id:
                 schedule.bus = Bus.objects.get(id=bus_id)
             if driver_id:
-                schedule.driver = Driver.objects.get(id=driver_id)
-                schedule.driver.total_trip_assigned += 1
+                new_driver = Driver.objects.get(id=driver_id)
+                # Only update driver stats if driver actually changed
+                if schedule.driver != new_driver:
+                    if schedule.driver:
+                        schedule.driver.total_trip_assigned = max(
+                            0, schedule.driver.total_trip_assigned - 1
+                        )
+                        schedule.driver.save()
+                    new_driver.total_trip_assigned += 1
+                    new_driver.save()
+                    schedule.driver = new_driver
+
             if helper_id:
                 try:
                     schedule.helper = Helper.objects.get(id=helper_id)
@@ -467,6 +537,12 @@ def edit_schedule(request):
             schedule.schedule_status = schedule_status
             schedule.from_dsc = from_dsc
             schedule.to_dsc = not from_dsc
+
+            # Update or create today's trip instance
+            today = date.today()
+            trip_instance, created = TripInstance.objects.get_or_create(
+                schedule=schedule, date=today, defaults={"status": "pending"}
+            )
 
             # Check what changed and send notifications
             changes = []
@@ -570,19 +646,31 @@ def delete_schedule(request):
         try:
             schedule = Transportation_schedules.objects.get(schedule_id=schedule_id)
 
+            from datetime import date
+
+            today = date.today()
+
             # Store details for SMS notification before deletion
             driver = schedule.driver
             helper = schedule.helper
             route = schedule.route
             departure_time = schedule.departure_time
             bus = schedule.bus
-            driver.total_trip_assigned -= 1
-            driver.save()
+
+            # Update driver stats
+            if driver:
+                driver.total_trip_assigned = max(0, driver.total_trip_assigned - 1)
+                driver.save()
+
+            # Delete associated trip instances for today
+            TripInstance.objects.filter(schedule=schedule, date=today).delete()
+
             # Delete the schedule
             schedule.delete()
 
             # Send cancellation SMS to driver
-            send_schedule_cancellation_sms(driver, route, departure_time, bus)
+            if driver:
+                send_schedule_cancellation_sms(driver, route, departure_time, bus)
 
             # Send cancellation SMS to helper if assigned
             if helper:
@@ -889,9 +977,6 @@ def trip_complete(request):
 @login_required
 def add_notice(request):
     """Add notice page for admin"""
-    from transit_hub.models import Notice
-    from datetime import datetime
-    from django.utils import timezone
 
     if request.method == "POST":
         title = request.POST.get("title")
@@ -976,9 +1061,184 @@ def view_notices(request):
     return render(request, "transport_manager/view_notices.html", context)
 
 
-# ============ TRIP INSTANCE API ENDPOINTS ============
-# Note: trip_start and trip_end functionality is now handled automatically
-# by the enhanced send_location endpoint
+@login_required
+@csrf_exempt
+def toggle_notice(request):
+    """Toggle notice active status"""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            notice_id = data.get("notice_id")
+            new_status = data.get("is_active")
+
+            from transit_hub.models import Notice
+
+            notice = Notice.objects.get(id=notice_id)
+            notice.is_active = new_status
+            notice.save()
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "message": f"Notice {'activated' if new_status else 'deactivated'} successfully",
+                    "is_active": notice.is_active,
+                }
+            )
+
+        except Notice.DoesNotExist:
+            return JsonResponse(
+                {"success": False, "message": "Notice not found"}, status=404
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+    return JsonResponse(
+        {"success": False, "message": "Invalid request method"}, status=405
+    )
+
+
+@login_required(login_url="diu_admin")
+def load_google_maps_script(request):
+    """Securely load Google Maps script without exposing API key to frontend"""
+    from django.conf import settings
+    from django.http import HttpResponse
+
+    api_key = settings.GOOGLE_MAPS_API_KEY
+    if not api_key:
+        # Return empty script if no API key configured
+        return HttpResponse(
+            "console.warn('Google Maps API key not configured - running in demo mode');",
+            content_type="application/javascript",
+        )
+
+    # Create a script that loads Google Maps without exposing the key
+    script_content = f"""
+// Secure Google Maps loader - API key never exposed to frontend
+(function() {{
+    if (typeof google !== 'undefined' && window.googleMapsLoaded) {{
+        return; // Already loaded
+    }}
+    
+    const script = document.createElement('script');
+    script.async = true;
+    script.defer = true;
+    script.src = 'https://maps.googleapis.com/maps/api/js?key={api_key}&libraries=marker&callback=initGoogleMapsGlobal&loading=async';
+    script.onerror = function() {{
+        console.warn('Google Maps API failed to load - running in demo mode');
+        window.googleMapsLoaded = false;
+        window.googleMapsApiLoaded = false;
+    }};
+    
+    document.head.appendChild(script);
+}})();
+
+// Global initialization function
+window.initGoogleMapsGlobal = function() {{
+    window.googleMapsLoaded = true;
+    window.googleMapsApiLoaded = true;
+    console.log('Google Maps API loaded successfully');
+    
+    // Trigger any pending map initializations
+    if (window.initGoogleMapsTracking) {{
+        window.initGoogleMapsTracking();
+    }}
+    if (window.initGoogleMaps) {{
+        window.initGoogleMaps();
+    }}
+}};
+
+window.gm_authFailure = function() {{
+    console.warn('Google Maps API authentication failed');
+    window.googleMapsLoaded = false;
+    window.googleMapsApiLoaded = false;
+}};
+"""
+
+    return HttpResponse(script_content, content_type="application/javascript")
+
+
+@login_required(login_url="diu_admin")
+def trip_reports(request):
+
+    # Get filter parameters
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+    driver_filter = request.GET.get("driver")
+    route_filter = request.GET.get("route")
+    status_filter = request.GET.get("status")
+    bus_filter = request.GET.get("bus")
+
+    # Default to last 7 days if no dates provided
+    today = date.today()
+    if not start_date:
+        start_date = (today - timedelta(days=7)).strftime("%Y-%m-%d")
+    if not end_date:
+        end_date = today.strftime("%Y-%m-%d")
+
+    # Base queryset
+    trips = (
+        TripInstance.objects.select_related(
+            "schedule__route", "schedule__bus", "schedule__driver", "schedule__helper"
+        )
+        .filter(date__range=[start_date, end_date])
+        .order_by("-date", "schedule__departure_time")
+    )
+
+    # Apply filters
+    if driver_filter:
+        trips = trips.filter(schedule__driver__id=driver_filter)
+    if route_filter:
+        trips = trips.filter(schedule__route__id=route_filter)
+    if status_filter:
+        trips = trips.filter(status=status_filter)
+    if bus_filter:
+        trips = trips.filter(schedule__bus__id=bus_filter)
+
+    # Get statistics
+    total_trips = trips.count()
+    completed_trips = trips.filter(status="completed").count()
+    in_progress_trips = trips.filter(status="in_progress").count()
+    pending_trips = trips.filter(status="pending").count()
+    cancelled_trips = trips.filter(status="cancelled").count()
+
+    completion_rate = (completed_trips / total_trips * 100) if total_trips > 0 else 0
+
+    # Pagination
+    paginator = Paginator(trips, 20)  # 20 trips per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    # Get data for filter dropdowns
+    drivers = Driver.objects.filter(driver_status=True).order_by("name")
+    routes = Route.objects.filter(route_status=True).order_by("route_name")
+    buses = Bus.objects.filter(bus_status=True).order_by("bus_tag")
+
+    # Trip status choices
+    status_choices = TripInstance.TRIP_STATUS_CHOICES
+
+    context = {
+        "trips": page_obj,
+        "total_trips": total_trips,
+        "completed_trips": completed_trips,
+        "in_progress_trips": in_progress_trips,
+        "pending_trips": pending_trips,
+        "cancelled_trips": cancelled_trips,
+        "completion_rate": round(completion_rate, 1),
+        "start_date": start_date,
+        "end_date": end_date,
+        "drivers": drivers,
+        "routes": routes,
+        "buses": buses,
+        "status_choices": status_choices,
+        "current_filters": {
+            "driver": driver_filter,
+            "route": route_filter,
+            "status": status_filter,
+            "bus": bus_filter,
+        },
+    }
+
+    return render(request, "transport_manager/trip_reports.html", context)
 
 
 @api_view(["GET"])

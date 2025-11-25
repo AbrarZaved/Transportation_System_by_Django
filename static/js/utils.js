@@ -622,16 +622,10 @@ function initializeTrackingMapWithApiLoad() {
     return;
   }
 
-  // Get the API key from a meta tag or use a default (you'll need to set this)
-  let apiKey = "";
-  const metaApiKey = document.querySelector('meta[name="google-maps-api-key"]');
-  if (metaApiKey) {
-    apiKey = metaApiKey.getAttribute("content");
-  }
-
-  // If no API key found, show demo mode
-  if (!apiKey) {
-    console.warn("Google Maps API key not found, running in demo mode");
+  // Check if Maps API script is already included in the page
+  // The API key should be loaded server-side in the template, not in JavaScript
+  if (!window.googleMapsApiLoaded) {
+    console.warn("Google Maps API not loaded by server, running in demo mode");
     initializeTrackingMap(); // Will show demo mode
     return;
   }
@@ -639,6 +633,7 @@ function initializeTrackingMapWithApiLoad() {
   // Set up global callbacks for API loading
   window.initGoogleMapsTracking = function () {
     window.googleMapsLoaded = true;
+    window.googleMapsApiLoaded = true;
     console.log("Google Maps API loaded successfully for tracking");
     initializeTrackingMap();
   };
@@ -651,18 +646,18 @@ function initializeTrackingMapWithApiLoad() {
     initializeTrackingMap(); // Will show demo mode
   };
 
-  // Dynamically load Google Maps API
-  const script = document.createElement("script");
-  script.async = true;
-  script.defer = true;
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker&callback=initGoogleMapsTracking&loading=async`;
-  script.onerror = function () {
-    console.warn("Google Maps API failed to load - running in demo mode");
-    window.googleMapsLoaded = false;
+  // Check if the Google Maps script is already loaded in the page
+  // This should be loaded server-side in the Django template
+  if (typeof google !== "undefined") {
+    window.googleMapsLoaded = true;
+    window.googleMapsApiLoaded = true;
+    initializeTrackingMap();
+  } else {
+    console.warn(
+      "Google Maps API should be loaded server-side - running in demo mode"
+    );
     initializeTrackingMap(); // Will show demo mode
-  };
-
-  document.head.appendChild(script);
+  }
 }
 
 function initializeTrackingMap() {

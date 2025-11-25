@@ -17,6 +17,16 @@ function filterDrivers() {
   });
 }
 
+function filterHelpers() {
+  const query = document.getElementById("filter-helper").value.toLowerCase();
+  const rows = document.querySelectorAll("#helper-details");
+
+  rows.forEach((row) => {
+    const keywords = row.getAttribute("helper-data").toLowerCase();
+    row.style.display = keywords.includes(query) ? "table-row" : "none";
+  });
+}
+
 function toggleModal(id) {
   const modal = document.getElementById(id);
   const content = modal.querySelector(".transform");
@@ -76,11 +86,25 @@ function editDriver(
   // Open the edit modal
   toggleModal("editDriverModal");
 }
+
+function editHelper(id, name, phone, status) {
+  // Populate the edit form with current values
+  document.getElementById("editHelperId").value = id;
+  document.getElementById("editHelperName").value = name;
+  document.getElementById("editHelperPhone").value = phone || "";
+  document.getElementById("editHelperStatus").checked = status;
+
+  // Open the edit modal
+  toggleModal("editHelperModal");
+}
 document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("filter-bus").addEventListener("input", filterBuses);
   document
     .getElementById("filter-driver")
     .addEventListener("input", filterDrivers);
+  document
+    .getElementById("filter-helper")
+    .addEventListener("input", filterHelpers);
   document.querySelectorAll(".modal-toggle").forEach((button) => {
     button.addEventListener("click", function () {
       const modalId = this.getAttribute("data-modal-id");

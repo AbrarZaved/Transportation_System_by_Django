@@ -22,12 +22,9 @@
     window.googleMapsLoaded = false;
   };
 </script>
-<script
-  async
-  defer
-  src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=marker&callback=initGoogleMaps&loading=async"
-  onerror="console.warn('Google Maps API failed to load - running in demo mode'); window.googleMapsLoaded = false;"
-></script>
+
+<!-- Secure Google Maps loading without exposing API key -->
+<script src="{% url 'load_google_maps_script' %}" defer></script>
 <!-- Hero Section -->
 <section class="bg-white py-10 px-4 text-center border-b">
   <h1 class="text-3xl md:text-4xl font-bold text-indigo-600">
@@ -95,7 +92,7 @@
         <div>
           <p><span class="font-medium">Driver:</span> {{ bus.driver_name }}</p>
           <p>
-            <span class="font-medium">Bus Capacity:</span> 
+            <span class="font-medium">Bus Capacity:</span>
             {{ bus.bus_capacity }}
           </p>
           <p>

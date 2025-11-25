@@ -39,8 +39,47 @@ function closeModal() {
 }
 
 function toggleNotice(id, newStatus) {
-  // You can implement this with AJAX to toggle notice status
-  console.log(`Toggle notice ${id} to ${newStatus ? "active" : "inactive"}`);
+  // Make AJAX request to toggle notice status
+  fetch("/transport_manager/toggle_notice/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),
+    },
+    body: JSON.stringify({
+      notice_id: id,
+      is_active: newStatus,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        // Reload the page to show updated status
+        location.reload();
+      } else {
+        alert("Error: " + data.message);
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("An error occurred while updating the notice status.");
+    });
+}
+
+// Function to get CSRF token
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
 }
 
 // Also assign to window for extra safety

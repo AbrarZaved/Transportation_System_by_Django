@@ -198,6 +198,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupScrollToTop();
   setupTimeFilterButtons();
   setupRouteCardToggles();
+  initializeDirectionFilter();
 
   document.querySelectorAll('input[name="trip-type"]').forEach((radio) => {
     radio.addEventListener("change", function () {
@@ -632,4 +633,45 @@ function initializeReviewsCarousel() {
   if (totalSlides > slidesToShow) {
     startAutoSlide();
   }
+}
+
+// Direction filter functionality for upcoming buses table
+function initializeDirectionFilter() {
+  const filterButtons = document.querySelectorAll(".direction-filter-btn");
+  const busRows = document.querySelectorAll(".bus-row");
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const filter = this.getAttribute("data-filter");
+
+      // Update button styles
+      filterButtons.forEach((btn) => {
+        btn.classList.remove("bg-blue-600", "text-white");
+        btn.classList.add(
+          "bg-white",
+          "border",
+          "border-gray-300",
+          "text-gray-700"
+        );
+      });
+
+      this.classList.remove(
+        "bg-white",
+        "border",
+        "border-gray-300",
+        "text-gray-700"
+      );
+      this.classList.add("bg-blue-600", "text-white");
+
+      // Filter rows
+      busRows.forEach((row) => {
+        const rowDirection = row.getAttribute("data-direction");
+        if (filter === "all" || rowDirection === filter) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    });
+  });
 }
