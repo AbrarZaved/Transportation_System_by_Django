@@ -47,7 +47,7 @@
         <li>
           <a href="{% url 'view_bus' %}"
             class="{% if request.resolver_match.url_name == 'view_bus' %} hover:text-white border-b-2 border-white {% else %} hover:text-white {% endif %} focus:outline-none active:outline-none">
-            View Bus
+            Bus Location
           </a>
         </li>
         <li>
@@ -101,7 +101,7 @@
   <div id="mobileMenu" class="transition-all duration-500 ease-in-out max-h-0 overflow-hidden opacity-0 md:hidden bg-[#BE123C] shadow-xl border-t border-[#BE123C]">
     <ul class="flex flex-col p-4 space-y-3 font-semibold text-white">
       <li><a href="{% url 'index' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">Home</a></li>
-      <li><a href="{% url 'view_bus' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">View Bus</a></li>
+      <li><a href="{% url 'view_bus' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">Bus Location</a></li>
       <li><a href="{% url 'subscription' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">Subscription</a></li>
       <li><a href="{% url 'about_us' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">About Us</a></li>
       <li><a href="{% url 'contact_us' %}" class="block py-2 px-3 rounded-lg hover:underline transition focus:outline-none active:outline-none">Contact Us</a></li>

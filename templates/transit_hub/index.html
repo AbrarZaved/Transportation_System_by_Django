@@ -101,7 +101,7 @@
               />
               <label
                 for="to-dsc"
-                class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-slate-600 hover:bg-slate-50 peer-checked:border-pink-600 peer-checked:text-slate-600 transition text-sm"
+                class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-blue-700 hover:bg-blue-50 peer-checked:bg-[#EFECE3] peer-checked:text-black peer-checked:border-black transition text-sm"
               >
                 <div class="block">
                   <div class="font-semibold">To DSC</div>
@@ -137,7 +137,7 @@
               />
               <label
                 for="from-dsc"
-                class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-slate-600 hover:bg-slate-50 peer-checked:text-slate-600 peer-checked:border-pink-600 transition text-sm"
+                class="inline-flex items-center justify-between w-full p-3 text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer hover:text-blue-700 hover:bg-blue-50 peer-checked:bg-[#EFECE3] peer-checked:text-black peer-checked:border-black transition text-sm"
               >
                 <div class="block">
                   <div class="font-semibold">From DSC</div>
@@ -164,25 +164,7 @@
             </li>
           </ul>
         </div>
-        {% if request.session.is_student_authenticated %} {% if preferences %}
-        <h4 class="text-sm font-semibold text-gray-600 mb-2 border-blue-600">
-          Recently Searched
-        </h4>
-        {% endif %}
-        <div
-          class="flex flex-wrap md:flex-nowrap md:space-x-2 overflow-x-auto space-x-2 scrollbar-hide"
-          id="recent-searches"
-        >
-          <!-- Sample tags - replace with dynamic values if needed -->
-          {% for preference in preferences %}
-          <span
-            name="recent_searches"
-            class="bg-white border border-blue-600 text-slate-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-slate-50 transition"
-            >{{ preference.searched_locations|title }}</span
-          >
-          {% endfor %}
-        </div>
-        {% endif %}
+
         <div class="relative">
           <input
             type="text"
@@ -261,10 +243,29 @@
         <button
           type="submit"
           id="search"
-          class="w-full bg-blue-600 hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600 text-white font-semibold py-3 rounded-md transition"
+          class="w-full bg-[#BE123C] hover:bg-[#9B1C2C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9B1C2C] text-white font-semibold py-3 rounded-md transition"
         >
           Search
         </button>
+        {% if request.session.is_student_authenticated %} {% if preferences %}
+        <h4 class="text-sm font-semibold text-gray-600 mb-2 border-red-600">
+          Recently Searched
+        </h4>
+        {% endif %}
+        <div
+          class="flex flex-wrap md:flex-nowrap md:space-x-2 overflow-x-auto space-x-2 scrollbar-hide"
+          id="recent-searches"
+        >
+          <!-- Sample tags - replace with dynamic values if needed -->
+          {% for preference in preferences %}
+          <span
+            name="recent_searches"
+            class="bg-white border border-blue-600 text-slate-600 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-slate-50 transition"
+            >{{ preference.searched_locations|title }}</span
+          >
+          {% endfor %}
+        </div>
+        {% endif %}
       </form>
     </div>
     <!-- 🚍 Upcoming Buses -->

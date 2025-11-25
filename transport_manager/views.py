@@ -54,7 +54,7 @@ def dashboard(request):
 
 @login_required(login_url="diu_admin")
 def today_schedules(request):
-    from datetime import date
+
 
     current_time = datetime.now().replace(second=0, microsecond=0)
     current_day = localtime().strftime("%A").lower()
@@ -454,13 +454,16 @@ def edit_schedule(request):
             departure_time = request.POST.get("departure_time")
             schedule_status = request.POST.get("schedule_status") == "true"
             from_dsc = request.POST.get("direction") == "from_dsc"
-
+            print(
+                f"Received edit for schedule {schedule_id}: route={route_id}, bus={bus_id}, driver={driver_id}, helper={helper_id}, departure_time={departure_time}, status={schedule_status}, from_dsc={from_dsc}"
+            )
             # Parse new departure time
             new_departure_time = datetime.strptime(departure_time, "%H:%M").time()
 
             # Check if time has changed and create_new_trip is checked
             if create_new_trip and old_departure_time != new_departure_time:
                 # Create a new schedule with the new time
+                print("Creating new trip instance due to time change and 'create_new_trip' checked")
                 route = Route.objects.get(id=route_id) if route_id else schedule.route
                 bus = Bus.objects.get(id=bus_id) if bus_id else schedule.bus
                 driver = (
@@ -504,8 +507,11 @@ def edit_schedule(request):
             # Update schedule fields
             if route_id:
                 schedule.route = Route.objects.get(id=route_id)
+                print(f"Updated route to {schedule.route}")
             if bus_id:
+                print(f"Updated bus to {bus_id}")
                 schedule.bus = Bus.objects.get(id=bus_id)
+                print(f"Updated bus to {schedule.bus}")
             if driver_id:
                 new_driver = Driver.objects.get(id=driver_id)
                 # Only update driver stats if driver actually changed
@@ -540,12 +546,6 @@ def edit_schedule(request):
             schedule.from_dsc = from_dsc
             schedule.to_dsc = not from_dsc
 
-            # Update or create today's trip instance
-            today = date.today()
-            trip_instance, created = TripInstance.objects.get_or_create(
-                schedule=schedule, date=today, defaults={"status": "pending"}
-            )
-
             # Check what changed and send notifications
             changes = []
             if old_route != schedule.route:
@@ -554,7 +554,7 @@ def edit_schedule(request):
                 )
             if old_bus != schedule.bus:
                 changes.append(
-                    f"বাস পরিবর্তন: {old_bus.bus_tag} থেকে {schedule.bus.bus_tag}"
+                    f"বাস পরিবর্তন: {old_bus.bus_name} থেকে {schedule.bus.bus_name}"
                 )
             if old_departure_time != schedule.departure_time:
                 changes.append(
@@ -563,6 +563,36 @@ def edit_schedule(request):
             if old_status != schedule.schedule_status:
                 status_text = "সক্রিয়" if schedule.schedule_status else "নিষ্ক্রিয়"
                 changes.append(f"অবস্থা পরিবর্তন: {status_text}")
+
+            # Update or create today's trip instance
+            today = date.today()
+            trip_instance, created = TripInstance.objects.get_or_create(
+                schedule=schedule, date=today, defaults={"status": "pending"}
+            )
+            print(f"Trip instance for today: {trip_instance}, created: {created}")
+            # If trip instance already exists and schedule was modified, update it
+            if not created and changes:
+                # Only reset trip if it's still pending (don't interrupt in-progress trips)
+                if trip_instance.status == "pending":
+                    # Reset trip instance to reflect schedule changes
+                    trip_instance.actual_start_time = None
+                    trip_instance.actual_end_time = None
+                    trip_instance.save(
+                        update_fields=["actual_start_time", "actual_end_time"]
+                    )
+                    print(
+                        f"Trip instance {trip_instance.id} updated due to schedule changes"
+                    )
+                elif trip_instance.status == "in_progress":
+                    # Log that trip is in progress and can't be modified
+                    print(
+                        f"Trip instance {trip_instance.id} is in progress - schedule changes will apply to future trips"
+                    )
+                elif trip_instance.status == "completed":
+                    # Log that trip is completed
+                    print(
+                        f"Trip instance {trip_instance.id} is completed - schedule changes don't affect completed trips"
+                    )
 
             schedule.save()
 
@@ -862,7 +892,6 @@ def trips(request, driver_id, auth_token):
     try:
         today = date.today()
         current_time = localtime().time()
-
 
         # Get today's trip instances for this driver
         trips_queryset = (

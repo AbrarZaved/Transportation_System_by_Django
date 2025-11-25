@@ -9,7 +9,7 @@ import {
 let filterRoute = null;
 let filterTime = "all";
 
-async function handleRecentSearch(studentId) {
+async function handleRecentSearch() {
   document.querySelectorAll('[name="recent_searches"]').forEach((el) => {
     el.addEventListener("click", (e) => {
       e.preventDefault();
@@ -18,7 +18,7 @@ async function handleRecentSearch(studentId) {
       ).value;
       const place = el.textContent.trim();
       document.getElementById("place").value = place;
-      fetchRoutes(place, tripType, studentId, filterTime);
+      fetchRoutes(place, tripType, filterTime);
     });
   });
 }
@@ -64,7 +64,7 @@ async function fetchRoutes(place, tripType, timeFilter = "all") {
         }</span>`;
       });
 
-      await handleRecentSearch(studentId);
+      await handleRecentSearch();
     }
 
     const filtered = await filterRoutesByTime(routeData, timeFilter);
@@ -201,12 +201,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeDirectionFilter();
 
   document.querySelectorAll('input[name="trip-type"]').forEach((radio) => {
-    radio.addEventListener("change", function () {
+    radio.addEventListener("click", function () {
       const placeInput = document.getElementById("place");
       placeInput.placeholder =
         this.value === "To DSC"
           ? "From which place to DSC?"
           : "Enter your destination";
+      placeInput.focus();
     });
   });
 

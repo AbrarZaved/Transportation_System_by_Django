@@ -101,12 +101,11 @@ def index(request):
 
     if user:
         preferences = list(
-            Preference.objects.filter(student__username=user).order_by("-created_at")[
+            Preference.objects.filter(student__username=user).order_by("-last_searched")[
                 :3
             ]
         )
-
-    # Get recent reviews for carousel (4+ star reviews)
+    places=[i.searched_locations for i in preferences]  # Get recent reviews for carousel (4+ star reviews)
     try:
         recent_reviews = (
             StudentReview.objects.select_related("student", "bus", "driver")
@@ -243,21 +242,13 @@ def get_schedules(trip_type, place, username=None):
 def save_preference_by_session(username, place):
     student = Student.objects.filter(username=username).first()
 
-    if (
-        student
-        and not Preference.objects.filter(
-            student=student, searched_locations=place
-        ).exists()
-    ):
-        Preference.objects.create(
+    if student:
+        Preference.objects.update_or_create(
             student=student,
             searched_locations=place,
-            total_searches=1,
+            defaults={"total_searches": F("total_searches") + 1},
         )
-    else:
-        Preference.objects.filter(student=student, searched_locations=place).update(
-            total_searches=F("total_searches") + 1
-        )
+    
 
 
 @sync_to_async

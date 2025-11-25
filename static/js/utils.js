@@ -597,7 +597,9 @@ window.refreshBusLocation = function (busName) {
 // Function to dynamically load Google Maps API if not already loaded
 function initializeTrackingMapWithApiLoad() {
   // Check if Google Maps API is already loaded
-  if (typeof google !== "undefined" && window.googleMapsLoaded) {
+  if (typeof google !== "undefined" && google.maps) {
+    window.googleMapsLoaded = true;
+    window.googleMapsApiLoaded = true;
     initializeTrackingMap();
     return;
   }
@@ -606,8 +608,10 @@ function initializeTrackingMapWithApiLoad() {
   if (document.querySelector('script[src*="maps.googleapis.com"]')) {
     // Wait for it to load
     const checkGoogleMaps = setInterval(() => {
-      if (typeof google !== "undefined" && window.googleMapsLoaded) {
+      if (typeof google !== "undefined" && google.maps) {
         clearInterval(checkGoogleMaps);
+        window.googleMapsLoaded = true;
+        window.googleMapsApiLoaded = true;
         initializeTrackingMap();
       }
     }, 100);
@@ -615,56 +619,67 @@ function initializeTrackingMapWithApiLoad() {
     // Timeout after 10 seconds
     setTimeout(() => {
       clearInterval(checkGoogleMaps);
-      if (typeof google === "undefined" || !window.googleMapsLoaded) {
-        initializeTrackingMap(); // Will show demo mode
+      if (typeof google === "undefined" || !google.maps) {
+        loadGoogleMapsScript();
       }
     }, 10000);
     return;
   }
 
-  // Check if Maps API script is already included in the page
-  // The API key should be loaded server-side in the template, not in JavaScript
-  if (!window.googleMapsApiLoaded) {
-    console.warn("Google Maps API not loaded by server, running in demo mode");
-    initializeTrackingMap(); // Will show demo mode
-    return;
-  }
+  // Load Google Maps script dynamically
+  loadGoogleMapsScript();
+}
 
-  // Set up global callbacks for API loading
-  window.initGoogleMapsTracking = function () {
-    window.googleMapsLoaded = true;
-    window.googleMapsApiLoaded = true;
-    console.log("Google Maps API loaded successfully for tracking");
-    initializeTrackingMap();
+// Function to load Google Maps script from server
+function loadGoogleMapsScript() {
+  // Create script element to load Google Maps
+  const script = document.createElement("script");
+  script.src = "/load_google_maps.js"; // This will load our secure script
+  script.async = true;
+  script.defer = true;
+
+  script.onload = function () {
+    console.log("Google Maps loader script loaded");
+    // Wait a bit for the actual Google Maps API to load
+    setTimeout(() => {
+      if (typeof google !== "undefined" && google.maps) {
+        window.googleMapsLoaded = true;
+        window.googleMapsApiLoaded = true;
+        initializeTrackingMap();
+      } else {
+        // Still check periodically
+        const checkGoogleMaps = setInterval(() => {
+          if (typeof google !== "undefined" && google.maps) {
+            clearInterval(checkGoogleMaps);
+            window.googleMapsLoaded = true;
+            window.googleMapsApiLoaded = true;
+            initializeTrackingMap();
+          }
+        }, 500);
+
+        // Final timeout
+        setTimeout(() => {
+          clearInterval(checkGoogleMaps);
+          console.warn("Google Maps API failed to load - running in demo mode");
+          initializeTrackingMap(); // Will show demo mode
+        }, 15000);
+      }
+    }, 1000);
   };
 
-  window.gm_authFailure = function () {
-    console.warn(
-      "Google Maps API authentication failed - running in demo mode"
-    );
-    window.googleMapsLoaded = false;
+  script.onerror = function () {
+    console.warn("Failed to load Google Maps API - running in demo mode");
     initializeTrackingMap(); // Will show demo mode
   };
 
-  // Check if the Google Maps script is already loaded in the page
-  // This should be loaded server-side in the Django template
-  if (typeof google !== "undefined") {
-    window.googleMapsLoaded = true;
-    window.googleMapsApiLoaded = true;
-    initializeTrackingMap();
-  } else {
-    console.warn(
-      "Google Maps API should be loaded server-side - running in demo mode"
-    );
-    initializeTrackingMap(); // Will show demo mode
-  }
+  document.head.appendChild(script);
 }
 
 function initializeTrackingMap() {
   // Initialize Google Map
   const mapContainer = document.getElementById("trackingMap");
 
-  if (typeof google === "undefined" || !window.googleMapsLoaded) {
+  if (typeof google === "undefined" || !google.maps) {
     // If Google Maps is not loaded or API key invalid, show demo mode
     mapContainer.innerHTML = `
       <div class="h-full flex items-center justify-center bg-blue-50">
@@ -673,17 +688,35 @@ function initializeTrackingMap() {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m-6 3l6-3"/>
           </svg>
           <p class="text-blue-600 font-semibold">Demo Tracking Mode</p>
-          <p class="text-sm text-gray-600 mb-4">Configure Google Maps API key for live map view</p>
+          <p class="text-sm text-gray-600 mb-4">Loading Google Maps API...</p>
           <div class="bg-white p-4 rounded-lg shadow-sm border">
             <p class="text-xs text-gray-500 mb-2 font-medium">Live GPS Coordinates:</p>
             <div id="demoCoordinates" class="text-sm font-mono text-gray-700 bg-gray-50 p-2 rounded"></div>
           </div>
           <div class="mt-4 text-xs text-gray-500">
-            <p>🚌 Real-time GPS tracking (API fallback mode)</p>
+            <p>🚌 Real-time GPS tracking (API loading...)</p>
           </div>
         </div>
       </div>
     `;
+
+    // Try to load Google Maps API again after a delay
+    setTimeout(() => {
+      if (typeof google === "undefined" || !google.maps) {
+        console.warn(
+          "Google Maps API still not available - staying in demo mode"
+        );
+        mapContainer.innerHTML = mapContainer.innerHTML
+          .replace(
+            "Loading Google Maps API...",
+            "Configure Google Maps API key for live map view"
+          )
+          .replace("API loading...", "API fallback mode");
+      } else {
+        // API became available, reinitialize
+        initializeTrackingMap();
+      }
+    }, 3000);
     return;
   }
 

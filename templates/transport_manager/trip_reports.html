@@ -35,6 +35,14 @@
     .status-completed { background-color: #d1fae5; color: #065f46; }
     .status-cancelled { background-color: #fee2e2; color: #991b1b; }
     
+    .scroll-hidden {
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* Internet Explorer 10+ */
+    }
+    .scroll-hidden::-webkit-scrollbar {
+        display: none; /* WebKit browsers */
+    }
+    
     @media (max-width: 768px) {
         .responsive-table {
             font-size: 0.875rem;
@@ -219,7 +227,7 @@
         <div class="bg-white shadow-lg rounded-lg overflow-hidden">
             {% if trips %}
                 <div class="overflow-x-auto">
-                    <table class="responsive-table min-w-full divide-y divide-gray-200">
+                    <table class="responsive-table min-w-full divide-y divide-gray-200 scroll-hidden">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
@@ -239,8 +247,8 @@
                                         <div class="text-sm font-medium text-gray-900">{{ trip.date|date:"M d, Y" }}</div>
                                         <div class="text-xs text-gray-500">{{ trip.date|date:"l" }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-indigo-600">{{ trip.schedule.route.route_name }}</div>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm font-medium text-indigo-600 break-words max-w-xs">{{ trip.schedule.route.route_name }}</div>
                                         <div class="text-xs text-gray-500">
                                             {% if trip.schedule.from_dsc %}
                                                 <span class="text-blue-600">From DSC</span>
@@ -300,13 +308,13 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="status-badge status-{{ trip.status }}">
                                             {% if trip.status == "pending" %}
-                                                ⏳ Pending
+                                            Pending
                                             {% elif trip.status == "in_progress" %}
-                                                🚌 In Progress
+                                            In Progress
                                             {% elif trip.status == "completed" %}
-                                                ✅ Completed
+                                            Completed
                                             {% elif trip.status == "cancelled" %}
-                                                ❌ Cancelled
+                                            Cancelled
                                             {% endif %}
                                         </span>
                                     </td>

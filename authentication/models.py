@@ -118,6 +118,7 @@ class Preference(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     searched_locations = models.CharField(max_length=100, blank=True, null=True)
     total_searches = models.IntegerField(default=0)
+    last_searched = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
