@@ -895,11 +895,8 @@ def trips(request, driver_id, auth_token):
 def trip_complete(request):
     """Complete a trip instance"""
 
-    trip_id = request.data.get("trip_id") or request.data.get(
-        "schedule_id"
-    )  # Support legacy
-    auth_token = request.data.get("auth_token")
-
+    trip_id = json.loads(request.body).get("trip_id")
+    auth_token = json.loads(request.body).get("auth_token")
     # Validate required fields
     if not trip_id or not auth_token:
         return Response(
@@ -931,15 +928,25 @@ def trip_complete(request):
             ).get(schedule_id=trip_id, date=date.today())
 
         # Verify the authenticated driver owns this trip
-        if trip.schedule.driver.id != driver_auth.user.id:
+
+        if trip.schedule.driver.id != driver_auth.driver.id:
             return Response(
                 {"error": "Unauthorized: You can only complete your own trips"},
                 status=status.HTTP_403_FORBIDDEN,
             )
+        # Auto-start trip if it's still pending before completing
+        if trip.status == "pending":
+            try:
+                trip.start_trip()
+                print("Trip auto-started before completion")
+            except ValueError as e:
+                return Response(
+                    {"error": f"Cannot start trip: {str(e)}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         # Complete the trip using the model method
         trip.complete_trip()
-
         return Response(
             {
                 "status": "success",

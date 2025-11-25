@@ -231,8 +231,7 @@ Notices - DIU Transportation Admin{% endblock %} {% block extra_css %}
                   class="text-{% if notice.is_active %}red{% else %}green{% endif %}-600 hover:text-{% if notice.is_active %}red{% else %}green{% endif %}-800 text-sm font-medium"
                   id="toggle-btn-{{ notice.id }}"
                 >
-                  {% if notice.is_active %}Deactivate{% else %}Activate{% endif
-                  %}
+                  {% if notice.is_active %}Deactivate{% else %}Activate{% endif %}
                 </button>
                 {% else %}
                 <span class="text-gray-400 text-sm font-medium">Expired</span>
@@ -251,8 +250,7 @@ Notices - DIU Transportation Admin{% endblock %} {% block extra_css %}
       class="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between"
     >
       <div class="flex items-center text-sm text-gray-500">
-        Showing {{ notices.start_index }} to {{ notices.end_index }} of {{
-        notices.paginator.count }} notices
+        Showing {{ notices.start_index }} to {{ notices.end_index }} of {{ notices.paginator.count }} notices
       </div>
       <div class="flex items-center space-x-2">
         {% if notices.has_previous %}
@@ -262,15 +260,13 @@ Notices - DIU Transportation Admin{% endblock %} {% block extra_css %}
         >
           Previous
         </a>
-        {% endif %} {% for num in notices.paginator.page_range %} {% if
-        notices.number == num %}
+        {% endif %} {% for num in notices.paginator.page_range %} {% if notices.number == num %}
         <span
           class="px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-300 rounded-lg"
         >
           {{ num }}
         </span>
-        {% elif num > notices.number|add:'-3' and num < notices.number|add:'3'
-        %}
+        {% elif num > notices.number|add:'-3' and num < notices.number|add:'3' %}
         <a
           href="?page={{ num }}"
           class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
