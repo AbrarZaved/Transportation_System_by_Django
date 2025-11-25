@@ -1097,7 +1097,6 @@ def toggle_notice(request):
     )
 
 
-@login_required(login_url="diu_admin")
 def load_google_maps_script(request):
     """Securely load Google Maps script without exposing API key to frontend"""
     from django.conf import settings
