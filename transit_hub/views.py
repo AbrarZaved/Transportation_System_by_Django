@@ -138,7 +138,7 @@ def index(request):
     today = datetime.now().strftime("%A")
     if today != "Friday":
         bus_times = {
-            "to_dsc": ["7:00 AM", "10:00 AM"],
+            "to_dsc": ["7:00 AM", "8:30 AM", "10:00 AM", "12:00 PM"],
             "from_dsc": ["11:15 AM", "1:30 PM", "4:20 PM", "6:10 PM"],
         }
     else:
