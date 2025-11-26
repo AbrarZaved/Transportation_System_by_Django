@@ -251,7 +251,7 @@ def assign_schedule(request):
         "buses": Bus.objects.filter(route_assigned=False),
         "drivers": available_drivers,
         "helpers": Helper.objects.filter(bus_assigned=False),
-        "times": ["11:00 AM", "1:00 PM", "4:00 PM", "6:00 PM"],
+        "times": ["11:15 AM", "1:20 PM", "4:20 PM", "6:10 PM"],
         "from_dsc_routes": from_dsc_routes,
         "to_dsc_routes": to_dsc_routes,
     }

@@ -40,9 +40,22 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   /* --- Open Modal Buttons --- */
-  ["sign_in_desktop", "sign_in_mobile", "login-button"].forEach((id) => {
+  ["sign_in_desktop", "sign_in_mobile"].forEach((id) => {
     const btn = document.getElementById(id);
     btn?.addEventListener("click", () => {
+      if (hamburger && mobileMenu.classList.contains("open")) {
+        hamburger.classList.remove("active");
+        mobileMenu.classList.remove("open");
+      }
+      openModal();
+    });
+  });
+
+  // Handle login buttons with class-based selection
+  document.querySelectorAll(".login-button").forEach((btn) => {
+    btn?.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       if (hamburger && mobileMenu.classList.contains("open")) {
         hamburger.classList.remove("active");
         mobileMenu.classList.remove("open");

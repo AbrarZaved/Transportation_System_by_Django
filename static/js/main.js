@@ -98,12 +98,15 @@ async function fetchRoutes(place, tripType, timeFilter = "all") {
 function setupTimeFilterButtons() {
   document.querySelectorAll(".time-filter-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
+      console.log("pressed");
       filterTime = btn.dataset.time;
-
       document.querySelectorAll(".time-filter-btn").forEach((b) => {
-        b.classList.remove("border-slate-500", "text-slate-600", "bg-slate-50");
+        b.classList.add("bg-white", "text-gray-700", "border-gray-300");
+        b.classList.remove("bg-[#EFECE3]", "text-black", "border-black");
       });
-      btn.classList.add("border-slate-500", "text-slate-600", "bg-slate-50");
+
+      btn.classList.remove("bg-white", "text-gray-700", "border-gray-300");
+      btn.classList.add("bg-[#EFECE3]", "text-black", "border-black");
 
       if (!filterRoute) return;
 
@@ -177,6 +180,25 @@ function clearStoppagesCache() {
   console.log("Stoppages cache cleared");
 }
 
+// Initialize trip type time filters on page load
+function initializeTripTypeTimeFilters() {
+  const checkedTripType = document.querySelector(
+    'input[name="trip-type"]:checked'
+  );
+  const toDscTimes = document.getElementById("to-dsc-times");
+  const fromDscTimes = document.getElementById("from-dsc-times");
+
+  if (checkedTripType && toDscTimes && fromDscTimes) {
+    if (checkedTripType.value === "To DSC") {
+      toDscTimes.classList.remove("hidden");
+      fromDscTimes.classList.add("hidden");
+    } else {
+      toDscTimes.classList.add("hidden");
+      fromDscTimes.classList.remove("hidden");
+    }
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const messages = document.getElementById("messages");
   if (messages) {
@@ -199,6 +221,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupTimeFilterButtons();
   setupRouteCardToggles();
   initializeDirectionFilter();
+  initializeTripTypeTimeFilters();
 
   document.querySelectorAll('input[name="trip-type"]').forEach((radio) => {
     radio.addEventListener("click", function () {
@@ -207,7 +230,42 @@ document.addEventListener("DOMContentLoaded", async () => {
         this.value === "To DSC"
           ? "From which place to DSC?"
           : "Enter your destination";
-      placeInput.focus();
+
+      // Toggle time filter buttons based on trip type
+      const toDscTimes = document.getElementById("to-dsc-times");
+      const fromDscTimes = document.getElementById("from-dsc-times");
+
+      if (this.value === "To DSC") {
+        toDscTimes?.classList.remove("hidden");
+        fromDscTimes?.classList.add("hidden");
+      } else {
+        toDscTimes?.classList.add("hidden");
+        fromDscTimes?.classList.remove("hidden");
+      }
+
+      // Reset time filter to "all" when switching trip type
+      const allTimeButton = document.querySelector('button[data-time="all"]');
+      if (allTimeButton) {
+        // Remove active class from all time buttons
+        document.querySelectorAll(".time-filter-btn").forEach((btn) => {
+          btn.classList.remove("bg-[#EFECE3]", "text-black", "border-black");
+          btn.classList.add("bg-white", "text-gray-700", "border-gray-300");
+        });
+
+        // Set "All" button as active
+        allTimeButton.classList.remove(
+          "bg-white",
+          "text-gray-700",
+          "border-gray-300"
+        );
+        allTimeButton.classList.add(
+          "bg-[#EFECE3]",
+          "text-black",
+          "border-black"
+        );
+
+        filterTime = "all";
+      }
     });
   });
 

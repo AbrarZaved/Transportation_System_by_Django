@@ -3,8 +3,6 @@ from django.core.cache import cache
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
-from social_core.backends import username
 from authentication.models import Preference, Student, StudentReview
 from transit_hub.models import Route, Bus, Notice
 from django.http import JsonResponse
@@ -18,7 +16,7 @@ from transport_manager.models import (
 from .models import RouteStoppage as RouteStoppageModel
 from django.db.models import F
 from django.shortcuts import render
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import localtime
@@ -101,11 +99,11 @@ def index(request):
 
     if user:
         preferences = list(
-            Preference.objects.filter(student__username=user).order_by("-last_searched")[
-                :3
-            ]
+            Preference.objects.filter(student__username=user).order_by(
+                "-last_searched"
+            )[:3]
         )
-    places=[i.searched_locations for i in preferences]  # Get recent reviews for carousel (4+ star reviews)
+    # Get recent reviews for carousel (4+ star reviews)
     try:
         recent_reviews = (
             StudentReview.objects.select_related("student", "bus", "driver")
@@ -136,6 +134,15 @@ def index(request):
     except Exception as e:
         # Fallback if StudentReview model doesn't exist or there's an error
         reviews_data = []
+
+    today = datetime.now().strftime("%A")
+    if today != "Friday":
+        bus_times = {
+            "to_dsc": ["7:00 AM", "10:00 AM"],
+            "from_dsc": ["11:15 AM", "1:30 PM", "4:20 PM", "6:10 PM"],
+        }
+    else:
+        bus_times = {"to_dsc": ["7:30 AM"], "from_dsc": ["2:20 PM", "6:30 PM"]}
     return render(
         request,
         "transit_hub/index.html",
@@ -145,6 +152,7 @@ def index(request):
             "notices_by_route": notices_by_route,
             "global_notices": global_notices,
             "recent_reviews": reviews_data,
+            "bus_times": bus_times,
             "google_maps_api_key": settings.GOOGLE_MAPS_API_KEY,
         },
     )
@@ -248,7 +256,6 @@ def save_preference_by_session(username, place):
             searched_locations=place,
             defaults={"total_searches": F("total_searches") + 1},
         )
-    
 
 
 @sync_to_async
@@ -329,13 +336,29 @@ def contact_us(request):
 
 
 def view_bus(request):
-    # Get distinct schedules with related information
-    schedules = Transportation_schedules.objects.select_related(
-        "bus", "route", "driver"
-    ).distinct()
+    from datetime import date
+
+    today = date.today()
+    current_time = localtime().time()
+
+    # Get active trip instances for today (pending or in_progress) to show active buses
+    trip_instances = (
+        TripInstance.objects.select_related(
+            "schedule__bus", "schedule__route", "schedule__driver"
+        )
+        .filter(
+            date=today,
+            status__in=["pending", "in_progress"],
+            schedule__schedule_status=True,
+        )
+        .distinct()
+        .order_by("schedule__departure_time")
+    )
 
     buses_data = []
-    for schedule in schedules:
+    for trip_instance in trip_instances:
+        schedule = trip_instance.schedule
+
         # Get stoppages for this route
         route_stoppages = (
             RouteStoppageModel.objects.filter(route=schedule.route)
@@ -347,14 +370,17 @@ def view_bus(request):
 
         buses_data.append(
             {
+                "trip_id": trip_instance.id,
                 "bus_name": schedule.bus.bus_name,
                 "bus_capacity": schedule.bus.bus_capacity,
                 "bus_tag": schedule.bus.bus_tag,
                 "route_name": schedule.route.route_name,
                 "driver_name": schedule.driver.name,
                 "stoppages": stoppage_names,
+                "status": trip_instance.status,
                 "departure_time": schedule.departure_time.strftime("%I:%M %p"),
-                "days": schedule.days,
+                "from_dsc": schedule.from_dsc,
+                "direction": "From DSC" if schedule.from_dsc else "To DSC",
             }
         )
 
@@ -447,3 +473,60 @@ def get_all_stoppages(request):
     )
 
     return JsonResponse({"stoppages": list(stoppages)})
+
+
+def get_active_buses_api(request):
+    """
+    API endpoint to get active buses data using TripInstance model
+    """
+    from datetime import date
+
+    today = date.today()
+    current_time = localtime().time()
+
+    # Get active trip instances for today (pending or in_progress)
+    trip_instances = (
+        TripInstance.objects.select_related(
+            "schedule__bus", "schedule__route", "schedule__driver"
+        )
+        .filter(
+            date=today,
+            status__in=["pending", "in_progress"],
+            schedule__schedule_status=True,
+        )
+        .distinct()
+        .order_by("schedule__departure_time")
+    )
+
+    buses_data = []
+    for trip_instance in trip_instances:
+        schedule = trip_instance.schedule
+
+        # Get stoppages for this route
+        route_stoppages = (
+            RouteStoppageModel.objects.filter(route=schedule.route)
+            .select_related("stoppage")
+            .order_by("-created_at")
+        )
+
+        stoppage_names = [rs.stoppage.stoppage_name for rs in route_stoppages]
+
+        buses_data.append(
+            {
+                "trip_id": trip_instance.id,
+                "bus_name": schedule.bus.bus_name,
+                "bus_capacity": schedule.bus.bus_capacity,
+                "bus_tag": schedule.bus.bus_tag,
+                "route_name": schedule.route.route_name,
+                "driver_name": schedule.driver.name,
+                "stoppages": stoppage_names,
+                "status": trip_instance.status,
+                "departure_time": schedule.departure_time.strftime("%I:%M %p"),
+                "from_dsc": schedule.from_dsc,
+                "direction": "From DSC" if schedule.from_dsc else "To DSC",
+            }
+        )
+
+    return JsonResponse(
+        {"success": True, "buses": buses_data, "total_count": len(buses_data)}
+    )

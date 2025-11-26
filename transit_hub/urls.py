@@ -11,6 +11,7 @@ urlpatterns = [
     path("contact_us", views.contact_us, name="contact_us"),
     path("view_bus", views.view_bus, name="view_bus"),
     path("api/stoppages/", views.get_all_stoppages, name="get_all_stoppages"),
+    path("api/active_buses/", views.get_active_buses_api, name="get_active_buses_api"),
     path("api/route_stoppage/", views.RouteStoppage.as_view(), name="route_stoppage"),
     path(
         "api/route_stoppage/<int:id>",

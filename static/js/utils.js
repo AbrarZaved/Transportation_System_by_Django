@@ -52,17 +52,48 @@ function convertTo24Hour(timeStr) {
     return null;
   }
 
-  const [time, modifier] = timeStr.split(" ");
+  // Check if already in 24-hour format (HH:MM without AM/PM)
+  if (/^\d{1,2}:\d{2}$/.test(timeStr.trim())) {
+    const [hours, minutes] = timeStr.trim().split(":").map(Number);
 
-  // Additional validation
+    // Validate hours and minutes for 24-hour format
+    if (
+      isNaN(hours) ||
+      isNaN(minutes) ||
+      hours < 0 ||
+      hours > 23 ||
+      minutes < 0 ||
+      minutes > 59
+    ) {
+      return null;
+    }
+
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+      2,
+      "0"
+    )}`;
+  }
+
+  // Handle 12-hour format with AM/PM
+  const [time, modifier] = timeStr.split(" ");
+  console.log(time, modifier);
+
+  // Additional validation for 12-hour format
   if (!time || !modifier) {
     return null;
   }
 
   let [hours, minutes] = time.split(":").map(Number);
 
-  // Validate hours and minutes
-  if (isNaN(hours) || isNaN(minutes)) {
+  // Validate hours and minutes for 12-hour format
+  if (
+    isNaN(hours) ||
+    isNaN(minutes) ||
+    hours < 1 ||
+    hours > 12 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
     return null;
   }
 
@@ -82,9 +113,7 @@ function convertTo24Hour(timeStr) {
 export async function filterRoutesByTime(routes, selectedTime) {
   if (selectedTime === "all") return routes;
   if (!routes || routes.length === 0) return [];
-
   const selected24HrTime = convertTo24Hour(selectedTime);
-
   // If selectedTime conversion failed, return all routes
   if (!selected24HrTime) {
     return routes;
@@ -206,8 +235,12 @@ export function buildBusCards(routeData) {
               onerror="this.onerror=null;this.src='/static/img/default-bus.png';"
             />
             <div>
-              <h3 class="text-lg font-bold text-gray-800 hover:underline cursor-pointer">${value.bus.name}</h3>
-              <p class="text-sm text-gray-600">Route: ${value.route.route_name}</p>
+              <h3 class="text-lg font-bold text-gray-800 hover:underline cursor-pointer">${
+                value.bus.name
+              }</h3>
+              <p class="text-sm text-gray-600">Route: ${
+                value.route.route_name
+              }</p>
             </div>
           </div>
 
@@ -216,6 +249,9 @@ export function buildBusCards(routeData) {
             <span class="inline-block bg-green-600 text-white text-sm md:text-base font-semibold py-2 px-4 rounded-lg shadow">
               ${value.departure_time}
             </span>
+            ${
+              value.departure_time !== "Available"
+                ? `
             <button onclick="openTrackModal('${value.bus.name}', '${value.route.route_name}')" class="inline-block bg-blue-600 text-white text-sm md:text-base font-semibold py-2 px-4 rounded-lg shadow">
               <div class="inline-flex items-center justify-center gap-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,6 +261,9 @@ export function buildBusCards(routeData) {
                 Track Bus
               </div>
             </button>
+            `
+                : ""
+            }
           </div>
         </div>
     `;
@@ -321,8 +360,19 @@ window.openTrackModal = function (busName, routeName) {
           </div>
           <div class="text-sm text-gray-700">
             <div class="grid grid-cols-2 gap-x-4 gap-y-1">
-              <p><span class="font-medium">Coordinates:</span> <span id="busCoordinates">Loading...</span></p>
-              <p><span class="font-medium">Last Updated:</span> <span id="lastUpdate">--</span></p>
+              <p><span class="font-medium">Current Location:</span> <span id="currentLocation">Detecting...</span></p>
+              <p><span class="font-medium">Speed:</span> <span id="busSpeed">-- km/h</span></p>
+              <p><span class="font-medium">Next Stop:</span> <span id="nextStop">Loading...</span></p>
+              <p><span class="font-medium">ETA:</span> <span id="estimatedArrival">Calculating...</span></p>
+            </div>
+          </div>
+          <div class="mt-2 flex items-center justify-between">
+            <label class="flex items-center text-sm text-gray-700">
+              <input type="checkbox" id="showPathToggle" checked class="mr-2 rounded">
+              <span>Show route path</span>
+            </label>
+            <div class="text-xs text-gray-600">
+              Last updated: <span id="lastUpdate">--</span>
             </div>
           </div>
         </div>
@@ -369,6 +419,11 @@ window.openTrackModal = function (busName, routeName) {
   // Store bus name for tracking
   window.currentTrackingBus = busName;
 
+  // Set up path toggle control
+  setTimeout(() => {
+    setupPathToggle();
+  }, 100);
+
   // Initialize real GPS tracking
   setTimeout(() => {
     initializeRealBusTracking(busName);
@@ -393,6 +448,14 @@ window.closeTrackModal = function () {
     if (window.busMarker) {
       window.busMarker = null;
     }
+    if (window.startMarker) {
+      window.startMarker = null;
+    }
+    if (window.busPathPolyline) {
+      window.busPathPolyline = null;
+    }
+    // Reset path coordinates
+    window.busPathCoordinates = [];
   }
 };
 
@@ -402,6 +465,9 @@ window.busMarker = null;
 window.busTrackingInterval = null;
 window.currentTrackingBus = null;
 window.lastKnownPosition = null;
+window.busPathPolyline = null;
+window.busPathCoordinates = [];
+window.startMarker = null;
 
 // Initialize real bus tracking
 function initializeRealBusTracking(busName) {
@@ -469,8 +535,43 @@ function updateBusLocationOnMap(lat, lng, isMoving, lastUpdated) {
 
     // Create or update bus marker
     if (window.busMarker) {
+      // Add current position to path before updating marker
+      const currentPos = window.busMarker.getPosition();
+      if (
+        currentPos &&
+        (currentPos.lat() !== position.lat || currentPos.lng() !== position.lng)
+      ) {
+        window.busPathCoordinates.push({
+          lat: currentPos.lat(),
+          lng: currentPos.lng(),
+        });
+        updatePolyline();
+      }
       window.busMarker.setPosition(position);
     } else {
+      // Create start marker for the first position
+      window.startMarker = new google.maps.Marker({
+        position: position,
+        map: window.busTrackingMap,
+        title: `Start: ${window.currentTrackingBus}`,
+        icon: {
+          url:
+            "data:image/svg+xml;charset=UTF-8," +
+            encodeURIComponent(`
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" fill="#10B981" stroke="white" stroke-width="2"/>
+              <path d="M8 12l2 2 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          `),
+          scaledSize: new google.maps.Size(24, 24),
+          anchor: new google.maps.Point(12, 12),
+        },
+      });
+
+      // Initialize path with starting position
+      window.busPathCoordinates = [position];
+
+      // Create the bus marker
       window.busMarker = new google.maps.Marker({
         position: position,
         map: window.busTrackingMap,
@@ -490,21 +591,117 @@ function updateBusLocationOnMap(lat, lng, isMoving, lastUpdated) {
           anchor: new google.maps.Point(16, 16),
         },
       });
+
+      // Initialize polyline
+      initializePolyline();
     }
 
-    // Center map on bus location
-    window.busTrackingMap.setCenter(position);
-    window.busTrackingMap.setZoom(15);
+    // Update marker icon color based on movement
+    window.busMarker.setIcon({
+      url:
+        "data:image/svg+xml;charset=UTF-8," +
+        encodeURIComponent(`
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="14" fill="${
+            isMoving ? "#22C55E" : "#EF4444"
+          }" stroke="white" stroke-width="2"/>
+          <path d="M8 12h16v8H8v-8zm2 2v4h12v-4H10zm-2-4h16v2H8V10zm4 12h8v2h-8v-2z" fill="white"/>
+        </svg>
+      `),
+      scaledSize: new google.maps.Size(32, 32),
+      anchor: new google.maps.Point(16, 16),
+    });
+
+    // Center map on bus location but don't zoom in too much if we have a path
+    if (window.busPathCoordinates.length > 5) {
+      // If we have a significant path, fit bounds to show the whole route
+      const bounds = new google.maps.LatLngBounds();
+      window.busPathCoordinates.forEach((coord) => bounds.extend(coord));
+      bounds.extend(position);
+      window.busTrackingMap.fitBounds(bounds, { padding: 50 });
+    } else {
+      // For shorter paths, just center on current position
+      window.busTrackingMap.setCenter(position);
+      window.busTrackingMap.setZoom(15);
+    }
   }
 
   // Store last known position
   window.lastKnownPosition = { lat, lng, isMoving, lastUpdated };
 }
 
+// Initialize polyline for bus path tracking
+function initializePolyline() {
+  if (window.busTrackingMap && window.googleMapsLoaded) {
+    window.busPathPolyline = new google.maps.Polyline({
+      path: window.busPathCoordinates,
+      geodesic: true,
+      strokeColor: "#2563EB",
+      strokeOpacity: 0.8,
+      strokeWeight: 4,
+      map: window.busTrackingMap,
+    });
+  }
+}
+
+// Update polyline with new coordinates
+function updatePolyline() {
+  if (window.busPathPolyline && window.busPathCoordinates.length > 0) {
+    window.busPathPolyline.setPath(window.busPathCoordinates);
+    updatePathStats();
+  }
+}
+
+// Calculate and update path statistics
+function updatePathStats() {
+  // Path statistics are now handled internally for polyline updates
+  // No need to display technical path information to users
+  return;
+}
+
+// Calculate distance between two coordinates (Haversine formula)
+function calculateDistance(pos1, pos2) {
+  const R = 6371; // Radius of the Earth in kilometers
+  const dLat = ((pos2.lat - pos1.lat) * Math.PI) / 180;
+  const dLon = ((pos2.lng - pos1.lng) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((pos1.lat * Math.PI) / 180) *
+      Math.cos((pos2.lat * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Clear bus path
+window.clearBusPath = function () {
+  if (window.busPathPolyline) {
+    window.busPathPolyline.setPath([]);
+  }
+  window.busPathCoordinates = [];
+  updatePathStats();
+};
+
+// Toggle path visibility
+function setupPathToggle() {
+  const toggle = document.getElementById("showPathToggle");
+  if (toggle) {
+    toggle.addEventListener("change", function () {
+      if (window.busPathPolyline) {
+        window.busPathPolyline.setVisible(this.checked);
+      }
+    });
+  }
+}
+
 // Update tracking UI with status information
 function updateTrackingUI(data) {
   const statusElement = document.getElementById("busStatus");
-  const coordinatesElement = document.getElementById("busCoordinates");
+  const currentLocationElement = document.getElementById("currentLocation");
+  const busSpeedElement = document.getElementById("busSpeed");
+  const nextStopElement = document.getElementById("nextStop");
+  const estimatedArrivalElement = document.getElementById("estimatedArrival");
   const lastUpdateElement = document.getElementById("lastUpdate");
 
   if (statusElement) {
@@ -530,23 +727,116 @@ function updateTrackingUI(data) {
     }
   }
 
-  if (coordinatesElement && data.latitude && data.longitude) {
-    coordinatesElement.textContent = `${parseFloat(data.latitude).toFixed(
-      6
-    )}, ${parseFloat(data.longitude).toFixed(6)}`;
-  } else if (coordinatesElement) {
-    coordinatesElement.textContent = "No coordinates available";
+  // Update current location with a more user-friendly description
+  if (currentLocationElement && data.latitude && data.longitude) {
+    // For now, show area coordinates, but this could be enhanced with reverse geocoding
+    const lat = parseFloat(data.latitude);
+    const lng = parseFloat(data.longitude);
+
+    // Simple area detection based on coordinates (can be enhanced)
+    let locationName = "On Route";
+    if (lat >= 23.875 && lat <= 23.885 && lng >= 90.315 && lng <= 90.325) {
+      locationName = "Near Daffodil Campus";
+    } else if (lat >= 23.81 && lat <= 23.82 && lng >= 90.405 && lng <= 90.415) {
+      locationName = "Dhaka City Center";
+    } else if (lat >= 23.76 && lat <= 23.77 && lng >= 90.36 && lng <= 90.37) {
+      locationName = "Motijheel Area";
+    }
+
+    currentLocationElement.textContent = locationName;
+  } else if (currentLocationElement) {
+    currentLocationElement.textContent = "Location unavailable";
   }
 
+  // Calculate and display speed
+  if (busSpeedElement) {
+    if (
+      data.is_moving &&
+      window.lastKnownPosition &&
+      data.latitude &&
+      data.longitude
+    ) {
+      // Calculate speed based on distance and time difference
+      const now = new Date();
+      const lastUpdate = window.lastPositionTime || now;
+      const timeDiff = (now - lastUpdate) / 1000; // seconds
+
+      if (
+        timeDiff > 0 &&
+        window.lastKnownPosition.lat &&
+        window.lastKnownPosition.lng
+      ) {
+        const distance = calculateDistance(
+          {
+            lat: parseFloat(window.lastKnownPosition.lat),
+            lng: parseFloat(window.lastKnownPosition.lng),
+          },
+          { lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) }
+        );
+        const speed = ((distance * 1000) / timeDiff) * 3.6; // Convert m/s to km/h
+
+        if (speed > 0 && speed < 120) {
+          // Reasonable speed range for a bus
+          busSpeedElement.textContent = `${Math.round(speed)} km/h`;
+        } else {
+          busSpeedElement.textContent = data.is_moving ? "Moving" : "0 km/h";
+        }
+      } else {
+        busSpeedElement.textContent = data.is_moving ? "Moving" : "0 km/h";
+      }
+    } else {
+      busSpeedElement.textContent = data.is_moving ? "Starting..." : "0 km/h";
+    }
+
+    // Store current position and time for next calculation
+    window.lastPositionTime = new Date();
+  }
+
+  // Update next stop (this would ideally come from route data)
+  if (nextStopElement) {
+    // This is a placeholder - in a real system, you'd calculate this based on route and current position
+    if (data.is_moving) {
+      nextStopElement.textContent = "Approaching next stop...";
+    } else {
+      nextStopElement.textContent = "At current stop";
+    }
+  }
+
+  // Update estimated arrival (placeholder)
+  if (estimatedArrivalElement) {
+    if (data.is_moving) {
+      const now = new Date();
+      const eta = new Date(now.getTime() + (Math.random() * 10 + 5) * 60000); // Random 5-15 mins
+      estimatedArrivalElement.textContent = eta.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } else {
+      estimatedArrivalElement.textContent = "Waiting at stop";
+    }
+  }
+
+  // Update last update time
   if (lastUpdateElement) {
     if (data.timestamp) {
-      const updateTime = new Date(data.timestamp).toLocaleString();
-      lastUpdateElement.textContent = updateTime;
+      const updateTime = new Date(data.timestamp);
+      const now = new Date();
+      const diffMinutes = Math.floor((now - updateTime) / 60000);
+
+      if (diffMinutes < 1) {
+        lastUpdateElement.textContent = "just now";
+      } else if (diffMinutes < 60) {
+        lastUpdateElement.textContent = `${diffMinutes}m ago`;
+      } else {
+        lastUpdateElement.textContent = updateTime.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
     } else if (data.last_updated) {
-      // Fallback to last_updated if timestamp is not available
       lastUpdateElement.textContent = data.last_updated;
     } else {
-      lastUpdateElement.textContent = "Never";
+      lastUpdateElement.textContent = "never";
     }
   }
 
