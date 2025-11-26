@@ -925,7 +925,7 @@ def trips(request, driver_id, auth_token):
 def trip_complete(request):
     """Complete a trip instance"""
 
-    trip_id = json.loads(request.body).get("trip_id")
+    trip_id = json.loads(request.body).get("schedule_id")
     auth_token = json.loads(request.body).get("auth_token")
     print(f"Received trip completion request for trip_id: {trip_id}")
     # Validate required fields
