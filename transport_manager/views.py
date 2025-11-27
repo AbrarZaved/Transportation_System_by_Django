@@ -55,7 +55,6 @@ def dashboard(request):
 @login_required(login_url="diu_admin")
 def today_schedules(request):
 
-
     current_time = datetime.now().replace(second=0, microsecond=0)
     current_day = localtime().strftime("%A").lower()
     today = date.today()
@@ -463,7 +462,9 @@ def edit_schedule(request):
             # Check if time has changed and create_new_trip is checked
             if create_new_trip and old_departure_time != new_departure_time:
                 # Create a new schedule with the new time
-                print("Creating new trip instance due to time change and 'create_new_trip' checked")
+                print(
+                    "Creating new trip instance due to time change and 'create_new_trip' checked"
+                )
                 route = Route.objects.get(id=route_id) if route_id else schedule.route
                 bus = Bus.objects.get(id=bus_id) if bus_id else schedule.bus
                 driver = (
@@ -796,7 +797,7 @@ def send_location(request):
             # If trip is pending and driver sends location, auto-start the trip
             if current_trip.status == "pending" and not is_trip_ending:
                 try:
-                    current_trip.start_trip()
+                    # current_trip.start_trip()
                     response_data["trip_started"] = True
                     response_data["message"] = (
                         "Location updated and trip started automatically"
@@ -947,35 +948,41 @@ def trip_complete(request):
         )
 
     try:
-        # Try to get trip instance by ID first, then by schedule_id for legacy support
+        # Get trip instance by schedule ID and today's date
         try:
+            # First try to get trip instance by schedule ID for today
             trip = TripInstance.objects.select_related(
                 "schedule__driver", "schedule__route", "schedule__bus"
-            ).get(id=trip_id)
-        except (TripInstance.DoesNotExist, ValueError):
-            # Legacy support: try to find today's trip instance for this schedule
+            ).get(schedule__schedule_id=trip_id, date=date.today())
+            print(f"Found trip by schedule ID {trip_id} for today: {trip}")
+        except TripInstance.DoesNotExist:
+            # Fallback: try to find trip by schedule's primary key
             trip = TripInstance.objects.select_related(
                 "schedule__driver", "schedule__route", "schedule__bus"
             ).get(schedule_id=trip_id, date=date.today())
+            print(f"Found trip by schedule primary key {trip_id} for today: {trip}")
 
         # Verify the authenticated driver owns this trip
 
         if trip.schedule.driver.id != driver_auth.driver.id:
+            print(trip)
+            print(trip.schedule.driver.id, driver_auth.driver.id)
+            print(driver_auth.driver, trip.schedule.driver)
             return Response(
                 {"error": "Unauthorized: You can only complete your own trips"},
                 status=status.HTTP_403_FORBIDDEN,
             )
         # Auto-start trip if it's still pending before completing
-        if trip.status == "pending":
-            try:
-                trip.start_trip()
-                print("Trip auto-started before completion")
-            except ValueError as e:
-                print(f"Error auto-starting trip: {str(e)}")
-                return Response(
-                    {"error": f"Cannot start trip: {str(e)}"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+        # if trip.status == "pending":
+        #     try:
+        #         trip.start_trip()
+        #         print("Trip auto-started before completion")
+        #     except ValueError as e:
+        #         print(f"Error auto-starting trip: {str(e)}")
+        #         return Response(
+        #             {"error": f"Cannot start trip: {str(e)}"},
+        #             status=status.HTTP_400_BAD_REQUEST,
+        #         )
 
         # Complete the trip using the model method
         trip.complete_trip()
@@ -1287,6 +1294,7 @@ def trips_today(request):
     today = date.today()
     driver_id = request.query_params.get("driver_id")
     status_filter = request.query_params.get("status")
+    schedule_id = request.query_params.get("schedule_id")
 
     queryset = TripInstance.objects.select_related(
         "schedule__route", "schedule__bus", "schedule__driver"
@@ -1297,6 +1305,9 @@ def trips_today(request):
 
     if status_filter:
         queryset = queryset.filter(status=status_filter)
+
+    if schedule_id:
+        queryset = queryset.filter(schedule__schedule_id=schedule_id)
 
     queryset = queryset.order_by("schedule__departure_time")
 

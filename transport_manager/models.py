@@ -118,7 +118,7 @@ class TripInstance(models.Model):
         verbose_name_plural = "Trip Instances"
 
     def __str__(self):
-        return f"{self.schedule.route.route_name} - {self.date} - {self.status}"
+        return f"{self.schedule.route.route_name} -{self.schedule.driver} - {self.date} - {self.status}"
 
     @property
     def is_today(self):
