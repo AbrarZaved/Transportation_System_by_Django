@@ -34,28 +34,32 @@ def index(request):
     current_time = localtime().time()
     current_day = localtime().strftime("%A").lower()
 
-    # Get upcoming buses data (all routes within next 1 hour)
+    # Get upcoming buses data from TripInstance (actual active trips for today)
     upcoming_buses_data = cache.get("upcoming_buses")
     if upcoming_buses_data is None:
+        today = date.today()
         # Calculate time range (current time to 1 hour from now)
         current_datetime = localtime()
         one_hour_later = (current_datetime + timedelta(hours=1)).time()
 
-        # Get all upcoming schedules for today within next hour
-        all_schedules = (
-            Transportation_schedules.objects.select_related("bus", "driver", "route")
+        # Get all active trip instances for today within next hour
+        trip_instances = (
+            TripInstance.objects.select_related("schedule__bus", "schedule__driver", "schedule__route")
             .filter(
-                departure_time__gte=current_time,
-                departure_time__lte=one_hour_later,
-                days__contains=current_day,
+                date=today,
+                schedule__departure_time__gte=current_time,
+                schedule__departure_time__lte=one_hour_later,
+                status__in=["pending", "in_progress"],  # Only active trips
+                schedule__schedule_status=True,
             )
-            .order_by("departure_time")
+            .order_by("schedule__departure_time")
         )
 
         # Group by route and direction, get the next departure for each
         upcoming_buses_data = []
         processed_routes = set()
-        for schedule in all_schedules:
+        for trip_instance in trip_instances:
+            schedule = trip_instance.schedule
             route_direction_key = f"{schedule.route.id}_{schedule.from_dsc}"
 
             if route_direction_key not in processed_routes:
@@ -68,6 +72,7 @@ def index(request):
                         "departure_time": schedule.departure_time.strftime("%I:%M %p"),
                         "route_id": schedule.route.id,
                         "from_dsc": schedule.from_dsc,
+                        "trip_status": trip_instance.status,
                     }
                 )
         cache.set(
