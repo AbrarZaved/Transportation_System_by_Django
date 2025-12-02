@@ -35,6 +35,16 @@ from django.core.paginator import Paginator
 from django.db.models import Avg
 
 
+def get_client_ip(request):
+    """Extract client IP address from request"""
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(",")[0]
+    else:
+        ip = request.META.get("REMOTE_ADDR")
+    return ip
+
+
 def student_wrapper(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
@@ -163,10 +173,89 @@ def login_request(request):
         request.session["username"] = student.username
         request.session["is_student_authenticated"] = True
         request.session.set_expiry(3600)  # 1 hour
+
+        # Create login activity record (location will be updated via AJAX)
+        from authentication.models import StudentLoginActivity
+
+        login_activity = StudentLoginActivity.objects.create(
+            student=student,
+            ip_address=get_client_ip(request),
+            user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
+        )
+        request.session["login_activity_id"] = login_activity.id
+        request.session["location_tracked"] = False  # Reset flag for new login
+
         messages.success(request, "Logged In!", extra_tags=student.name)
         return redirect("index")
 
     return redirect("index")
+
+
+@csrf_exempt
+def update_login_location(request):
+    """Update login location via AJAX after user approves geolocation"""
+    if request.method == "POST":
+        try:
+            from geopy.geocoders import Nominatim
+
+            data = json.loads(request.body)
+            login_activity_id = request.session.get("login_activity_id")
+
+            if not login_activity_id:
+                return JsonResponse(
+                    {"success": False, "message": "No active login session"}
+                )
+
+            from authentication.models import StudentLoginActivity
+
+            login_activity = StudentLoginActivity.objects.filter(
+                id=login_activity_id
+            ).first()
+
+            if login_activity:
+                latitude = data.get("latitude")
+                longitude = data.get("longitude")
+
+                # Convert coordinates to readable address
+                try:
+                    geolocator = Nominatim(user_agent="bahon-location-service")
+                    location = geolocator.reverse(
+                        f"{latitude}, {longitude}", language="en"
+                    )
+                    print(location.address)
+                    login_activity.location = (
+                        location.address
+                        if location
+                        else f"Lat: {latitude}, Lon: {longitude}"
+                    )
+                except Exception as e:
+                    # If geocoding fails, store coordinates as fallback
+                    login_activity.location = f"Lat: {latitude}, Lon: {longitude}"
+
+                login_activity.save()
+                return JsonResponse({"success": True})
+
+            return JsonResponse(
+                {"success": False, "message": "Login activity not found"}
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+
+    return JsonResponse({"success": False, "message": "Invalid request method"})
+
+
+@csrf_exempt
+def check_login_session(request):
+    """Check if there's a fresh login session that needs location tracking"""
+    login_activity_id = request.session.get("login_activity_id")
+    location_tracked = request.session.get("location_tracked", False)
+
+    if login_activity_id and not location_tracked:
+        # Mark as tracked to avoid repeated requests
+        request.session["location_tracked"] = True
+        return JsonResponse({"should_track": True})
+
+    return JsonResponse({"should_track": False})
 
 
 def register_request(request):
@@ -893,3 +982,115 @@ def admin_ticket_detail(request, ticket_id):
     }
 
     return render(request, "admin_kits/ticket_detail.html", context)
+
+
+@login_required(login_url="diu_admin")
+def student_reports(request):
+    """Admin view for student activity reports"""
+    from authentication.models import StudentLoginActivity
+    from django.db.models import Count, Q
+
+    # Get all students with their statistics
+    students = Student.objects.annotate(
+        total_logins=Count("login_activities"),
+        total_searches=models.Sum("preference__total_searches"),
+    ).order_by("-total_logins")
+
+    # Get filter parameters
+    student_filter = request.GET.get("student_id", "")
+
+    # Filter by specific student if requested
+    if student_filter:
+        students = students.filter(student_id=student_filter)
+
+    # Pagination for students list
+    paginator = Paginator(students, 20)
+    page_number = request.GET.get("page")
+    students_page = paginator.get_page(page_number)
+
+    # Overall statistics
+    total_students = Student.objects.count()
+    total_logins = StudentLoginActivity.objects.count()
+    students_with_location = (
+        StudentLoginActivity.objects.filter(location__isnull=False)
+        .exclude(location="")
+        .values("student")
+        .distinct()
+        .count()
+    )
+
+    context = {
+        "students": students_page,
+        "total_students": total_students,
+        "total_logins": total_logins,
+        "students_with_location": students_with_location,
+        "current_filter": student_filter,
+    }
+
+    return render(request, "transport_manager/student_reports.html", context)
+
+
+@login_required(login_url="diu_admin")
+def student_report_detail(request, student_id):
+    """Detailed report for a specific student"""
+    from authentication.models import StudentLoginActivity
+    from django.db.models import Count
+
+    student = get_object_or_404(Student, student_id=student_id)
+
+    # Get login activities
+    login_activities = student.login_activities.all()[:50]  # Last 50 logins
+
+    # Get first and last login for summary (before slicing)
+    all_logins = student.login_activities.all()
+    first_login = all_logins.first()
+    last_login = all_logins.last()
+
+    # Get search preferences with counts
+    preferences = Preference.objects.filter(student=student).order_by(
+        "-total_searches"
+    )[:10]
+
+    # Calculate statistics
+    total_logins = student.login_activities.count()
+    logins_with_location = (
+        student.login_activities.filter(location__isnull=False)
+        .exclude(location="")
+        .count()
+    )
+
+    total_searches = (
+        Preference.objects.filter(student=student).aggregate(
+            total=models.Sum("total_searches")
+        )["total"]
+        or 0
+    )
+
+    unique_locations_searched = Preference.objects.filter(student=student).count()
+
+    # Get most searched location
+    most_searched = preferences.first()
+
+    # Recent login activity (last 7 days)
+    from datetime import timedelta
+
+    seven_days_ago = now() - timedelta(days=7)
+    recent_logins = student.login_activities.filter(
+        login_time__gte=seven_days_ago
+    ).count()
+
+    context = {
+        "student": student,
+        "login_activities": login_activities,
+        "first_login": first_login,
+        "last_login": last_login,
+        "preferences": preferences,
+        "total_logins": total_logins,
+        "logins_with_location": logins_with_location,
+        "total_searches": total_searches,
+        "unique_locations_searched": unique_locations_searched,
+        "most_searched": most_searched,
+        "recent_logins": recent_logins,
+    }
+
+    return render(request, "transport_manager/student_report_detail.html", context)

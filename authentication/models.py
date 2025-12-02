@@ -219,7 +219,6 @@ class SupportTicket(models.Model):
         ("closed", "Closed"),
     ]
 
-
     CATEGORY_CHOICES = [
         ("bus_schedule", "Bus Schedule"),
         ("route_issue", "Route Issue"),
@@ -236,7 +235,7 @@ class SupportTicket(models.Model):
     )
     subject = models.CharField(max_length=255)
     category = models.CharField(
-        max_length=50, choices=CATEGORY_CHOICES, default="other",blank=True
+        max_length=50, choices=CATEGORY_CHOICES, default="other", blank=True
     )
     description = models.TextField()
     image = models.ImageField(upload_to="support_tickets/", null=True, blank=True)
@@ -290,3 +289,20 @@ class TicketMessage(models.Model):
     def __str__(self):
         sender = self.sender_student or self.sender_supervisor
         return f"Message by {sender} on {self.ticket.ticket_id}"
+
+
+class StudentLoginActivity(models.Model):
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, related_name="login_activities"
+    )
+    login_time = models.DateTimeField(auto_now_add=True)
+    location = models.CharField(max_length=500, blank=True, null=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ["-login_time"]
+        verbose_name_plural = "Student Login Activities"
+
+    def __str__(self):
+        return f"{self.student.name} - {self.login_time.strftime('%Y-%m-%d %H:%M')}"

@@ -25,6 +25,17 @@ urlpatterns = [
         "api/reviews_carousel/", views.get_reviews_for_carousel, name="reviews_carousel"
     ),
     path("contact_us", views.contact_us, name="contact_us"),
+    # Location tracking
+    path(
+        "update-login-location/",
+        views.update_login_location,
+        name="update_login_location",
+    ),
+    path(
+        "check-login-session/",
+        views.check_login_session,
+        name="check_login_session",
+    ),
     # Support Tickets - Student
     path("support/", views.support_tickets, name="support_tickets"),
     path("support/create/", views.create_ticket, name="create_ticket"),
@@ -35,5 +46,12 @@ urlpatterns = [
         "admin/support/<str:ticket_id>/",
         views.admin_ticket_detail,
         name="admin_ticket_detail",
+    ),
+    # Student Reports - Admin
+    path("admin/reports/students/", views.student_reports, name="student_reports"),
+    path(
+        "admin/reports/students/<str:student_id>/",
+        views.student_report_detail,
+        name="student_report_detail",
     ),
 ]

@@ -9,6 +9,7 @@ from authentication.models import (
     StudentReview,
     SupportTicket,
     TicketMessage,
+    StudentLoginActivity,
 )
 
 
@@ -133,3 +134,12 @@ class TicketMessageAdmin(admin.ModelAdmin):
         return "Unknown"
 
     get_sender.short_description = "Sender"
+
+
+@admin.register(StudentLoginActivity)
+class StudentLoginActivityAdmin(admin.ModelAdmin):
+    list_display = ["student", "login_time", "location", "ip_address"]
+    list_filter = ["login_time"]
+    search_fields = ["student__name", "student__student_id", "ip_address", "location"]
+    readonly_fields = ["login_time"]
+    date_hierarchy = "login_time"

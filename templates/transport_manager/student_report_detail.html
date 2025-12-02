@@ -1,0 +1,266 @@
+{% extends 'admin_kits/base.html' %} {% load static %} {% block title %}{{ student.name }} - Activity Report{% endblock %} {% block content %}
+<div class="space-y-6">
+  <!-- Back Button -->
+  <div>
+    <a
+      href="{% url 'student_reports' %}"
+      class="text-emerald-600 hover:text-emerald-700 font-medium inline-flex items-center gap-2"
+    >
+      <i class="fas fa-arrow-left"></i> Back to Reports
+    </a>
+  </div>
+
+  <!-- Student Header -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="flex items-center gap-6">
+      <div
+        class="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center text-white text-3xl font-bold"
+      >
+        {% if student.profile_pic.url %}
+        <img
+          src="{{ student.profile_pic.url }}"
+          alt="{{ student.name }}'s photo"
+          class="w-full h-full object-cover"
+        />
+        {% else %}
+        <div
+          class="w-full h-full bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center"
+        >
+          {{ student.name|first|upper }}
+        </div>
+        {% endif %}
+      </div>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">{{ student.name }}</h1>
+        <div class="flex gap-4 mt-2 text-sm text-gray-600">
+          <span><i class="fas fa-id-card"></i> {{ student.student_id }}</span>
+          <span
+            ><i class="fas fa-building"></i> {{ student.dept_name|default:"N/A"
+            }}</span
+          >
+          <span><i class="fas fa-envelope"></i> {{ student.email }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600 mb-1">Total Logins</p>
+          <p class="text-3xl font-bold text-blue-600">{{ total_logins }}</p>
+        </div>
+        <div
+          class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center"
+        >
+          <i class="fas fa-sign-in-alt text-blue-600 text-xl"></i>
+        </div>
+      </div>
+      <p class="text-xs text-gray-500 mt-2">
+        {{ recent_logins }} in last 7 days
+      </p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600 mb-1">With Location</p>
+          <p class="text-3xl font-bold text-green-600">
+            {{ logins_with_location }}
+          </p>
+        </div>
+        <div
+          class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"
+        >
+          <i class="fas fa-map-marker-alt text-green-600 text-xl"></i>
+        </div>
+      </div>
+      <p class="text-xs text-gray-500 mt-2">
+        {{ logins_with_location }} of {{ total_logins }} logins
+      </p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600 mb-1">Total Searches</p>
+          <p class="text-3xl font-bold text-purple-600">{{ total_searches }}</p>
+        </div>
+        <div
+          class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center"
+        >
+          <i class="fas fa-search text-purple-600 text-xl"></i>
+        </div>
+      </div>
+      <p class="text-xs text-gray-500 mt-2">
+        {{ unique_locations_searched }} unique locations
+      </p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600 mb-1">Most Searched</p>
+          <p class="text-lg font-bold text-orange-600 truncate">
+            {% if most_searched %} {{ most_searched.searched_locations }} {% else %} N/A {% endif %}
+          </p>
+        </div>
+        <div
+          class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center"
+        >
+          <i class="fas fa-star text-orange-600 text-xl"></i>
+        </div>
+      </div>
+      {% if most_searched %}
+      <p class="text-xs text-gray-500 mt-2">
+        {{ most_searched.total_searches }} times
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Two Column Layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Login History (Left - 2/3) -->
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-xl font-bold text-gray-900">
+            <i class="fas fa-history"></i> Login History (Last 50)
+          </h2>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                >
+                  Date & Time
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                >
+                  Location
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                >
+                  IP Address
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              {% for activity in login_activities %}
+              <tr class="hover:bg-gray-50 transition">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <i class="fas fa-clock text-gray-400"></i> {{ activity.login_time|date:"M d, Y - h:i A" }}
+                </td>
+                <td class="px-6 py-4 text-sm align-top">
+                <div class="max-w-[220px] break-words leading-snug">
+                    {% if activity.location %}
+                    <span class="text-emerald-600 font-medium">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ activity.location }}
+                    </span>
+                    {% else %}
+                    <span class="text-gray-400 italic">
+                    <i class="fas fa-times-circle"></i> No location
+                    </span>
+                    {% endif %}
+                </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  <i class="fas fa-network-wired text-gray-400"></i> {{ activity.ip_address|default:"N/A" }}    
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="3" class="px-6 py-8 text-center text-gray-500">
+                  <i class="fas fa-inbox text-4xl mb-2"></i>
+                  <p>No login history found</p>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Preferences (Right - 1/3) -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-xl font-bold text-gray-900">
+            <i class="fas fa-search-location"></i> Top Searches
+          </h2>
+        </div>
+
+        <div class="p-6">
+          {% if preferences %}
+          <div class="space-y-4">
+            {% for pref in preferences %}
+            <div class="border-l-4 border-emerald-500 bg-gray-50 p-4 rounded">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-semibold text-gray-900">
+                  {{ pref.searched_locations }}
+                </h3>
+                <span
+                  class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full"
+                >
+                  {{ pref.total_searches }}
+                </span>
+              </div>
+              <p class="text-xs text-gray-500">
+                <i class="fas fa-clock"></i> Last: {{ pref.last_searched|date:"M d, Y" }}
+              </p>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-search text-4xl mb-2"></i>
+            <p>No search history</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Additional Info Card -->
+      <div
+        class="bg-gradient-to-br from-emerald-500 to-blue-600 rounded-lg shadow p-6 mt-6 text-white"
+      >
+        <h3 class="text-lg font-bold mb-4">
+          <i class="fas fa-info-circle"></i> Activity Summary
+        </h3>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between">
+            <span>Active Since:</span>
+            <span class="font-semibold"
+              >{% if last_login %}{{ last_login.login_time|date:"M d, Y" }}{% else %}N/A{% endif %}</span
+            >
+          </div>
+          <div class="flex justify-between">
+            <span>Last Login:</span>
+            <span class="font-semibold"
+              >{% if first_login %}{{ first_login.login_time|date:"M d, Y" }}{% else %}N/A{% endif %}</span
+            >
+          </div>
+          <div class="flex justify-between">
+            <span>Verified:</span>
+            <span class="font-semibold">
+              {% if student.verified %}
+              <i class="fas fa-check-circle"></i> Yes {% else %}
+              <i class="fas fa-times-circle"></i> No {% endif %}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

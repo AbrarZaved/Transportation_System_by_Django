@@ -1,0 +1,220 @@
+{% extends 'admin_kits/base.html' %} {% load static %} 
+{% block title %}Student Activity Reports{% endblock %} {% block content %}
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-900">Student Activity Reports</h1>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600 mb-1">Total Students</p>
+          <p class="text-3xl font-bold text-blue-600">{{ total_students }}</p>
+        </div>
+        <div
+          class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center"
+        >
+          <i class="fas fa-users text-blue-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600 mb-1">Total Logins</p>
+          <p class="text-3xl font-bold text-green-600">{{ total_logins }}</p>
+        </div>
+        <div
+          class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"
+        >
+          <i class="fas fa-sign-in-alt text-green-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600 mb-1">With Location Data</p>
+          <p class="text-3xl font-bold text-purple-600">
+            {{ students_with_location }}
+          </p>
+        </div>
+        <div
+          class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center"
+        >
+          <i class="fas fa-map-marker-alt text-purple-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <form method="GET" class="flex gap-4 items-end">
+      <div class="flex-1">
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Filter by Student ID</label
+        >
+        <input
+          type="text"
+          name="student_id"
+          value="{{ current_filter }}"
+          placeholder="Enter student ID..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+        />
+      </div>
+      <button
+        type="submit"
+        class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition"
+      >
+        <i class="fas fa-search"></i> Search
+      </button>
+      {% if current_filter %}
+      <a
+        href="{% url 'student_reports' %}"
+        class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition"
+      >
+        <i class="fas fa-times"></i> Clear
+      </a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Students Table -->
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-xl font-bold text-gray-900">Students Activity Summary</h2>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Student ID
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Name
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Department
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Total Logins
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Total Searches
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for student in students %}
+          <tr class="hover:bg-gray-50 transition">
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+            >
+              {{ student.student_id }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div
+                  class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-semibold mr-3"
+                >
+                  {{ student.name|first|upper }}
+                </div>
+                <div class="text-sm font-medium text-gray-900">
+                  {{ student.name }}
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ student.dept_name|default:"N/A" }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span
+                class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800"
+              >
+                <i class="fas fa-sign-in-alt mr-1"></i> {{ student.total_logins|default:0 }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span
+                class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+              >
+                <i class="fas fa-search mr-1"></i> {{ student.total_searches|default:0 }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <a
+                href="{% url 'student_report_detail' student.student_id %}"
+                class="text-emerald-600 hover:text-emerald-900 font-medium"
+              >
+                <i class="fas fa-chart-line"></i> View Details
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+              <i class="fas fa-inbox text-4xl mb-2"></i>
+              <p>No students found</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if students.has_other_pages %}
+    <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+      <div class="flex justify-center gap-2">
+        {% if students.has_previous %}
+        <a
+          href="?page={{ students.previous_page_number }}{% if current_filter %}&student_id={{ current_filter }}{% endif %}"
+          class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm"
+        >
+          Previous
+        </a>
+        {% endif %}
+
+        <span
+          class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium"
+        >
+          Page {{ students.number }} of {{ students.paginator.num_pages }}
+        </span>
+
+        {% if students.has_next %}
+        <a
+          href="?page={{ students.next_page_number }}{% if current_filter %}&student_id={{ current_filter }}{% endif %}"
+          class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm"
+        >
+          Next
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
