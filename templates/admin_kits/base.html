@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <title>{% block title %}DIU Transportation Admin{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <script src="https://cdn.tailwindcss.com"></script>
     {% block style %}
     <style>
@@ -39,16 +41,7 @@
             href="{% url 'dashboard' %}"
             class="px-4 py-2 rounded hover:bg-slate-800 flex items-center gap-2"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path d="M2 10a8 8 0 018-8v8h8a8 8 0 01-8 8v-8z" />
-              <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
-            </svg>
-            Dashboard
+            <i class="fa-solid fa-gauge"></i> Dashboard
           </a>
 
           <!-- Schedules & Buses -->
@@ -61,20 +54,19 @@
             href="{% url 'assign_schedule' %}"
             class="px-4 py-2 rounded hover:bg-slate-800 flex items-center gap-2"
           >
-            <!-- icon omitted for brevity -->
-            Assign Schedule
+            <i class="fa-solid fa-calendar-check"></i> Assign Schedule
           </a>
           <a
             href="{% url 'view_bus' %}"
             class="px-4 py-2 rounded hover:bg-slate-800 flex items-center gap-2"
           >
-            View Bus
+            <i class="fa-solid fa-bus"></i> View Bus
           </a>
           <a
             href="{% url 'today_schedules' %}"
             class="px-4 py-2 rounded hover:bg-slate-800 flex items-center gap-2"
           >
-            Today's Schedule
+            <i class="fa-solid fa-clock"></i> Today's Schedule
           </a>
 
           <!-- Management (Superuser only) -->
@@ -88,25 +80,25 @@
             href="{% url 'trip_reports' %}"
             class="px-4 py-2 rounded hover:bg-slate-800 flex items-center gap-2"
           >
-            Trip Reports
+            <i class="fa-solid fa-route"></i> Trip Reports
           </a>
           <a
             href="{% url 'manage_drivers_buses' %}"
             class="px-4 py-2 rounded hover:bg-slate-800 flex items-center gap-2"
           >
-            Buses & Drivers
+            <i class="fa-solid fa-id-card-clip"></i> Buses & Drivers
           </a>
           <a
             href="{% url 'route_management' %}"
             class="px-4 py-2 rounded hover:bg-slate-800 flex items-center gap-2"
           >
-            Route Management
+            <i class="fa-solid fa-road"></i> Route Management
           </a>
           <a
             href="{% url 'add_notice' %}"
             class="px-4 py-2 rounded hover:bg-slate-800 flex items-center gap-2"
           >
-            Notice Management
+            <i class="fa-solid fa-bullhorn"></i> Notice Management
           </a>
           {% endif %}
 
@@ -121,7 +113,7 @@
             href="{% url 'student_reports' %}"
             class="px-4 py-2 rounded hover:bg-slate-800 flex items-center gap-2"
           >
-            Student Reports
+            <i class="fa-solid fa-user-graduate"></i> Student Reports
           </a>
           {% endif %}
 
@@ -135,7 +127,7 @@
             href="{% url 'admin_support_tickets' %}"
             class="px-4 py-2 rounded hover:bg-slate-800 flex items-center gap-2"
           >
-            Support Tickets
+            <i class="fa-solid fa-headset"></i> Support Tickets
           </a>
 
           <!-- Divider & Logout -->
@@ -144,7 +136,7 @@
             href="{% url 'logout' %}"
             class="mt-3 bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-center text-sm flex items-center gap-2 justify-center"
           >
-            Logout
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
           </a>
         </nav>
       </aside>
