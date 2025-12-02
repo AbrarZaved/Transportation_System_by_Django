@@ -1,13 +1,11 @@
 import os
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.hashers import check_password, make_password
-
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.utils.text import slugify
 from django.utils.timezone import now
 import uuid
-
 from transit_hub.models import Driver
 
 
@@ -211,3 +209,84 @@ class DriverAuth(models.Model):
 
     def check_password(self, raw_password):
         return check_password(raw_password, self.password)
+
+
+class SupportTicket(models.Model):
+    STATUS_CHOICES = [
+        ("open", "Open"),
+        ("in_progress", "In Progress"),
+        ("resolved", "Resolved"),
+        ("closed", "Closed"),
+    ]
+
+
+    CATEGORY_CHOICES = [
+        ("bus_schedule", "Bus Schedule"),
+        ("route_issue", "Route Issue"),
+        ("driver_behavior", "Driver Behavior"),
+        ("bus_condition", "Bus Condition"),
+        ("payment", "Payment"),
+        ("account", "Account"),
+        ("other", "Other"),
+    ]
+
+    ticket_id = models.CharField(max_length=20, unique=True, editable=False)
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, related_name="support_tickets"
+    )
+    subject = models.CharField(max_length=255)
+    category = models.CharField(
+        max_length=50, choices=CATEGORY_CHOICES, default="other",blank=True
+    )
+    description = models.TextField()
+    image = models.ImageField(upload_to="support_tickets/", null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="open")
+    assigned_to = models.ForeignKey(
+        Supervisor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_tickets",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.ticket_id} - {self.subject}"
+
+    def save(self, *args, **kwargs):
+        if not self.ticket_id:
+            # Generate unique ticket ID
+            prefix = "TKT"
+            timestamp = now().strftime("%Y%m%d")
+            random_str = str(uuid.uuid4())[:6].upper()
+            self.ticket_id = f"{prefix}-{timestamp}-{random_str}"
+        super().save(*args, **kwargs)
+
+
+class TicketMessage(models.Model):
+    ticket = models.ForeignKey(
+        SupportTicket, on_delete=models.CASCADE, related_name="messages"
+    )
+    sender_student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, null=True, blank=True
+    )
+    sender_supervisor = models.ForeignKey(
+        Supervisor, on_delete=models.CASCADE, null=True, blank=True
+    )
+    message = models.TextField()
+    is_internal = models.BooleanField(
+        default=False
+    )  # Internal notes only visible to admins
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        sender = self.sender_student or self.sender_supervisor
+        return f"Message by {sender} on {self.ticket.ticket_id}"

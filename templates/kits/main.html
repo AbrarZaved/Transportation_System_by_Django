@@ -22,7 +22,7 @@
     <!-- Smooth modal animation -->
   </head>
 
-  <body>
+  <body class="flex flex-col min-h-screen">
 
     
     <!-- Header -->
@@ -226,11 +226,13 @@
 </div>
 
     
+    <main class="flex-grow">
+      {% block content %}
 
-    {% block content %}
+      {% endblock %}
+    </main>
 
-    {% endblock %}
-
+    {% include 'kits/footer.html' %}
 
   </body>
 </html>

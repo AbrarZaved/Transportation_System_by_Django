@@ -332,12 +332,7 @@ def about_us(request):
     )
 
 
-def contact_us(request):
-    return render(
-        request,
-        "transit_hub/contact.html",
-        {"google_maps_api_key": settings.GOOGLE_MAPS_API_KEY},
-    )
+
 
 
 def view_bus(request):
@@ -383,9 +378,6 @@ def view_bus(request):
                 "driver_name": schedule.driver.name,
                 "stoppages": stoppage_names,
                 "status": trip_instance.status,
-                "departure_time": schedule.departure_time.strftime("%I:%M %p"),
-                "from_dsc": schedule.from_dsc,
-                "direction": "From DSC" if schedule.from_dsc else "To DSC",
             }
         )
 

@@ -1,0 +1,220 @@
+{% extends 'kits/main.html' %}
+{% load static %}
+
+{% block title %}
+<title>My Support Tickets - BAHON</title>
+{% endblock %}
+
+{% block content %}
+<section class="bg-gray-50 min-h-screen py-8">
+  <div class="max-w-7xl mx-auto px-4">
+    
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Support Tickets</h1>
+          <p class="text-gray-600 mt-1">Manage your support requests</p>
+        </div>
+        <button 
+          onclick="openCreateModal()" 
+          class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition">
+          <i class="fas fa-plus"></i> Create Ticket
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+      <form method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+          <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+            <option value="all" {% if current_status == 'all' %}selected{% endif %}>All Status</option>
+            {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+          <select name="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+            <option value="all" {% if current_category == 'all' %}selected{% endif %}>All Categories</option>
+            {% for value, label in category_choices %}
+            <option value="{{ value }}" {% if current_category == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="flex items-end">
+          <button type="submit" class="w-full bg-slate-600 hover:bg-slate-700 text-white px-6 py-2 rounded-lg font-medium transition">
+            <i class="fas fa-filter"></i> Apply Filters
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tickets List -->
+    <div class="space-y-4">
+      {% if tickets %}
+        {% for ticket in tickets %}
+        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden">
+          <div class="p-6">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="text-sm font-mono text-gray-500">{{ ticket.ticket_id }}</span>
+                  
+                  <!-- Status Badge -->
+                  {% if ticket.status == 'open' %}
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">Open</span>
+                  {% elif ticket.status == 'in_progress' %}
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">In Progress</span>
+                  {% elif ticket.status == 'resolved' %}
+                    <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Resolved</span>
+                  {% else %}
+                    <span class="px-3 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded-full">Closed</span>
+                  {% endif %}
+                  
+                  <!-- Priority Badge -->
+                  {% if ticket.priority == 'urgent' %}
+                    <span class="px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+                      <i class="fas fa-exclamation-circle"></i> Urgent
+                    </span>
+                  {% elif ticket.priority == 'high' %}
+                    <span class="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">High</span>
+                  {% endif %}
+                </div>
+                
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ ticket.subject }}</h3>
+                <p class="text-gray-600 mb-3 line-clamp-2">{{ ticket.description }}</p>
+                
+                <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                  <span><i class="fas fa-tag"></i> {{ ticket.get_category_display }}</span>
+                  <span><i class="fas fa-clock"></i> {{ ticket.created_at|date:"M d, Y - h:i A" }}</span>
+                  {% if ticket.assigned_to %}
+                    <span><i class="fas fa-user-tie"></i> Assigned to {{ ticket.assigned_to.first_name }}</span>
+                  {% endif %}
+                  
+                </div>
+              </div>
+              
+              <div class="flex gap-2">
+                <a href="{% url 'ticket_detail' ticket.ticket_id %}" 
+                   class="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-sm font-medium transition">
+                  View Details
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        
+        <!-- Pagination -->
+        {% if tickets.has_other_pages %}
+        <div class="flex justify-center gap-2 mt-6">
+          {% if tickets.has_previous %}
+            <a href="?page={{ tickets.previous_page_number }}&status={{ current_status }}&category={{ current_category }}" 
+               class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+              Previous
+            </a>
+          {% endif %}
+          
+          <span class="px-4 py-2 bg-pink-600 text-white rounded-lg">
+            Page {{ tickets.number }} of {{ tickets.paginator.num_pages }}
+          </span>
+          
+          {% if tickets.has_next %}
+            <a href="?page={{ tickets.next_page_number }}&status={{ current_status }}&category={{ current_category }}" 
+               class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+              Next
+            </a>
+          {% endif %}
+        </div>
+        {% endif %}
+        
+      {% else %}
+        <div class="bg-white rounded-xl shadow-md p-12 text-center">
+          <div class="text-gray-400 text-6xl mb-4">
+            <i class="fas fa-ticket-alt"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">No Tickets Found</h3>
+          <p class="text-gray-500 mb-6">You haven't created any support tickets yet.</p>
+          <button onclick="openCreateModal()" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-medium transition">
+            Create Your First Ticket
+          </button>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Create Ticket Modal -->
+<div id="createTicketModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-gray-900">Create Support Ticket</h2>
+        <button onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-600 text-2xl">
+          &times;
+        </button>
+      </div>
+    </div>
+    
+    <form method="POST" action="{% url 'create_ticket' %}" enctype="multipart/form-data" class="p-6 space-y-4">
+      {% csrf_token %}
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Subject *</label>
+        {{form.subject}}
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+            {{form.category}}
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Image</label>
+            {{form.image}}
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+        {{form.description}}
+      </div>
+      
+      <div class="flex gap-3 pt-4">
+        <button type="submit" class="flex-1 bg-pink-600 hover:bg-pink-700 text-white py-3 rounded-lg font-medium transition">
+          Create Ticket
+        </button>
+        <button type="button" onclick="closeCreateModal()" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% include 'kits/message.html' %}
+
+<script>
+  function openCreateModal() {
+    document.getElementById('createTicketModal').classList.remove('hidden');
+  }
+  
+  function closeCreateModal() {
+    document.getElementById('createTicketModal').classList.add('hidden');
+  }
+  
+  // Close modal on outside click
+  document.getElementById('createTicketModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeCreateModal();
+    }
+  });
+</script>
+{% endblock %}

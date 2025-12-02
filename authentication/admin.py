@@ -7,6 +7,8 @@ from authentication.models import (
     Student,
     Supervisor,
     StudentReview,
+    SupportTicket,
+    TicketMessage,
 )
 
 
@@ -82,3 +84,52 @@ class StudentReviewAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.select_related("student", "bus", "driver").order_by("-created_at")
+
+
+@admin.register(SupportTicket)
+class SupportTicketAdmin(admin.ModelAdmin):
+    list_display = [
+        "ticket_id",
+        "student",
+        "subject",
+        "category",
+        "status",
+        "assigned_to",
+        "created_at",
+    ]
+    list_filter = ["status", "category", "created_at"]
+    search_fields = [
+        "ticket_id",
+        "student__name",
+        "student__student_id",
+        "subject",
+        "description",
+    ]
+    readonly_fields = ["ticket_id", "created_at", "updated_at", "resolved_at"]
+    list_editable = ["status"]
+
+    fieldsets = (
+        (
+            "Ticket Information",
+            {"fields": ("ticket_id", "student", "subject", "category", "description")},
+        ),
+        ("Status & Priority", {"fields": ("status", "priority", "assigned_to")}),
+        ("Timestamps", {"fields": ("created_at", "updated_at", "resolved_at")}),
+    )
+
+
+@admin.register(TicketMessage)
+class TicketMessageAdmin(admin.ModelAdmin):
+    list_display = ["ticket", "get_sender", "is_internal", "created_at"]
+    list_filter = ["is_internal", "created_at"]
+    search_fields = ["ticket__ticket_id", "message"]
+    readonly_fields = ["created_at"]
+
+    def get_sender(self, obj):
+        if obj.sender_student:
+            return f"Student: {obj.sender_student.name}"
+        elif obj.sender_supervisor:
+            return f"Admin: {obj.sender_supervisor.first_name} {obj.sender_supervisor.last_name}"
+        return "Unknown"
+
+    get_sender.short_description = "Sender"

@@ -8,7 +8,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("search_route/", views.search_route, name="search_route"),
     path("about_us", views.about_us, name="about_us"),
-    path("contact_us", views.contact_us, name="contact_us"),
+
     path("view_bus", views.view_bus, name="view_bus"),
     path("api/stoppages/", views.get_all_stoppages, name="get_all_stoppages"),
     path("api/active_buses/", views.get_active_buses_api, name="get_active_buses_api"),

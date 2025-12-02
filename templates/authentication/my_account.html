@@ -1,149 +1,230 @@
-{% extends 'kits/main.html' %}
-{% load static %}
-{% load custom_filters %}
+{% extends 'kits/main.html' %} {% load static %} {% load custom_filters %} {% block title %}
+<title>My Account - BAHON</title>
+{% endblock %} {% block content %}
+<section class="bg-gray-100 py-14">
+  <div class="max-w-5xl mx-auto px-4">
+    <!-- Hero Section -->
+    <form
+      method="POST"
+      action="{% url 'edit_profile' %}"
+      enctype="multipart/form-data"
+      class="bg-white rounded-2xl shadow-lg p-8 mb-10 relative overflow-hidden"
+    >
+      {% csrf_token %}
 
-{% block title %}
-  <title>My Account - BAHON</title>
-{% endblock %}
-
-{% block content %}
-  <section class="bg-gray-100 py-14">
-    <div class="max-w-5xl mx-auto px-4">
-      <!-- Hero Section -->
-      <form method="POST" action="{% url 'edit_profile' %}" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-lg p-8 mb-10 relative overflow-hidden">
-        {% csrf_token %}
-
-        <div class="flex items-center justify-between flex-wrap gap-4">
-          <div class="flex items-center gap-4">
-            <!-- Editable Profile Image -->
-            <label class="relative w-16 h-16 cursor-pointer">
-              <img src="{{ student.profile_pic.url }}" alt="Avatar" class="w-16 h-16 rounded-full shadow-md border-2 border-pink-500 object-cover" />
-              <input type="file" name="profile_pic" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="this.form.submit()" />
-              <div class="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center rounded-full opacity-0 hover:opacity-100 transition">
-                <i class="fas fa-camera text-white"></i>
-              </div>
-            </label>
-
-            <div>
-              <h2 class="text-2xl font-bold text-gray-900">Hello, {{ student.name|first_name }}</h2>
-              <p class="text-gray-500 text-sm">Student ID: {{ student.student_id }}</p>
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div class="flex items-center gap-4">
+          <!-- Editable Profile Image -->
+          <label class="relative w-16 h-16 cursor-pointer">
+            <img
+              src="{{ student.profile_pic.url }}"
+              alt="Avatar"
+              class="w-16 h-16 rounded-full shadow-md border-2 border-pink-500 object-cover"
+            />
+            <input
+              type="file"
+              name="profile_pic"
+              accept="image/*"
+              class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              onchange="this.form.submit()"
+            />
+            <div
+              class="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center rounded-full opacity-0 hover:opacity-100 transition"
+            >
+              <i class="fas fa-camera text-white"></i>
             </div>
-          </div>
+          </label>
 
-          <a href="{% url 'sign_out' %}" class="text-red-500 font-medium hover:underline text-sm">Logout</a>
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900">
+              Hello, {{ student.name|first_name }}
+            </h2>
+            <p class="text-gray-500 text-sm">
+              Student ID: {{ student.student_id }}
+            </p>
+          </div>
         </div>
 
-        <!-- Stat Bar -->
-        <div class="grid grid-cols-2 sm:grid-cols-2 mt-12 gap-6">
-          <div class="flex flex-col items-center text-center">
-            <div class="text-pink-600 text-2xl mb-1">
-              <i class="fas fa-bus"></i>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800">{{ total_searches }}</h3>
-            <p class="text-sm text-gray-500">Total Searches</p>
-          </div>
-          <div class="flex flex-col items-center text-center">
-            <div class="text-pink-600 text-2xl mb-1">
-              <i class="fas fa-calendar"></i>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800">2</h3>
-            <p class="text-sm text-gray-500">Upcoming Trips</p>
-          </div>
-        </div>
-      </form>
-
-      <!-- Profile Card -->
-      <div class="bg-white rounded-2xl shadow-md p-8 mb-10">
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-semibold text-gray-800">Profile Details</h3>
-          <button id="edit" class="text-pink-600 hover:underline font-medium text-sm">Edit</button>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 text-gray-700">
-          <div>
-            <strong>Full Name:</strong> {{ student.name }}
-          </div>
-          <div>
-            <strong>Phone Number:</strong> {{ student.phone_number }}
-          </div>
-          <div>
-            <strong>Email:</strong> {{ student.email }}
-          </div>
-          <div>
-            <strong id="dept" data-profile="{{ student.dept_name }}">Department:</strong> {{ student.dept_name }}
-          </div>
-          <div>
-            <strong id="batch" data-profile="{{ student.batch_code }}">Batch Code:</strong> {{ student.batch_code }}
-          </div>
-        </div>
-      </div>
-      {% include "kits/message.html" %}
-      <!-- Quick Action Buttons -->
-      <div class="flex flex-wrap justify-center gap-4">
-        <a href="{% url 'index' %}" class="flex items-center gap-2 px-6 py-3 bg-slate-600 text-white rounded-lg shadow hover:bg-slate-700 transition"><i class="fas fa-search"></i> Search Buses</a>
-        <button id="historyButton" class="flex items-center gap-2 px-6 py-3 bg-gray-800 text-white rounded-lg shadow hover:bg-black transition"><i class="fas fa-history"></i> View History</button>
+        <a
+          href="{% url 'sign_out' %}"
+          class="text-red-500 font-medium hover:underline text-sm"
+          >Logout</a
+        >
       </div>
 
-      <!-- History Modal -->
-      <div id="historyModal" class="modal-overlay">
-        <div class="modal-content">
-          <span class="close-button">&times;</span>
-          <h2>Search History</h2>
-          <ul id="historyList" class="history-list">
-            <p>Loading...</p>
-            <!-- JS will populate this -->
-          </ul>
+      <!-- Stat Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-2 mt-12 gap-6">
+        <div class="flex flex-col items-center text-center">
+          <div class="text-pink-600 text-2xl mb-1">
+            <i class="fas fa-bus"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800">{{ total_searches }}</h3>
+          <p class="text-sm text-gray-500">Total Searches</p>
+        </div>
+        <div class="flex flex-col items-center text-center">
+          <div class="text-pink-600 text-2xl mb-1">
+            <i class="fas fa-calendar"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800">2</h3>
+          <p class="text-sm text-gray-500">Upcoming Trips</p>
         </div>
       </div>
+    </form>
 
-      <!-- Edit Profile Modal -->
-      <div id="editProfile" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
-        <div id="editModalContent" class="bg-white w-full max-w-md p-6 rounded-xl shadow-lg transform scale-90 opacity-0 transition-all duration-300">
-          <form action="{% url 'edit_profile' %}" method="POST">
-            {% csrf_token %}
-            <div class="section-header flex items-center justify-between mb-4">
-              <h3 class="text-xl font-semibold text-gray-800">Profile Information</h3>
-              <button type="submit" class="bg-slate-600 hover:bg-slate-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 shadow-md">Update</button>
-            </div>
-            <br />
-            <div class="profile-info-grid">
-              <div class="info-group">
-                <span class="info-label">Full Name</span>
-                <input type="text" value="{{ student.name }}" required name="full_name" class="w-full p-2 border rounded-lg" />
-              </div>
-              <input type="hidden" name="username" value="{{ student.username }}" />
-              <div class="info-group">
-                <span class="info-label">Student ID</span>
-                <input type="text" value="{{ student.student_id }}" required name="student_id" class="w-full p-2 border rounded-lg" />
-              </div>
-
-              <div class="info-group">
-                <span class="info-label">Phone Number</span>
-                <input type="text" value="{{ student.phone_number }}" required name="phone_number" class="w-full p-2 border rounded-lg" />
-              </div>
-              <div class="info-group">
-                <span class="info-label">Department</span>
-                <input type="text" value="{{ student.dept_name }}" required name="dept_name" class="w-full p-2 border rounded-lg" />
-              </div>
-              <div class="info-group">
-                <span class="info-label">Batch Code</span>
-                <input type="text" value="{{ student.batch_code }}" required name="batch_code" class="w-full p-2 border rounded-lg" />
-              </div>
-            </div>
-          </form>
+    <!-- Profile Card -->
+    <div class="bg-white rounded-2xl shadow-md p-8 mb-10">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-semibold text-gray-800">Profile Details</h3>
+        <button
+          id="edit"
+          class="text-pink-600 hover:underline font-medium text-sm"
+        >
+          Edit
+        </button>
+      </div>
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 text-gray-700"
+      >
+        <div><strong>Full Name:</strong> {{ student.name }}</div>
+        <div><strong>Phone Number:</strong> {{ student.phone_number }}</div>
+        <div><strong>Email:</strong> {{ student.email }}</div>
+        <div>
+          <strong id="dept" data-profile="{{ student.dept_name }}"
+            >Department:</strong
+          >
+          {{ student.dept_name }}
+        </div>
+        <div>
+          <strong id="batch" data-profile="{{ student.batch_code }}"
+            >Batch Code:</strong
+          >
+          {{ student.batch_code }}
         </div>
       </div>
-      <!-- Ensure all opened divs are closed before closing section -->
     </div>
-  </section>
-  {% if messages %}
-    {% for message in messages %}
-      <div id="update-success" data-message="{{ message }}"></div>
-    {% endfor %}
-  {% endif %}
-  <script src="{% static 'js/account.js' %}" type="module"></script>
-  <script>
-    localStorage.setItem('student_id', '{{ student.student_id }}')
-  </script>
-{% endblock %}
+    {% include "kits/message.html" %}
+    <!-- Quick Action Buttons -->
+    <div class="flex flex-wrap justify-center gap-4">
+      <a
+        href="{% url 'index' %}"
+        class="flex items-center gap-2 px-6 py-3 bg-slate-600 text-white rounded-lg shadow hover:bg-slate-700 transition"
+        ><i class="fas fa-search"></i> Search Buses</a
+      >
+      <button
+        id="historyButton"
+        class="flex items-center gap-2 px-6 py-3 bg-gray-800 text-white rounded-lg shadow hover:bg-black transition"
+      >
+        <i class="fas fa-history"></i> View History
+      </button>
+      <a
+        href="{% url 'support_tickets' %}"
+        class="flex items-center gap-2 px-6 py-3 bg-green-800 text-white rounded-lg shadow hover:bg-green-900 transition"
+      >
+        <i class="fas fa-envelope-open-text"></i> My Support Tickets
+      </a>
+    </div>
 
-{% include 'kits/footer.html' %}
+    <!-- History Modal -->
+    <div id="historyModal" class="modal-overlay">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Search History</h2>
+        <ul id="historyList" class="history-list">
+          <p>Loading...</p>
+          <!-- JS will populate this -->
+        </ul>
+      </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div
+      id="editProfile"
+      class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm hidden"
+    >
+      <div
+        id="editModalContent"
+        class="bg-white w-full max-w-md p-6 rounded-xl shadow-lg transform scale-90 opacity-0 transition-all duration-300"
+      >
+        <form action="{% url 'edit_profile' %}" method="POST">
+          {% csrf_token %}
+          <div class="section-header flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">
+              Profile Information
+            </h3>
+            <button
+              type="submit"
+              class="bg-slate-600 hover:bg-slate-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 shadow-md"
+            >
+              Update
+            </button>
+          </div>
+          <br />
+          <div class="profile-info-grid">
+            <div class="info-group">
+              <span class="info-label">Full Name</span>
+              <input
+                type="text"
+                value="{{ student.name }}"
+                required
+                name="full_name"
+                class="w-full p-2 border rounded-lg"
+              />
+            </div>
+            <input
+              type="hidden"
+              name="username"
+              value="{{ student.username }}"
+            />
+            <div class="info-group">
+              <span class="info-label">Student ID</span>
+              <input
+                type="text"
+                value="{{ student.student_id }}"
+                required
+                name="student_id"
+                class="w-full p-2 border rounded-lg"
+              />
+            </div>
+
+            <div class="info-group">
+              <span class="info-label">Phone Number</span>
+              <input
+                type="text"
+                value="{{ student.phone_number }}"
+                required
+                name="phone_number"
+                class="w-full p-2 border rounded-lg"
+              />
+            </div>
+            <div class="info-group">
+              <span class="info-label">Department</span>
+              <input
+                type="text"
+                value="{{ student.dept_name }}"
+                required
+                name="dept_name"
+                class="w-full p-2 border rounded-lg"
+              />
+            </div>
+            <div class="info-group">
+              <span class="info-label">Batch Code</span>
+              <input
+                type="text"
+                value="{{ student.batch_code }}"
+                required
+                name="batch_code"
+                class="w-full p-2 border rounded-lg"
+              />
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Ensure all opened divs are closed before closing section -->
+  </div>
+</section>
+{% if messages %} {% for message in messages %}
+<div id="update-success" data-message="{{ message }}"></div>
+{% endfor %} {% endif %}
+<script src="{% static 'js/account.js' %}" type="module"></script>
+{% endblock %}

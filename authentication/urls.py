@@ -24,4 +24,16 @@ urlpatterns = [
     path(
         "api/reviews_carousel/", views.get_reviews_for_carousel, name="reviews_carousel"
     ),
+    path("contact_us", views.contact_us, name="contact_us"),
+    # Support Tickets - Student
+    path("support/", views.support_tickets, name="support_tickets"),
+    path("support/create/", views.create_ticket, name="create_ticket"),
+    path("support/<str:ticket_id>/", views.ticket_detail, name="ticket_detail"),
+    # Support Tickets - Admin
+    path("admin/support/", views.admin_support_tickets, name="admin_support_tickets"),
+    path(
+        "admin/support/<str:ticket_id>/",
+        views.admin_ticket_detail,
+        name="admin_ticket_detail",
+    ),
 ]

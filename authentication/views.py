@@ -2,6 +2,7 @@ from functools import wraps
 import json
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.core.validators import validate_email
 from django.db import models
 from django.forms import ValidationError
@@ -10,8 +11,20 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework import status
-from authentication.email import create_email_otp, send_otp_email
-from authentication.models import EmailOTP, Preference, Student, StudentReview
+from authentication.email import (
+    create_email_otp,
+    send_otp_email,
+    send_support_ticket_generated_email,
+    send_support_ticket_updated_email,
+)
+from authentication.forms import SupportTicketForm
+from authentication.models import (
+    EmailOTP,
+    Preference,
+    Student,
+    StudentReview,
+    SupportTicket,
+)
 from threading import Thread
 from authentication.models import DriverAuth
 from transit_hub.models import Bus, Route, Driver
@@ -648,3 +661,235 @@ def get_reviews_for_carousel(request):
         )
 
     return JsonResponse({"reviews": reviews_data})
+
+
+def contact_us(request):
+    form = SupportTicketForm()
+    if request.method == "POST":
+        print("Received POST request for contact us")
+        username = request.session.get("username")
+        if username:
+            student = get_object_or_404(Student, username=username)
+            form = SupportTicketForm(request.POST, request.FILES)
+            if form.is_valid():
+                ticket = form.save(commit=False)
+                ticket.student = student
+                ticket.save()
+                email_thread = Thread(
+                    target=send_support_ticket_generated_email, args=(student, ticket)
+                )
+                email_thread.daemon = True  # Thread will die when main program exits
+                email_thread.start()
+                messages.success(
+                    request, f"Ticket {ticket.ticket_id} created successfully!"
+                )
+                return redirect("ticket_detail", ticket_id=ticket.ticket_id)
+            else:
+                messages.error(request, "Please fill all required fields correctly.")
+        else:
+            messages.error(request, "Please login to submit a ticket.")
+            return redirect("index")
+    return render(request, "authentication/contact.html", {"form": form})
+
+
+# Support Ticket Views
+def support_tickets(request):
+    form = SupportTicketForm()
+    """View for students to manage their support tickets"""
+    username = request.session.get("username")
+    if not username:
+        messages.error(request, "Please login to view your support tickets.")
+        return redirect("index")
+
+    student = get_object_or_404(Student, username=username)
+
+    # Get filter parameters
+    status_filter = request.GET.get("status", "all")
+    category_filter = request.GET.get("category", "all")
+
+    # Base query
+    tickets = student.support_tickets.all()
+
+    # Apply filters
+    if status_filter != "all":
+        tickets = tickets.filter(status=status_filter)
+    if category_filter != "all":
+        tickets = tickets.filter(category=category_filter)
+
+    # Pagination
+    paginator = Paginator(tickets, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    from authentication.models import SupportTicket
+
+    context = {
+        "tickets": page_obj,
+        "student": student,
+        "status_choices": SupportTicket.STATUS_CHOICES,
+        "category_choices": SupportTicket.CATEGORY_CHOICES,
+        "current_status": status_filter,
+        "current_category": category_filter,
+        "form": form,
+    }
+
+    return render(request, "authentication/support_tickets.html", context)
+
+
+def create_ticket(request):
+    """Create a new support ticket"""
+
+    username = request.session.get("username")
+    if not username:
+        return JsonResponse({"success": False, "error": "Not authenticated"})
+
+    student = get_object_or_404(Student, username=username)
+    if request.method == "POST":
+        form = SupportTicketForm(request.POST, request.FILES)
+        if form.is_valid():
+            ticket = form.save(commit=False)
+            ticket.student = student
+            ticket.save()
+            email_thread = Thread(
+                target=send_support_ticket_generated_email, args=(student, ticket)
+            )
+            email_thread.daemon = True  # Thread will die when main program exits
+            email_thread.start()
+            messages.success(
+                request, f"Ticket {ticket.ticket_id} created successfully!"
+            )
+            return redirect("ticket_detail", ticket_id=ticket.ticket_id)
+        else:
+            messages.error(
+                request,
+                "There was an error with your submission. Please check the form and try again.",
+            )
+            return redirect("support_tickets")
+
+    return redirect("support_tickets")
+
+
+def ticket_detail(request, ticket_id):
+    """View ticket details"""
+    username = request.session.get("username")
+    if not username:
+        messages.error(request, "Please login to view ticket details.")
+        return redirect("login")
+
+    student = get_object_or_404(Student, username=username)
+    ticket = get_object_or_404(student.support_tickets, ticket_id=ticket_id)
+
+    context = {
+        "ticket": ticket,
+        "student": student,
+    }
+
+    return render(request, "authentication/ticket_detail.html", context)
+
+
+# Admin Support Ticket Views
+@login_required(login_url="diu_admin")
+def admin_support_tickets(request):
+    """Admin view for managing all support tickets with filtering and stats"""
+    # Get filter parameters
+    status_filter = request.GET.get("status", "all")
+    category_filter = request.GET.get("category", "all")
+    assigned_filter = request.GET.get("assigned", "all")
+
+    # Base query
+    tickets = SupportTicket.objects.all()
+
+    # Apply filters
+    if status_filter != "all":
+        tickets = tickets.filter(status=status_filter)
+    if category_filter != "all":
+        tickets = tickets.filter(category=category_filter)
+    if assigned_filter == "me":
+        tickets = tickets.filter(assigned_to=request.user)
+    elif assigned_filter == "unassigned":
+        tickets = tickets.filter(assigned_to__isnull=True)
+
+    # Statistics
+    stats = {
+        "total": SupportTicket.objects.count(),
+        "open": SupportTicket.objects.filter(status="open").count(),
+        "in_progress": SupportTicket.objects.filter(status="in_progress").count(),
+        "resolved": SupportTicket.objects.filter(status="resolved").count(),
+    }
+
+    # Pagination
+    paginator = Paginator(tickets, 15)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "tickets": page_obj,
+        "stats": stats,
+        "status_choices": SupportTicket.STATUS_CHOICES,
+        "category_choices": SupportTicket.CATEGORY_CHOICES,
+        "current_status": status_filter,
+        "current_category": category_filter,
+        "current_assigned": assigned_filter,
+    }
+
+    return render(request, "transport_manager/support_tickets.html", context)
+
+
+def admin_ticket_detail(request, ticket_id):
+    """Admin view for ticket details with full controls"""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        messages.error(request, "You don't have permission to access this page.")
+        return redirect("admin_login")
+
+    from authentication.models import SupportTicket, TicketMessage, Supervisor
+
+    ticket = get_object_or_404(SupportTicket, ticket_id=ticket_id)
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        if action == "add_note":
+            note_text = request.POST.get("note")
+            if note_text:
+                TicketMessage.objects.create(
+                    ticket=ticket,
+                    sender_supervisor=request.user,
+                    message=note_text,
+                    is_internal=True,
+                )
+                ticket.updated_at = now()
+                ticket.save()
+                messages.success(request, "Note added successfully!")
+
+        elif action == "update_status":
+            new_status = request.POST.get("status")
+            if new_status:
+                ticket.status = new_status
+                if new_status == "resolved":
+                    ticket.resolved_at = now()
+                ticket.save()
+                send_support_ticket_updated_email(ticket.student, ticket)
+                messages.success(request, f"Ticket status updated to {new_status}!")
+
+        elif action == "assign":
+            supervisor_id = request.POST.get("assigned_to")
+            if supervisor_id:
+                supervisor = get_object_or_404(Supervisor, id=supervisor_id)
+                ticket.assigned_to = supervisor
+                ticket.save()
+                messages.success(
+                    request, f"Ticket assigned to {supervisor.first_name}!"
+                )
+
+        return redirect("admin_ticket_detail", ticket_id=ticket_id)
+
+    supervisors = Supervisor.objects.filter(is_staff=True)
+
+    context = {
+        "ticket": ticket,
+        "admin_notes": ticket.messages.filter(is_internal=True),
+        "supervisors": supervisors,
+        "status_choices": SupportTicket.STATUS_CHOICES,
+    }
+
+    return render(request, "admin_kits/ticket_detail.html", context)

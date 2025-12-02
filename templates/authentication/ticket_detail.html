@@ -1,0 +1,100 @@
+{% extends 'kits/main.html' %}
+{% load static %}
+
+{% block title %}
+<title>Ticket {{ ticket.ticket_id }} - BAHON</title>
+{% endblock %}
+
+{% block content %}
+<section class="bg-gray-50 min-h-screen py-8">
+  <div class="max-w-5xl mx-auto px-4">
+
+    <!-- Back Button -->
+    <div class="mb-4">
+      <a href="{% url 'support_tickets' %}" class="text-pink-600 hover:text-pink-700 font-medium inline-flex items-center gap-2">
+        <i class="fas fa-arrow-left"></i> Back to Tickets
+      </a>
+    </div>
+
+    <!-- Ticket Header -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+      <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
+        <div>
+          <div class="flex items-center gap-3 mb-2">
+            <span class="text-lg font-mono text-gray-600">{{ ticket.ticket_id }}</span>
+
+            {% if ticket.status == 'open' %}
+            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">Open</span>
+            {% elif ticket.status == 'in_progress' %}
+            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full">In Progress</span>
+            {% elif ticket.status == 'resolved' %}
+            <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">Resolved</span>
+            {% else %}
+            <span class="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded-full">Closed</span>
+            {% endif %}
+          </div>
+
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">
+            {{ ticket.subject }}
+          </h1>
+
+          <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+            <span><i class="fas fa-tag"></i> {{ ticket.get_category_display }}</span>
+            <span><i class="fas fa-clock"></i> Created {{ ticket.created_at|date:"M d, Y - h:i A" }}</span>
+            {% if ticket.assigned_to %}
+            <span><i class="fas fa-user-tie"></i> Assigned to {{ ticket.assigned_to.first_name }} {{ ticket.assigned_to.last_name }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-200 pt-4">
+        <h3 class="text-sm font-semibold text-gray-700 mb-2">Description:</h3>
+        <p class="text-gray-700 whitespace-pre-wrap">{{ ticket.description }}</p>
+      </div>
+
+      {% if ticket.image %}
+      <div class="border-t border-gray-200 pt-4">
+        <h3 class="text-sm font-semibold text-gray-700 mb-2">Attached Image:</h3>
+        <div class="border border-gray-200 rounded-lg overflow-hidden mt-2">
+          <img src="{{ ticket.image.url }}" alt="Ticket attachment" class="w-full h-auto max-h-[400px] object-contain bg-gray-50" />
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Ticket Information -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">Ticket Information</h3>
+
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between">
+          <span class="text-gray-600">Created:</span>
+          <span class="font-medium">{{ ticket.created_at|date:"M d, Y - h:i A" }}</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span class="text-gray-600">Last Updated:</span>
+          <span class="font-medium">{{ ticket.updated_at|date:"M d, Y - h:i A" }}</span>
+        </div>
+
+        {% if ticket.resolved_at %}
+        <div class="flex justify-between">
+          <span class="text-gray-600">Resolved:</span>
+          <span class="font-medium text-green-600">{{ ticket.resolved_at|date:"M d, Y - h:i A" }}</span>
+        </div>
+        {% endif %}
+
+        <div class="border-t border-gray-200 pt-3 mt-3">
+          <p class="text-xs text-gray-500 italic">
+            <i class="fas fa-info-circle"></i>
+            The support team will review your ticket and update the status accordingly.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% include 'kits/message.html' %}
+{% endblock %}

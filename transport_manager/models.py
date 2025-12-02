@@ -239,3 +239,5 @@ class LocationData(models.Model):
 
     def __str__(self):
         return f"LocationData for {self.bus.bus_name} at {self.timestamp}"
+
+
