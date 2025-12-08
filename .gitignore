@@ -7,6 +7,8 @@ __pycache__/
 *.pyo
 *.pyd
 *.pyc
+*.cpython-*.pyc
+**/*.cpython-*.pyc
 backups/*sql
 backup.sql
 staticfiles/
