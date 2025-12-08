@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
             body: JSON.stringify({ otp }),
           });
           if (response) {
-            // Wait a moment for session to be set, then redirect
+            // Waited a moment for session to be set, then redirect
             setTimeout(() => {
               window.location.href = `${window.location.origin}`;
             }, 100);
@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const resendBtn = e.target;
       const originalText = resendBtn.textContent;
 
-      // Disable button and show loading state
+      // Disabled button and show loading state
       resendBtn.textContent = "Sending...";
       resendBtn.classList.add("opacity-50", "cursor-not-allowed");
       resendBtn.style.pointerEvents = "none";
@@ -87,11 +87,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (response) {
           showToast("Success", response.message || "New OTP sent successfully!");
 
-          // Clear all OTP inputs
+          // Cleared all OTP inputs
           inputs.forEach((input) => (input.value = ""));
           inputs[0].focus();
 
-          // Start countdown timer (60 seconds)
+          // Started countdown timer (60 seconds)
           let countdown = 60;
           const updateTimer = () => {
             if (countdown > 0) {

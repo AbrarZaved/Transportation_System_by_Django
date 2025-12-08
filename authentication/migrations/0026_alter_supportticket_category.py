@@ -16,3 +16,4 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, choices=[('bus_schedule', 'Bus Schedule'), ('route_issue', 'Route Issue'), ('driver_behavior', 'Driver Behavior'), ('bus_condition', 'Bus Condition'), ('payment', 'Payment'), ('account', 'Account'), ('other', 'Other')], default='other', max_length=50),
         ),
     ]
+

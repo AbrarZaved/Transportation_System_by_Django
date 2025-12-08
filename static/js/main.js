@@ -168,19 +168,19 @@ function setupRouteCardToggles() {
   });
 }
 
-// Clear sessionStorage on page unload (when session ends)
+// Cleared sessionStorage on page unload (when session ends)
 window.addEventListener("beforeunload", () => {
-  // Clear stoppages from sessionStorage when user is leaving
+  // Cleared stoppages from sessionStorage when user is leaving
   console.log("Clearing stoppages from sessionStorage");
 });
 
-// Clear sessionStorage when user logs out
+// Cleared sessionStorage when user logs out
 function clearStoppagesCache() {
   sessionStorage.removeItem("stoppages");
   console.log("Stoppages cache cleared");
 }
 
-// Initialize trip type time filters on page load
+// Initialized trip type time filters on page load
 function initializeTripTypeTimeFilters() {
   const checkedTripType = document.querySelector(
     'input[name="trip-type"]:checked'
@@ -210,7 +210,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       messages.dataset.message,
       messages.dataset.messageUsername || null
     );
-    // Clear stoppages cache on logout
+    // Cleared stoppages cache on logout
     clearStoppagesCache();
   }
   const studentId = localStorage.getItem("student_id");
@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           ? "From which place to DSC?"
           : "Enter your destination";
 
-      // Toggle time filter buttons based on trip type
+      // Toggled time filter buttons based on trip type
       const toDscTimes = document.getElementById("to-dsc-times");
       const fromDscTimes = document.getElementById("from-dsc-times");
 
@@ -246,7 +246,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Reset time filter to "all" when switching trip type
       const allTimeButton = document.querySelector('button[data-time="all"]');
       if (allTimeButton) {
-        // Remove active class from all time buttons
+        // Removed active class from all time buttons
         document.querySelectorAll(".time-filter-btn").forEach((btn) => {
           btn.classList.remove("bg-[#EFECE3]", "text-black", "border-black");
           btn.classList.add("bg-white", "text-gray-700", "border-gray-300");
@@ -291,9 +291,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-// Load stoppages into session storage
+// Loaded stoppages into session storage
 async function loadStoppagesIntoSession() {
-  // Check if stoppages are already in sessionStorage
+  // Checked if stoppages are already in sessionStorage
   const cachedStoppages = sessionStorage.getItem("stoppages");
   if (cachedStoppages) {
     console.log("Stoppages loaded from sessionStorage");
@@ -306,7 +306,7 @@ async function loadStoppagesIntoSession() {
     const response = await fetch(`${location.origin}/api/stoppages/`);
     const data = await response.json();
 
-    // Store in sessionStorage for future use
+    // Stored in sessionStorage for future use
     sessionStorage.setItem("stoppages", JSON.stringify(data.stoppages));
     console.log("Stoppages cached in sessionStorage");
 
@@ -419,7 +419,7 @@ function setupAutocomplete() {
     });
   }
 
-  // Initialize autocomplete with stoppages data - only when needed
+  // Initialized autocomplete with stoppages data - only when needed
   let isInitialized = false;
   async function initializeAutocomplete() {
     if (isInitialized) return; // Don't initialize multiple times
@@ -447,7 +447,7 @@ function setupAutocomplete() {
       return;
     }
 
-    // Initialize stoppages if not already done
+    // Initialized stoppages if not already done
     if (!isInitialized) {
       await initializeAutocomplete();
     }
@@ -477,7 +477,7 @@ function setupAutocomplete() {
   // Keyboard event handler
   placeInput.addEventListener("keydown", handleKeyNavigation);
 
-  // Hide dropdown when clicking outside
+  // Hid dropdown when clicking outside
   document.addEventListener("click", (e) => {
     if (!placeInput.contains(e.target) && !dropdown.contains(e.target)) {
       hideDropdown();
@@ -501,13 +501,13 @@ document.addEventListener("DOMContentLoaded", function () {
   let autoSlideInterval;
 
   function showSlide(index) {
-    // Hide all items
+    // Hid all items
     items.forEach((item, i) => {
       item.classList.toggle("opacity-100", i === index);
       item.classList.toggle("opacity-0", i !== index);
     });
 
-    // Update indicators
+    // Updated indicators
     indicators.forEach((indicator, i) => {
       indicator.classList.toggle("active", i === index);
       indicator.classList.toggle("bg-opacity-100", i === index);
@@ -561,16 +561,16 @@ document.addEventListener("DOMContentLoaded", function () {
   carousel.addEventListener("mouseenter", stopAutoSlide);
   carousel.addEventListener("mouseleave", startAutoSlide);
 
-  // Start auto-slide
+  // Started auto-slide
   startAutoSlide();
 
-  // Initialize first slide
+  // Initialized first slide
   showSlide(0);
 
-  // Initialize autocomplete
+  // Initialized autocomplete
   setupAutocomplete();
 
-  // Initialize reviews carousel
+  // Initialized reviews carousel
   initializeReviewsCarousel();
 });
 
@@ -605,7 +605,7 @@ function initializeReviewsCarousel() {
     const translateX = -(currentSlide * slideWidth);
     reviewsWrapper.style.transform = `translateX(${translateX}%)`;
 
-    // Update button states
+    // Updated button states
     if (prevBtn) {
       prevBtn.style.opacity = currentSlide === 0 ? "0.5" : "1";
       prevBtn.disabled = currentSlide === 0;
@@ -672,7 +672,7 @@ function initializeReviewsCarousel() {
   reviewsCarousel.addEventListener("mouseenter", stopAutoSlide);
   reviewsCarousel.addEventListener("mouseleave", startAutoSlide);
 
-  // Handle window resize
+  // Handled window resize
   window.addEventListener("resize", () => {
     const newSlidesToShow = getSlidesToShow();
     if (newSlidesToShow !== slidesToShow) {
@@ -685,10 +685,10 @@ function initializeReviewsCarousel() {
     }
   });
 
-  // Initialize carousel
+  // Initialized carousel
   updateCarousel();
 
-  // Start auto-slide if there are enough slides
+  // Started auto-slide if there are enough slides
   if (totalSlides > slidesToShow) {
     startAutoSlide();
   }
@@ -703,7 +703,7 @@ function initializeDirectionFilter() {
     button.addEventListener("click", function () {
       const filter = this.getAttribute("data-filter");
 
-      // Update button styles
+      // Updated button styles
       filterButtons.forEach((btn) => {
         btn.classList.remove("bg-blue-600", "text-white");
         btn.classList.add(
@@ -722,7 +722,7 @@ function initializeDirectionFilter() {
       );
       this.classList.add("bg-blue-600", "text-white");
 
-      // Filter rows
+      // Filtered rows
       busRows.forEach((row) => {
         const rowDirection = row.getAttribute("data-direction");
         if (filter === "all" || rowDirection === filter) {

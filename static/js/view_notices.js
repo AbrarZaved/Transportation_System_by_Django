@@ -39,7 +39,7 @@ function closeModal() {
 }
 
 function toggleNotice(id, newStatus) {
-  // Make AJAX request to toggle notice status
+  // Made AJAX request to toggle notice status
   fetch("/transport_manager/toggle_notice/", {
     method: "POST",
     headers: {
@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", function () {
   routeFilter.addEventListener("change", filterNotices);
   statusFilter.addEventListener("change", filterNotices);
 
-  // Close modal when clicking outside
+  // Closed modal when clicking outside
   document
     .getElementById("noticeModal")
     .addEventListener("click", function (e) {

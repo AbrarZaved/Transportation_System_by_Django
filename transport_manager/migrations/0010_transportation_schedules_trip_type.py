@@ -16,3 +16,4 @@ class Migration(migrations.Migration):
             field=models.CharField(choices=[('one_time', 'One Time'), ('fixed_route', 'Fixed Route')], default='one_time', max_length=20),
         ),
     ]
+

@@ -16,3 +16,4 @@ class Migration(migrations.Migration):
             field=models.JSONField(default=list, help_text="List of days (e.g. ['monday', 'wednesday'])"),
         ),
     ]
+

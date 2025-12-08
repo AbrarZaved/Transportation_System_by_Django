@@ -47,16 +47,16 @@ export async function showToast(title, message) {
   }, 3000);
 }
 function convertTo24Hour(timeStr) {
-  // Handle null, undefined, or empty string
+  // Handled null, undefined, or empty string
   if (!timeStr || typeof timeStr !== "string") {
     return null;
   }
 
-  // Check if already in 24-hour format (HH:MM without AM/PM)
+  // Checked if already in 24-hour format (HH:MM without AM/PM)
   if (/^\d{1,2}:\d{2}$/.test(timeStr.trim())) {
     const [hours, minutes] = timeStr.trim().split(":").map(Number);
 
-    // Validate hours and minutes for 24-hour format
+    // Validated hours and minutes for 24-hour format
     if (
       isNaN(hours) ||
       isNaN(minutes) ||
@@ -74,7 +74,7 @@ function convertTo24Hour(timeStr) {
     )}`;
   }
 
-  // Handle 12-hour format with AM/PM
+  // Handled 12-hour format with AM/PM
   const [time, modifier] = timeStr.split(" ");
   console.log(time, modifier);
 
@@ -85,7 +85,7 @@ function convertTo24Hour(timeStr) {
 
   let [hours, minutes] = time.split(":").map(Number);
 
-  // Validate hours and minutes for 12-hour format
+  // Validated hours and minutes for 12-hour format
   if (
     isNaN(hours) ||
     isNaN(minutes) ||
@@ -120,7 +120,7 @@ export async function filterRoutesByTime(routes, selectedTime) {
   }
 
   const filteredRoutes = routes.filter((route) => {
-    // Handle cases where departure_time might be null/undefined
+    // Handled cases where departure_time might be null/undefined
     if (!route.departure_time) {
       return false;
     }
@@ -137,7 +137,7 @@ export async function filterRoutesByTime(routes, selectedTime) {
 
   return filteredRoutes;
 }
-// Toggle function to expand/collapse bus details and ensure only one open at a time
+// Toggled function to expand/collapse bus details and ensure only one open at a time
 function toggleBusDetails(index) {
   const allDetails = document.querySelectorAll('[id^="bus-details-"]');
   allDetails.forEach((el, i) => {
@@ -320,7 +320,7 @@ export function buildBusCards(routeData) {
       </div>
       `;
 
-    // Close card div
+    // Closed card div
     html += `</div>`;
   });
 
@@ -416,7 +416,7 @@ window.openTrackModal = function (busName, routeName) {
   document.body.appendChild(modal);
   document.body.style.overflow = "hidden";
 
-  // Store bus name for tracking
+  // Stored bus name for tracking
   window.currentTrackingBus = busName;
 
   // Set up path toggle control
@@ -424,7 +424,7 @@ window.openTrackModal = function (busName, routeName) {
     setupPathToggle();
   }, 100);
 
-  // Initialize real GPS tracking
+  // Initialized real GPS tracking
   setTimeout(() => {
     initializeRealBusTracking(busName);
   }, 100);
@@ -435,7 +435,7 @@ window.closeTrackModal = function () {
   if (modal) {
     modal.remove();
     document.body.style.overflow = "";
-    // Stop real GPS tracking
+    // Stopped real GPS tracking
     if (window.busTrackingInterval) {
       clearInterval(window.busTrackingInterval);
       window.busTrackingInterval = null;
@@ -469,12 +469,12 @@ window.busPathPolyline = null;
 window.busPathCoordinates = [];
 window.startMarker = null;
 
-// Initialize real bus tracking
+// Initialized real bus tracking
 function initializeRealBusTracking(busName) {
   // Set up map first
   initializeTrackingMapWithApiLoad();
 
-  // Start fetching real GPS data immediately
+  // Started fetching real GPS data immediately
   fetchBusLocation(busName);
 
   // Set up interval to fetch GPS data every 5 seconds
@@ -528,14 +528,14 @@ async function fetchBusLocation(busName) {
   }
 }
 
-// Update bus location on map
+// Updated bus location on map
 function updateBusLocationOnMap(lat, lng, isMoving, lastUpdated) {
   if (window.busTrackingMap && window.googleMapsLoaded) {
     const position = { lat: parseFloat(lat), lng: parseFloat(lng) };
 
-    // Create or update bus marker
+    // Created or update bus marker
     if (window.busMarker) {
-      // Add current position to path before updating marker
+      // Added current position to path before updating marker
       const currentPos = window.busMarker.getPosition();
       if (
         currentPos &&
@@ -549,7 +549,7 @@ function updateBusLocationOnMap(lat, lng, isMoving, lastUpdated) {
       }
       window.busMarker.setPosition(position);
     } else {
-      // Create start marker for the first position
+      // Created start marker for the first position
       window.startMarker = new google.maps.Marker({
         position: position,
         map: window.busTrackingMap,
@@ -568,10 +568,10 @@ function updateBusLocationOnMap(lat, lng, isMoving, lastUpdated) {
         },
       });
 
-      // Initialize path with starting position
+      // Initialized path with starting position
       window.busPathCoordinates = [position];
 
-      // Create the bus marker
+      // Created the bus marker
       window.busMarker = new google.maps.Marker({
         position: position,
         map: window.busTrackingMap,
@@ -592,11 +592,11 @@ function updateBusLocationOnMap(lat, lng, isMoving, lastUpdated) {
         },
       });
 
-      // Initialize polyline
+      // Initialized polyline
       initializePolyline();
     }
 
-    // Update marker icon color based on movement
+    // Updated marker icon color based on movement
     window.busMarker.setIcon({
       url:
         "data:image/svg+xml;charset=UTF-8," +
@@ -626,11 +626,11 @@ function updateBusLocationOnMap(lat, lng, isMoving, lastUpdated) {
     }
   }
 
-  // Store last known position
+  // Stored last known position
   window.lastKnownPosition = { lat, lng, isMoving, lastUpdated };
 }
 
-// Initialize polyline for bus path tracking
+// Initialized polyline for bus path tracking
 function initializePolyline() {
   if (window.busTrackingMap && window.googleMapsLoaded) {
     window.busPathPolyline = new google.maps.Polyline({
@@ -644,7 +644,7 @@ function initializePolyline() {
   }
 }
 
-// Update polyline with new coordinates
+// Updated polyline with new coordinates
 function updatePolyline() {
   if (window.busPathPolyline && window.busPathCoordinates.length > 0) {
     window.busPathPolyline.setPath(window.busPathCoordinates);
@@ -652,14 +652,14 @@ function updatePolyline() {
   }
 }
 
-// Calculate and update path statistics
+// Calculated and update path statistics
 function updatePathStats() {
   // Path statistics are now handled internally for polyline updates
   // No need to display technical path information to users
   return;
 }
 
-// Calculate distance between two coordinates (Haversine formula)
+// Calculated distance between two coordinates (Haversine formula)
 function calculateDistance(pos1, pos2) {
   const R = 6371; // Radius of the Earth in kilometers
   const dLat = ((pos2.lat - pos1.lat) * Math.PI) / 180;
@@ -674,7 +674,7 @@ function calculateDistance(pos1, pos2) {
   return R * c;
 }
 
-// Clear bus path
+// Cleared bus path
 window.clearBusPath = function () {
   if (window.busPathPolyline) {
     window.busPathPolyline.setPath([]);
@@ -683,7 +683,7 @@ window.clearBusPath = function () {
   updatePathStats();
 };
 
-// Toggle path visibility
+// Toggled path visibility
 function setupPathToggle() {
   const toggle = document.getElementById("showPathToggle");
   if (toggle) {
@@ -695,7 +695,7 @@ function setupPathToggle() {
   }
 }
 
-// Update tracking UI with status information
+// Updated tracking UI with status information
 function updateTrackingUI(data) {
   const statusElement = document.getElementById("busStatus");
   const currentLocationElement = document.getElementById("currentLocation");
@@ -727,7 +727,7 @@ function updateTrackingUI(data) {
     }
   }
 
-  // Update current location with a more user-friendly description
+  // Updated current location with a more user-friendly description
   if (currentLocationElement && data.latitude && data.longitude) {
     // For now, show area coordinates, but this could be enhanced with reverse geocoding
     const lat = parseFloat(data.latitude);
@@ -748,7 +748,7 @@ function updateTrackingUI(data) {
     currentLocationElement.textContent = "Location unavailable";
   }
 
-  // Calculate and display speed
+  // Calculated and display speed
   if (busSpeedElement) {
     if (
       data.is_moving &&
@@ -756,7 +756,7 @@ function updateTrackingUI(data) {
       data.latitude &&
       data.longitude
     ) {
-      // Calculate speed based on distance and time difference
+      // Calculated speed based on distance and time difference
       const now = new Date();
       const lastUpdate = window.lastPositionTime || now;
       const timeDiff = (now - lastUpdate) / 1000; // seconds
@@ -788,11 +788,11 @@ function updateTrackingUI(data) {
       busSpeedElement.textContent = data.is_moving ? "Starting..." : "0 km/h";
     }
 
-    // Store current position and time for next calculation
+    // Stored current position and time for next calculation
     window.lastPositionTime = new Date();
   }
 
-  // Update next stop (this would ideally come from route data)
+  // Updated next stop (this would ideally come from route data)
   if (nextStopElement) {
     // This is a placeholder - in a real system, you'd calculate this based on route and current position
     if (data.is_moving) {
@@ -802,7 +802,7 @@ function updateTrackingUI(data) {
     }
   }
 
-  // Update estimated arrival (placeholder)
+  // Updated estimated arrival (placeholder)
   if (estimatedArrivalElement) {
     if (data.is_moving) {
       const now = new Date();
@@ -816,7 +816,7 @@ function updateTrackingUI(data) {
     }
   }
 
-  // Update last update time
+  // Updated last update time
   if (lastUpdateElement) {
     if (data.timestamp) {
       const updateTime = new Date(data.timestamp);
@@ -840,7 +840,7 @@ function updateTrackingUI(data) {
     }
   }
 
-  // Update demo coordinates if in demo mode
+  // Updated demo coordinates if in demo mode
   const demoCoordinatesElement = document.getElementById("demoCoordinates");
   if (demoCoordinatesElement) {
     if (data.latitude && data.longitude) {
@@ -886,7 +886,7 @@ window.refreshBusLocation = function (busName) {
 
 // Function to dynamically load Google Maps API if not already loaded
 function initializeTrackingMapWithApiLoad() {
-  // Check if Google Maps API is already loaded
+  // Checked if Google Maps API is already loaded
   if (typeof google !== "undefined" && google.maps) {
     window.googleMapsLoaded = true;
     window.googleMapsApiLoaded = true;
@@ -894,9 +894,9 @@ function initializeTrackingMapWithApiLoad() {
     return;
   }
 
-  // Check if API is already being loaded
+  // Checked if API is already being loaded
   if (document.querySelector('script[src*="maps.googleapis.com"]')) {
-    // Wait for it to load
+    // Waited for it to load
     const checkGoogleMaps = setInterval(() => {
       if (typeof google !== "undefined" && google.maps) {
         clearInterval(checkGoogleMaps);
@@ -916,13 +916,13 @@ function initializeTrackingMapWithApiLoad() {
     return;
   }
 
-  // Load Google Maps script dynamically
+  // Loaded Google Maps script dynamically
   loadGoogleMapsScript();
 }
 
 // Function to load Google Maps script from server
 function loadGoogleMapsScript() {
-  // Create script element to load Google Maps
+  // Created script element to load Google Maps
   const script = document.createElement("script");
   script.src = "/load_google_maps.js"; // This will load our secure script
   script.async = true;
@@ -930,7 +930,7 @@ function loadGoogleMapsScript() {
 
   script.onload = function () {
     console.log("Google Maps loader script loaded");
-    // Wait a bit for the actual Google Maps API to load
+    // Waited a bit for the actual Google Maps API to load
     setTimeout(() => {
       if (typeof google !== "undefined" && google.maps) {
         window.googleMapsLoaded = true;
@@ -966,7 +966,7 @@ function loadGoogleMapsScript() {
 }
 
 function initializeTrackingMap() {
-  // Initialize Google Map
+  // Initialized Google Map
   const mapContainer = document.getElementById("trackingMap");
 
   if (typeof google === "undefined" || !google.maps) {
@@ -1010,7 +1010,7 @@ function initializeTrackingMap() {
     return;
   }
 
-  // Initialize the map with default center (Dhaka, Bangladesh)
+  // Initialized the map with default center (Dhaka, Bangladesh)
   const defaultCenter = { lat: 23.8103, lng: 90.4125 };
 
   window.busTrackingMap = new google.maps.Map(mapContainer, {

@@ -34,15 +34,15 @@ def index(request):
     current_time = localtime().time()
     current_day = localtime().strftime("%A").lower()
 
-    # Get upcoming buses data from TripInstance (actual active trips for today)
+    # Got upcoming buses data from TripInstance (actual active trips for today)
     upcoming_buses_data = cache.get("upcoming_buses")
     if upcoming_buses_data is None:
         today = date.today()
-        # Calculate time range (current time to 1 hour from now)
+        # Calculated time range (current time to 1 hour from now)
         current_datetime = localtime()
         one_hour_later = (current_datetime + timedelta(hours=1)).time()
 
-        # Get all active trip instances for today within next hour
+        # Got all active trip instances for today within next hour
         trip_instances = (
             TripInstance.objects.select_related("schedule__bus", "schedule__driver", "schedule__route")
             .filter(
@@ -55,7 +55,7 @@ def index(request):
             .order_by("schedule__departure_time")
         )
 
-        # Group by route and direction, get the next departure for each
+        # Grouped by route and direction, get the next departure for each
         upcoming_buses_data = []
         processed_routes = set()
         for trip_instance in trip_instances:
@@ -79,7 +79,7 @@ def index(request):
             "upcoming_buses", upcoming_buses_data, timeout=60
         )  # 1 minute cache for hourly data
 
-    # Get active and visible notices
+    # Got active and visible notices
 
     now = timezone.now()
 
@@ -89,7 +89,7 @@ def index(request):
         .select_related("route")
     )
 
-    # Organize notices by route
+    # Organized notices by route
     notices_by_route = {}
     global_notices = []
 
@@ -108,7 +108,7 @@ def index(request):
                 "-last_searched"
             )[:3]
         )
-    # Get recent reviews for carousel (4+ star reviews)
+    # Got recent reviews for carousel (4+ star reviews)
     try:
         recent_reviews = (
             StudentReview.objects.select_related("student", "bus", "driver")
@@ -170,18 +170,18 @@ def get_schedules(trip_type, place, username=None):
     today = date.today()
     current_time = localtime().time()
     current_day = localtime().strftime("%A").lower()
-    # Search for trip instances that are available today
+    # Searched for trip instances that are available today
     trip_instances = (
         TripInstance.objects.select_related(
             "schedule__bus", "schedule__driver", "schedule__route"
         )
         .filter(
-            # Filter by route name or stoppage name
+            # Filtered by route name or stoppage name
             Q(schedule__route__route_name__icontains=place)
             | Q(
                 schedule__route__routestoppage__stoppage__stoppage_name__icontains=place
             ),
-            # Filter by direction
+            # Filtered by direction
             schedule__from_dsc=(trip_type == "From DSC"),
             # Only today's trips
             date=today,
@@ -189,7 +189,7 @@ def get_schedules(trip_type, place, username=None):
             schedule__departure_time__gte=current_time,
             # Only pending or in_progress trips (available trips)
             status__in=["pending", "in_progress"],
-            # Ensure the schedule is active
+            # Ensured the schedule is active
             schedule__schedule_status=True,
         )
         .distinct()
@@ -209,7 +209,7 @@ def get_schedules(trip_type, place, username=None):
         route_obj = schedule.route
         route_id = route_obj.id
 
-        # Determine status display
+        # Determined status display
         status_display = ""
         if trip_instance.status == "pending":
             status_display = "Available"
@@ -276,7 +276,7 @@ async def search_route(request):
         if trip_type == "From DSC" and place == "Daffodil Smart City":
             return JsonResponse({"routes": []})
 
-        # Get username from session using sync helper
+        # Got username from session using sync helper
         username = await get_username_from_session(request)
         data = await get_schedules(trip_type, place, username=username)
 
@@ -341,7 +341,7 @@ def view_bus(request):
     today = date.today()
     current_time = localtime().time()
 
-    # Get active trip instances for today (pending or in_progress) to show active buses
+    # Got active trip instances for today (pending or in_progress) to show active buses
     trip_instances = (
         TripInstance.objects.select_related(
             "schedule__bus", "schedule__route", "schedule__driver"
@@ -359,7 +359,7 @@ def view_bus(request):
     for trip_instance in trip_instances:
         schedule = trip_instance.schedule
 
-        # Get stoppages for this route
+        # Got stoppages for this route
         route_stoppages = (
             RouteStoppageModel.objects.filter(route=schedule.route)
             .select_related("stoppage")
@@ -396,10 +396,10 @@ def get_bus_location(request, bus_name):
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
     try:
-        # Get the bus
+        # Got the bus
         bus = Bus.objects.get(bus_name=bus_name)
 
-        # Get the most recent location data
+        # Got the most recent location data
         location_data = (
             LocationData.objects.filter(bus=bus).order_by("-timestamp").first()
         )
@@ -412,11 +412,11 @@ def get_bus_location(request, bus_name):
                 }
             )
 
-        # Check if data is recent (within last 2 minutes)
+        # Checked if data is recent (within last 2 minutes)
         time_threshold = timezone.now() - timedelta(minutes=2)
         is_recent = location_data.timestamp > time_threshold
 
-        # Check if bus is moving by comparing with previous location
+        # Checked if bus is moving by comparing with previous location
         is_moving = False
         previous_location = (
             LocationData.objects.filter(bus=bus, timestamp__lt=location_data.timestamp)
@@ -425,7 +425,7 @@ def get_bus_location(request, bus_name):
         )
 
         if previous_location and is_recent:
-            # Calculate distance between current and previous location
+            # Calculated distance between current and previous location
             lat_diff = abs(location_data.latitude - previous_location.latitude)
             lng_diff = abs(location_data.longitude - previous_location.longitude)
             # If coordinates changed by more than 0.0001 degrees (~10 meters), consider it moving
@@ -481,7 +481,7 @@ def get_active_buses_api(request):
     today = date.today()
     current_time = localtime().time()
 
-    # Get active trip instances for today (pending or in_progress)
+    # Got active trip instances for today (pending or in_progress)
     trip_instances = (
         TripInstance.objects.select_related(
             "schedule__bus", "schedule__route", "schedule__driver"
@@ -499,7 +499,7 @@ def get_active_buses_api(request):
     for trip_instance in trip_instances:
         schedule = trip_instance.schedule
 
-        # Get stoppages for this route
+        # Got stoppages for this route
         route_stoppages = (
             RouteStoppageModel.objects.filter(route=schedule.route)
             .select_related("stoppage")
@@ -527,3 +527,4 @@ def get_active_buses_api(request):
     return JsonResponse(
         {"success": True, "buses": buses_data, "total_count": len(buses_data)}
     )
+

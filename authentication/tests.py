@@ -29,7 +29,7 @@ class AuthenticationTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("index"))
 
-        # Check session is set
+        # Checked session is set
         self.assertEqual(self.client.session.get("username"), self.student.username)
         self.assertTrue(self.client.session.get("is_student_authenticated"))
 
@@ -44,11 +44,11 @@ class AuthenticationTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("index"))
 
-        # Check session is not set
+        # Checked session is not set
         self.assertNotIn("username", self.client.session)
         self.assertNotIn("is_student_authenticated", self.client.session)
 
-        # Check error message
+        # Checked error message
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(
             any("Incorrect password" in str(message) for message in messages)
@@ -65,11 +65,11 @@ class AuthenticationTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("index"))
 
-        # Check session is not set
+        # Checked session is not set
         self.assertNotIn("username", self.client.session)
         self.assertNotIn("is_student_authenticated", self.client.session)
 
-        # Check error message
+        # Checked error message
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(
             any("Student ID not found" in str(message) for message in messages)
@@ -85,7 +85,7 @@ class AuthenticationTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("index"))
 
-        # Check error message
+        # Checked error message
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(
             any(
@@ -96,7 +96,7 @@ class AuthenticationTestCase(TestCase):
 
     def test_login_with_unverified_student(self):
         """Test login failure with unverified student"""
-        # Create unverified student
+        # Created unverified student
         unverified_student = Student.objects.create(
             student_id="UNVERIFIED001",
             name="Unverified Student",
@@ -116,11 +116,11 @@ class AuthenticationTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("index"))
 
-        # Check session is not set
+        # Checked session is not set
         self.assertNotIn("username", self.client.session)
         self.assertNotIn("is_student_authenticated", self.client.session)
 
-        # Check error message
+        # Checked error message
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(any("not verified" in str(message) for message in messages))
 
@@ -141,7 +141,7 @@ class AuthenticationTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("verify_otp"))
 
-        # Check student was created
+        # Checked student was created
         new_student = Student.objects.get(student_id="NEW001")
         self.assertEqual(new_student.name, "New Student")
         self.assertEqual(new_student.email, "new@example.com")
@@ -164,7 +164,7 @@ class AuthenticationTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("index"))
 
-        # Check error message
+        # Checked error message
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(
             any("Student ID already exists" in str(message) for message in messages)
@@ -187,7 +187,7 @@ class AuthenticationTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("index"))
 
-        # Check error message
+        # Checked error message
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(
             any("at least 6 characters" in str(message) for message in messages)
@@ -195,7 +195,7 @@ class AuthenticationTestCase(TestCase):
 
     def test_resend_otp_success(self):
         """Test successful OTP resend"""
-        # Create unverified student and set session
+        # Created unverified student and set session
         unverified_student = Student.objects.create(
             student_id="RESEND001",
             name="Resend Student",
@@ -228,3 +228,4 @@ class AuthenticationTestCase(TestCase):
         data = response.json()
         self.assertFalse(data["success"])
         self.assertIn("Session expired", data["message"])
+

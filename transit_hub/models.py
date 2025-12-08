@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-# Create your models here.
+# Created your models here.
 
 
 class Driver(models.Model):
@@ -172,3 +172,4 @@ class Notice(models.Model):
     @property
     def is_visible(self):
         return self.is_active and not self.is_expired
+

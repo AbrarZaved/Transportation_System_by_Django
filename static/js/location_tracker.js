@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  // Check if there's a login activity ID in session (set on every login)
+  // Checked if there's a login activity ID in session (set on every login)
   // This will be triggered only after a fresh login
   fetch("/check-login-session/", {
     method: "GET",
@@ -16,13 +16,13 @@
         return; // No fresh login, skip location request
       }
 
-      // Check if geolocation is supported
+      // Checked if geolocation is supported
       if (!navigator.geolocation) {
         console.log("Geolocation is not supported by this browser.");
         return;
       }
 
-      // Request location with timeout
+      // Requested location with timeout
       const options = {
         enableHighAccuracy: true,
         timeout: 10000,
@@ -31,7 +31,7 @@
 
       navigator.geolocation.getCurrentPosition(
         function (position) {
-          // Success - send location to server
+          // Success - sent location to server
           const locationData = {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,

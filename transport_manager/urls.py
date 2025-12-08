@@ -37,3 +37,4 @@ urlpatterns = [
     path("trip_complete/", csrf_exempt(views.trip_complete), name="trip_complete"),
     path("api/trips/today/", views.trips_today, name="api_trips_today"),
 ]
+

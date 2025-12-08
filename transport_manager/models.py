@@ -136,7 +136,7 @@ class TripInstance(models.Model):
         scheduled_time = timezone.make_aware(
             datetime.datetime.combine(self.date, self.schedule.departure_time)
         )
-        # Allow starting 15 minutes before scheduled time
+        # Allowed starting 15 minutes before scheduled time
         return self.status == "pending" and now >= (
             scheduled_time - timedelta(minutes=15)
         )
@@ -152,16 +152,16 @@ class TripInstance(models.Model):
             raise ValueError("Trip cannot be started at this time")
 
         with transaction.atomic():
-            # Update trip status
+            # Updated trip status
             self.status = "in_progress"
             self.actual_start_time = timezone.now()
             self.save()
 
-            # Assign resources
+            # Assigned resources
             self.schedule.bus.route_assigned = True
             self.schedule.bus.save(update_fields=["route_assigned"])
 
-            # Update driver statistics
+            # Updated driver statistics
             driver = self.schedule.driver
             driver.total_trip_assigned += 1
             driver.save(update_fields=["total_trip_assigned"])
@@ -172,12 +172,12 @@ class TripInstance(models.Model):
             raise ValueError("Trip is not in progress")
 
         with transaction.atomic():
-            # Update trip status
+            # Updated trip status
             self.status = "completed"
             self.actual_end_time = timezone.now()
             self.save()
 
-            # Free up resources
+            # Freed up resources
             other_trips = TripInstance.objects.filter(
                 schedule__bus=self.schedule.bus,
             )
@@ -187,7 +187,7 @@ class TripInstance(models.Model):
                 self.schedule.bus.route_assigned = False
                 self.schedule.bus.save(update_fields=["route_assigned"])
 
-            # Update driver statistics
+            # Updated driver statistics
             driver = self.schedule.driver
             driver.total_trip_completed += 1
             driver.total_trip_assigned -= 1
@@ -214,7 +214,7 @@ class TripInstance(models.Model):
     def reset_trip(self):
         """Reset trip to pending status (admin function)"""
         if self.status == "in_progress":
-            # Free up resources first
+            # Freed up resources first
             self.schedule.bus.route_assigned = False
             self.schedule.bus.save(update_fields=["route_assigned"])
 
@@ -239,5 +239,6 @@ class LocationData(models.Model):
 
     def __str__(self):
         return f"LocationData for {self.bus.bus_name} at {self.timestamp}"
+
 
 

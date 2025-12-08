@@ -76,7 +76,7 @@ class TripInstanceCreateSerializer(serializers.ModelSerializer):
         if not schedule.schedule_status:
             raise serializers.ValidationError("Schedule is not active")
 
-        # Check if trip instance already exists for this date
+        # Checked if trip instance already exists for this date
         if TripInstance.objects.filter(schedule=schedule, date=date).exists():
             raise serializers.ValidationError(
                 "Trip instance already exists for this date"
@@ -151,3 +151,4 @@ class DriverTripSerializer(serializers.ModelSerializer):
             "can_start",
             "can_complete",
         ]
+

@@ -27,3 +27,4 @@ class SupportTicketForm(forms.ModelForm):
                 attrs={"class": "w-full mt-1 border border-gray-300 rounded px-4 py-2"}
             ),
         }
+

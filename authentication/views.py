@@ -102,10 +102,10 @@ def resend_otp(request):
                     {"success": False, "message": "Student not found."}, status=400
                 )
 
-            # Delete any existing OTPs for this user
+            # Deleted any existing OTPs for this user
             EmailOTP.objects.filter(user=student).delete()
 
-            # Create and send new OTP
+            # Created and sent new OTP
             otp = create_email_otp(student)
             email_thread = Thread(target=send_otp_email, args=(student, otp))
             email_thread.daemon = True
@@ -174,7 +174,7 @@ def login_request(request):
         request.session["is_student_authenticated"] = True
         request.session.set_expiry(3600)  # 1 hour
 
-        # Create login activity record (location will be updated via AJAX)
+        # Created login activity record (location will be updated via AJAX)
         from authentication.models import StudentLoginActivity
 
         login_activity = StudentLoginActivity.objects.create(
@@ -216,7 +216,7 @@ def update_login_location(request):
                 latitude = data.get("latitude")
                 longitude = data.get("longitude")
 
-                # Convert coordinates to readable address
+                # Converted coordinates to readable address
                 try:
                     geolocator = Nominatim(user_agent="bahon-location-service")
                     location = geolocator.reverse(
@@ -229,7 +229,7 @@ def update_login_location(request):
                         else f"Lat: {latitude}, Lon: {longitude}"
                     )
                 except Exception as e:
-                    # If geocoding fails, store coordinates as fallback
+                    # If geocoding failed, stored coordinates as fallback
                     login_activity.location = f"Lat: {latitude}, Lon: {longitude}"
 
                 login_activity.save()
@@ -251,7 +251,7 @@ def check_login_session(request):
     location_tracked = request.session.get("location_tracked", False)
 
     if login_activity_id and not location_tracked:
-        # Mark as tracked to avoid repeated requests
+        # Marked as tracked to avoid repeated requests
         request.session["location_tracked"] = True
         return JsonResponse({"should_track": True})
 
@@ -266,33 +266,33 @@ def register_request(request):
         email = request.POST.get("email", "").strip()
         phone_number = request.POST.get("phone_number", "").strip()
 
-        # Validate required fields
+        # Validated required fields
         if not all([student_id, password, name, email, phone_number]):
             messages.error(request, "All fields are required.")
             return redirect("index")
 
-        # Check if student ID already exists
+        # Checked if student ID already exists
         if Student.objects.filter(student_id=student_id).exists():
             messages.error(
                 request, "Student ID already exists. Please use a different ID."
             )
             return redirect("index")
 
-        # Check if email already exists
+        # Checked if email already exists
         if Student.objects.filter(email=email).exists():
             messages.error(
                 request, "Email already registered. Please use a different email."
             )
             return redirect("index")
 
-        # Validate email format
+        # Validated email format
         try:
             validate_email(email)
         except ValidationError:
             messages.error(request, "Please enter a valid email address.")
             return redirect("index")
 
-        # Validate password length
+        # Validated password length
         if len(password) < 6:
             messages.error(request, "Password must be at least 6 characters long.")
             return redirect("index")
@@ -308,7 +308,7 @@ def register_request(request):
             student.save()
             request.session["username"] = student.username
 
-            # Send OTP asynchronously using threading
+            # Sent OTP asynchronously using threading
             otp = create_email_otp(student)
             email_thread = Thread(target=send_otp_email, args=(student, otp))
             email_thread.daemon = True  # Thread will die when main program exits
@@ -372,7 +372,7 @@ def edit_profile(request):
             if value and value != getattr(student, field):
                 setattr(student, field, value)
 
-        # Handle profile picture separately
+        # Handled profile picture separately
         profile_pic = request.FILES.get("profile_pic")
         if profile_pic:
             student.profile_pic = profile_pic
@@ -416,7 +416,7 @@ def driver_login(request):
             password = data.get("password")
             device_id = data.get("device_id")
 
-            # Validate required fields
+            # Validated required fields
             if not username or not password or not device_id:
                 return JsonResponse(
                     {
@@ -443,7 +443,7 @@ def driver_login(request):
                                 status=status.HTTP_403_FORBIDDEN,
                             )
                     user.last_login = now()
-                    # Prevent re-hashing password on save
+                    # Prevented re-hashing password on save
                     user._password_changed = False
                     user.save(update_fields=["device_id", "last_login"])
                     return JsonResponse(
@@ -487,7 +487,7 @@ def reviews_page(request):
     """Display all reviews with filtering and pagination"""
     username = request.session.get("username")
 
-    # Get filter parameters
+    # Got filter parameters
     filter_type = request.GET.get("filter", "all")  # all, bus, driver
     search_query = request.GET.get("search", "")
 
@@ -496,13 +496,13 @@ def reviews_page(request):
         is_approved=True
     )
 
-    # Apply filters
+    # Applied filters
     if filter_type == "bus":
         reviews = reviews.filter(bus__isnull=False)
     elif filter_type == "driver":
         reviews = reviews.filter(driver__isnull=False)
 
-    # Apply search
+    # Applied search
     if search_query:
         reviews = reviews.filter(
             models.Q(bus__bus_name__icontains=search_query)
@@ -511,14 +511,14 @@ def reviews_page(request):
             | models.Q(comment__icontains=search_query)
         )
 
-    # Calculate statistics
+    # Calculated statistics
     all_reviews = StudentReview.objects.filter(is_approved=True)
     total_reviews = all_reviews.count()
     average_rating = (
         all_reviews.aggregate(avg_rating=models.Avg("rating"))["avg_rating"] or 0
     )
 
-    # Get current month's reviews
+    # Got current month's reviews
     from datetime import datetime
 
     current_month = datetime.now().month
@@ -527,16 +527,16 @@ def reviews_page(request):
         created_at__month=current_month, created_at__year=current_year
     ).count()
 
-    # Pagination
+    # Paginated
     paginator = Paginator(reviews, 12)  # 12 reviews per page
     page_number = request.GET.get("page")
     reviews_page_obj = paginator.get_page(page_number)
 
-    # Get available buses and drivers for the review form
+    # Got available buses and drivers for the review form
     buses = Bus.objects.all().order_by("bus_name")
     drivers = Driver.objects.filter(driver_status=True).order_by("name")
 
-    # Serialize data for JavaScript
+    # Serialized data for JavaScript
     buses_data = [
         {"id": bus.id, "bus_name": bus.bus_name, "bus_tag": bus.bus_tag}
         for bus in buses
@@ -599,7 +599,7 @@ def submit_review(request):
                 {"success": False, "message": "Invalid review type"}, status=400
             )
 
-        # Validate IDs based on review type
+        # Validated IDs based on review type
         if review_type == "bus" and not bus_id:
             return JsonResponse(
                 {"success": False, "message": "Bus ID is required for bus review"},
@@ -633,7 +633,7 @@ def submit_review(request):
                 status=400,
             )
 
-        # Get target objects
+        # Got target objects
         bus = None
         driver = None
 
@@ -653,19 +653,19 @@ def submit_review(request):
                     {"success": False, "message": "Driver not found"}, status=404
                 )
 
-        # Check if review already exists
+        # Checked if review already exists
         existing_review = StudentReview.objects.filter(
             student=student, bus=bus, driver=driver
         ).first()
 
         if existing_review:
-            # Update existing review
+            # Updated existing review
             existing_review.rating = rating
             existing_review.comment = comment
             existing_review.save()
             message = "Review updated successfully!"
         else:
-            # Create new review
+            # Created new review
             StudentReview.objects.create(
                 student=student, bus=bus, driver=driver, rating=rating, comment=comment
             )
@@ -792,20 +792,20 @@ def support_tickets(request):
 
     student = get_object_or_404(Student, username=username)
 
-    # Get filter parameters
+    # Got filter parameters
     status_filter = request.GET.get("status", "all")
     category_filter = request.GET.get("category", "all")
 
     # Base query
     tickets = student.support_tickets.all()
 
-    # Apply filters
+    # Applied filters
     if status_filter != "all":
         tickets = tickets.filter(status=status_filter)
     if category_filter != "all":
         tickets = tickets.filter(category=category_filter)
 
-    # Pagination
+    # Paginated
     paginator = Paginator(tickets, 10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -880,7 +880,7 @@ def ticket_detail(request, ticket_id):
 @login_required(login_url="diu_admin")
 def admin_support_tickets(request):
     """Admin view for managing all support tickets with filtering and stats"""
-    # Get filter parameters
+    # Got filter parameters
     status_filter = request.GET.get("status", "all")
     category_filter = request.GET.get("category", "all")
     assigned_filter = request.GET.get("assigned", "all")
@@ -888,7 +888,7 @@ def admin_support_tickets(request):
     # Base query
     tickets = SupportTicket.objects.all()
 
-    # Apply filters
+    # Applied filters
     if status_filter != "all":
         tickets = tickets.filter(status=status_filter)
     if category_filter != "all":
@@ -906,7 +906,7 @@ def admin_support_tickets(request):
         "resolved": SupportTicket.objects.filter(status="resolved").count(),
     }
 
-    # Pagination
+    # Paginated
     paginator = Paginator(tickets, 15)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -990,20 +990,20 @@ def student_reports(request):
     from authentication.models import StudentLoginActivity
     from django.db.models import Count, Q
 
-    # Get all students with their statistics
+    # Got all students with their statistics
     students = Student.objects.annotate(
         total_logins=Count("login_activities"),
         total_searches=models.Sum("preference__total_searches"),
     ).order_by("-total_logins")
 
-    # Get filter parameters
+    # Got filter parameters
     student_filter = request.GET.get("student_id", "")
 
-    # Filter by specific student if requested
+    # Filtered by specific student if requested
     if student_filter:
         students = students.filter(student_id=student_filter)
 
-    # Pagination for students list
+    # Paginated for students list
     paginator = Paginator(students, 20)
     page_number = request.GET.get("page")
     students_page = paginator.get_page(page_number)
@@ -1038,20 +1038,20 @@ def student_report_detail(request, student_id):
 
     student = get_object_or_404(Student, student_id=student_id)
 
-    # Get login activities
+    # Got login activities
     login_activities = student.login_activities.all()[:50]  # Last 50 logins
 
-    # Get first and last login for summary (before slicing)
+    # Got first and last login for summary (before slicing)
     all_logins = student.login_activities.all()
     first_login = all_logins.first()
     last_login = all_logins.last()
 
-    # Get search preferences with counts
+    # Got search preferences with counts
     preferences = Preference.objects.filter(student=student).order_by(
         "-total_searches"
     )[:10]
 
-    # Calculate statistics
+    # Calculated statistics
     total_logins = student.login_activities.count()
     logins_with_location = (
         student.login_activities.filter(location__isnull=False)
@@ -1068,7 +1068,7 @@ def student_report_detail(request, student_id):
 
     unique_locations_searched = Preference.objects.filter(student=student).count()
 
-    # Get most searched location
+    # Got most searched location
     most_searched = preferences.first()
 
     # Recent login activity (last 7 days)

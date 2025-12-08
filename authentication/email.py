@@ -56,3 +56,4 @@ def send_support_ticket_updated_email(student, ticket):
         "Bahon Transport Support Team"
     )
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [student.email])
+

@@ -17,3 +17,4 @@ class Migration(migrations.Migration):
             field=multiselectfield.db.fields.MultiSelectField(choices=[('monday', 'Monday'), ('tuesday', 'Tuesday'), ('wednesday', 'Wednesday'), ('thursday', 'Thursday'), ('friday', 'Friday'), ('saturday', 'Saturday'), ('sunday', 'Sunday')], help_text='Select multiple days', max_length=56),
         ),
     ]
+

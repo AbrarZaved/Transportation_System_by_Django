@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Handle login buttons with class-based selection
+  // Handled login buttons with class-based selection
   document.querySelectorAll(".login-button").forEach((btn) => {
     btn?.addEventListener("click", (e) => {
       e.preventDefault();

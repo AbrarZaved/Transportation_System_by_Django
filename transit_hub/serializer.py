@@ -15,3 +15,4 @@ class RouteStoppageSerializer(serializers.ModelSerializer):
     class Meta:
         model = RouteStoppage
         fields = ["id", "route", "stoppage", "stoppage_name"]
+

@@ -154,3 +154,4 @@ class LocationDataAdmin(admin.ModelAdmin):
     list_filter = ["bus", "timestamp"]
     search_fields = ["bus__bus_name"]
     list_per_page = 100
+

@@ -16,3 +16,4 @@ class Migration(migrations.Migration):
             field=models.ImageField(default='meerkat.png', upload_to='student_profiles/'),
         ),
     ]
+

@@ -12,12 +12,12 @@ const CACHE_KEYS = {
   TO_DSC_ROUTES: "to_dsc_routes_cache",
 };
 
-// Initialize data from template
+// Initialized data from template
 function initializeData(templateRouteData, templateTimeData) {
   routeData = templateRouteData;
   timeData = templateTimeData;
 
-  // Clear any existing caches when page loads to ensure fresh data
+  // Cleared any existing caches when page loads to ensure fresh data
   if (typeof Storage !== "undefined") {
     localStorage.removeItem("from_dsc_routes_cache");
     localStorage.removeItem("to_dsc_routes_cache");
@@ -51,7 +51,7 @@ function updateTimesForDirection(direction) {
   });
 }
 
-// Initialize direction change listeners and default times
+// Initialized direction change listeners and default times
 function initializeDirectionHandlers() {
   const directionInputs = document.querySelectorAll('input[name="direction"]');
 
@@ -61,14 +61,14 @@ function initializeDirectionHandlers() {
     });
   });
 
-  // Initialize times on page load - show from_dsc times by default
+  // Initialized times on page load - show from_dsc times by default
   const selectedDirection = document.querySelector(
     'input[name="direction"]:checked'
   );
   if (selectedDirection) {
     updateTimesForDirection(selectedDirection.value);
   } else {
-    // Show from_dsc times by default when no direction is selected
+    // Showed from_dsc times by default when no direction is selected
     updateTimesForDirection("from_dsc");
   }
 }
@@ -101,7 +101,7 @@ async function getRoutesForDirection(direction) {
   // If no cache, check if routeData from template is available
   if (typeof routeData !== "undefined" && routeData[direction]) {
     const routes = routeData[direction];
-    // Store in cache for future use
+    // Stored in cache for future use
     localStorage.setItem(cacheKey, JSON.stringify(routes));
     console.log(`Cached routes for ${direction} from template data`);
     return routes;
@@ -168,7 +168,7 @@ function renderRouteOptions(routes) {
   });
 }
 
-// Initialize logic when DOM is ready
+// Initialized logic when DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {
   // Make routeData available globally from the template
   if (typeof routeData !== "undefined") {
@@ -225,18 +225,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Clear cache when page is unloaded or refreshed
+  // Cleared cache when page is unloaded or refreshed
   window.addEventListener("beforeunload", () => {
     clearRouteCache();
   });
 
-  // Clear cache when navigating away from the page
+  // Cleared cache when navigating away from the page
   window.addEventListener("pagehide", () => {
     clearRouteCache();
   });
 });
 
-// Filter items function for search inputs
+// Filtered items function for search inputs
 function filterItems(inputEl, containerId) {
   const filter = inputEl.value.toLowerCase();
   const items = document.querySelectorAll(`#${containerId} label`);
@@ -246,7 +246,7 @@ function filterItems(inputEl, containerId) {
   });
 }
 
-// Add custom time function
+// Added custom time function
 function addCustomTime() {
   const customTimeInput = document.getElementById("custom-time");
   const timeValue = customTimeInput.value;
@@ -262,7 +262,7 @@ function addCustomTime() {
   const ampm = parseInt(hours) >= 12 ? "PM" : "AM";
   const formattedTime = `${hour12}:${minutes} ${ampm}`;
 
-  // Check if time already exists
+  // Checked if time already exists
   const existingTimes = Array.from(
     document.querySelectorAll('input[name="times"]')
   ).map((input) => input.value);
@@ -272,7 +272,7 @@ function addCustomTime() {
     return;
   }
 
-  // Create new time option
+  // Created new time option
   const timeList = document.getElementById("time-list");
   const newTimeLabel = document.createElement("label");
   newTimeLabel.className =
@@ -289,19 +289,19 @@ function addCustomTime() {
     <button type="button" onclick="removeCustomTime(this)" class="ml-auto text-red-500 text-xs hover:text-red-700">Remove</button>
   `;
 
-  // Insert at the beginning of the list
+  // Inserted at the beginning of the list
   timeList.insertBefore(newTimeLabel, timeList.firstChild);
 
-  // Clear the input
+  // Cleared the input
   customTimeInput.value = "";
 
-  // Check the newly added time
+  // Checked the newly added time
   const checkbox = newTimeLabel.querySelector('input[type="checkbox"]');
   checkbox.checked = true;
   limitTimeSelection(checkbox);
 }
 
-// Remove custom time function
+// Removed custom time function
 function removeCustomTime(button) {
   const label = button.closest("label");
   const checkbox = label.querySelector('input[type="checkbox"]');
@@ -321,7 +321,7 @@ function limitTimeSelection(checkbox) {
   const allTimeCheckboxes = document.querySelectorAll('input[name="times"]');
 
   if (checkedTimes.length >= 3) {
-    // Disable unchecked checkboxes
+    // Disabled unchecked checkboxes
     allTimeCheckboxes.forEach((cb) => {
       if (!cb.checked) {
         cb.disabled = true;
@@ -329,7 +329,7 @@ function limitTimeSelection(checkbox) {
       }
     });
   } else {
-    // Enable all checkboxes
+    // Enabled all checkboxes
     allTimeCheckboxes.forEach((cb) => {
       cb.disabled = false;
       cb.parentElement.style.opacity = "1";
@@ -343,7 +343,7 @@ window.addCustomTime = addCustomTime;
 window.removeCustomTime = removeCustomTime;
 window.limitTimeSelection = limitTimeSelection;
 
-// Initialize everything when DOM is loaded
+// Initialized everything when DOM is loaded
 document.addEventListener("DOMContentLoaded", function () {
   initializeDirectionHandlers();
 });

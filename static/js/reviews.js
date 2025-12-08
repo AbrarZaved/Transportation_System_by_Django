@@ -5,7 +5,7 @@ const DRIVERS_DATA = [];
 
 // Global function to set buses and drivers data from template
 window.setReviewsData = function (buses, drivers) {
-  BUSES_DATA.length = 0; // Clear existing data
+  BUSES_DATA.length = 0; // Cleared existing data
   DRIVERS_DATA.length = 0;
   BUSES_DATA.push(...buses);
   DRIVERS_DATA.push(...drivers);
@@ -58,7 +58,7 @@ window.populateDriverSelect = function () {
 };
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Check if data was set before DOM loaded
+  // Checked if data was set before DOM loaded
   if (
     window.reviewsDataReady &&
     BUSES_DATA.length > 0 &&
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
     populateSelects();
   }
 
-  // Initialize components
+  // Initialized components
   initializeReviewForm();
   initializeDeleteButtons();
   loadSelectOptions();
@@ -87,20 +87,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!reviewForm) return;
 
-    // Handle review type change
+    // Handled review type change
     reviewTypeRadios.forEach((radio) => {
       radio.addEventListener("change", function () {
         updateFormFields(this.value);
       });
     });
 
-    // Handle form submission
+    // Handled form submission
     reviewForm.addEventListener("submit", function (e) {
       e.preventDefault();
       submitReview();
     });
 
-    // Initialize with default selection
+    // Initialized with default selection
     updateFormFields("bus");
 
     function updateFormFields(reviewType) {
@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const targetSelect = document.getElementById("targetSelect");
     if (!targetSelect) return;
 
-    // Clear existing options
+    // Cleared existing options
     targetSelect.innerHTML = '<option value="">Choose...</option>';
 
     let data = [];
@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", function () {
       targetSelect.setAttribute("data-type", "driver");
     }
 
-    // Add options
+    // Added options
     data.forEach((item) => {
       const option = document.createElement("option");
       option.value = item.id;
@@ -192,7 +192,7 @@ document.addEventListener("DOMContentLoaded", function () {
       targetSelect.appendChild(option);
     });
 
-    // Update placeholder
+    // Updated placeholder
     targetSelect.firstElementChild.textContent = placeholder;
   }
 
@@ -204,7 +204,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalBtnText = submitBtn.innerHTML;
 
-    // Get form data
+    // Got form data
     const reviewType = form.querySelector(
       'input[name="review_type"]:checked'
     )?.value;
@@ -213,13 +213,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const rating = form.querySelector('input[name="rating"]:checked')?.value;
     const comment = form.querySelector("#comment").value.trim();
 
-    // Validate form based on review type
+    // Validated form based on review type
     if (!reviewType || !rating || !comment) {
       showToast("error", "Please fill in all required fields.");
       return;
     }
 
-    // Validate selections based on review type
+    // Validated selections based on review type
     if (reviewType === "bus" && !busId) {
       showToast("error", "Please select a bus to review.");
       return;
@@ -233,7 +233,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    // Show loading state
+    // Showed loading state
     submitBtn.innerHTML =
       '<i class="fas fa-spinner fa-spin"></i> Submitting...';
     submitBtn.disabled = true;
@@ -320,7 +320,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (response.ok && result.success) {
         showToast("success", result.message);
 
-        // Remove the review item from DOM
+        // Removed the review item from DOM
         const reviewItem = button.closest(
           ".user-review-item, [class*='border-l-4']"
         );
@@ -329,7 +329,7 @@ document.addEventListener("DOMContentLoaded", function () {
           setTimeout(() => {
             reviewItem.remove();
 
-            // Check if no more reviews
+            // Checked if no more reviews
             const reviewsContainer = reviewItem.closest(
               ".your-reviews-card, [class*='space-y-4']"
             );
@@ -359,11 +359,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  /**
-   * Show toast notification
-   */
+
   function showToast(type, message) {
-    // Use the global showToast function if available, otherwise fallback
+    // Used the global showToast function if available, otherwise fallback
     if (typeof window.showToast === "function") {
       window.showToast(type, message);
     } else {
@@ -384,9 +382,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  /**
-   * Get CSRF token from cookie
-   */
+  
+   // Got CSRF token from cookie
+   
   function getCSRFToken() {
     const cookies = document.cookie.split(";");
     for (let cookie of cookies) {
@@ -396,7 +394,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    // Fallback: try to get from meta tag
+    // tried to get from meta tag
     const metaTag = document.querySelector('meta[name="csrf-token"]');
     if (metaTag) {
       return metaTag.getAttribute("content");
@@ -406,7 +404,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /**
-   * Add animation classes to elements as they come into view
+   * Added animation classes to elements as they come into view
    */
   function initializeAnimations() {
     const observerOptions = {
@@ -429,7 +427,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Initialize animations
+  // Initialized animations
   initializeAnimations();
 
   /**
@@ -493,7 +491,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Initialize rating stars
+  // Initialized rating stars
   initializeRatingStars();
 
   /**
@@ -502,7 +500,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function initializeSearch() {
     const searchInput = document.querySelector('input[name="search"]');
     if (searchInput) {
-      // Add search on enter key
+      // Added search on enter key
       searchInput.addEventListener("keypress", function (e) {
         if (e.key === "Enter") {
           e.preventDefault();
@@ -512,6 +510,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Initialize search
+  // Initialized search
   initializeSearch();
 });

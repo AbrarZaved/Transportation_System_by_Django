@@ -21,3 +21,4 @@ class Migration(migrations.Migration):
             new_name='bus_assigned',
         ),
     ]
+

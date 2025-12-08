@@ -57,7 +57,7 @@ function editBus(id, name, tag, number, model, capacity, status) {
   document.getElementById("editBusCapacity").value = capacity;
   document.getElementById("editBusStatus").checked = status;
 
-  // Open the edit modal
+  // Opened the edit modal
   toggleModal("editBusModal");
 }
 
@@ -83,7 +83,7 @@ function editDriver(
   document.getElementById("editDriverLicenseCountry").value = country;
   document.getElementById("editDriverStatus").checked = status;
 
-  // Open the edit modal
+  // Opened the edit modal
   toggleModal("editDriverModal");
 }
 
@@ -94,7 +94,7 @@ function editHelper(id, name, phone, status) {
   document.getElementById("editHelperPhone").value = phone || "";
   document.getElementById("editHelperStatus").checked = status;
 
-  // Open the edit modal
+  // Opened the edit modal
   toggleModal("editHelperModal");
 }
 document.addEventListener("DOMContentLoaded", function () {

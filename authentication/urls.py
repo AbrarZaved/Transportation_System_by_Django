@@ -55,3 +55,4 @@ urlpatterns = [
         name="student_report_detail",
     ),
 ]
+

@@ -35,7 +35,7 @@ class SuperVisorManager(BaseUserManager):
         return self.create_user(employee_id, password, **extra_fields)
 
 
-# Create your models here.
+# Created your models here.
 class Supervisor(AbstractBaseUser):
     employee_id = models.CharField(max_length=50, unique=True)
     first_name = models.CharField(max_length=255)
@@ -123,7 +123,7 @@ class Preference(models.Model):
         if self.searched_locations:
             self.searched_locations = (
                 self.searched_locations.capitalize()
-            )  # Make the first letter upper case
+            )  # Made the first letter upper case
         super().save(*args, **kwargs)
 
 
@@ -168,7 +168,7 @@ class StudentReview(models.Model):
         return f"{self.student.name} - {target} - {self.rating} stars"
 
     def save(self, *args, **kwargs):
-        # Ensure at least bus or driver is provided
+        # Ensured at least bus or driver is provided
         if not self.bus and not self.driver:
             raise ValueError("At least bus or driver must be provided")
         super().save(*args, **kwargs)
@@ -191,7 +191,7 @@ class DriverAuth(models.Model):
         if self.pk is None or (
             hasattr(self, "_password_changed") and self._password_changed
         ):
-            # Check if password is already hashed
+            # Checked if password is already hashed
             if not self.password.startswith(("pbkdf2_", "bcrypt", "argon2")):
                 self.password = make_password(self.password)
 
@@ -259,7 +259,7 @@ class SupportTicket(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.ticket_id:
-            # Generate unique ticket ID
+            # Generated unique ticket ID
             prefix = "TKT"
             timestamp = now().strftime("%Y%m%d")
             random_str = str(uuid.uuid4())[:6].upper()
@@ -306,3 +306,4 @@ class StudentLoginActivity(models.Model):
 
     def __str__(self):
         return f"{self.student.name} - {self.login_time.strftime('%Y-%m-%d %H:%M')}"
+

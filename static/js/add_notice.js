@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Hide dropdown when clicking outside
+  // Hid dropdown when clicking outside
   document.addEventListener("click", function (e) {
     if (!routeSearch.contains(e.target) && !routeDropdown.contains(e.target)) {
       routeDropdown.classList.add("hidden");

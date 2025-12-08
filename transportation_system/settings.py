@@ -220,3 +220,4 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "bahon.transport@gmail.com"
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = "Bahon Transport <bahon.transport@gmail.com>"
+

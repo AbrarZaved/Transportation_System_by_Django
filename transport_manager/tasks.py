@@ -87,7 +87,7 @@ def generate_daily_trip_instances():
 
     logger.info(f"Generating trip instances for {today} ({current_day})")
 
-    # Get all active schedules that should run today
+    # Got all active schedules that should run today
     active_schedules = Transportation_schedules.objects.filter(
         schedule_status=True, days__contains=current_day
     ).select_related("route", "bus", "driver")
@@ -98,7 +98,7 @@ def generate_daily_trip_instances():
 
     for schedule in active_schedules:
         try:
-            # Check if trip instance already exists for today
+            # Checked if trip instance already exists for today
             trip_instance, created = TripInstance.objects.get_or_create(
                 schedule=schedule, date=today, defaults={"status": "pending"}
             )
@@ -141,7 +141,7 @@ def cleanup_old_trip_instances():
 
     logger.info(f"Cleaning up trip instances older than {cutoff_date}")
 
-    # Delete trip instances older than 30 days
+    # Deleted trip instances older than 30 days
     deleted_count, _ = TripInstance.objects.filter(date__lt=cutoff_date).delete()
 
     logger.info(f"Cleaned up {deleted_count} old trip instances")
@@ -157,7 +157,7 @@ def auto_complete_overdue_trips():
     """
     now = timezone.now()
 
-    # Find trips that are in_progress and overdue by more than 2 hours
+    # Found trips that are in_progress and overdue by more than 2 hours
     overdue_threshold = now - timedelta(hours=2)
 
     overdue_trips = TripInstance.objects.filter(
@@ -208,3 +208,4 @@ def reset_daily_assignments():
         "bus_reset_count": bus_reset_count,
         "driver_reset_count": driver_reset_count,
     }
+

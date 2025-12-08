@@ -3,7 +3,7 @@ function stoppageAdd(stoppageId, buttonId) {
   const stoppageFields = document.getElementById(`${stoppageId}`);
   const addBtn = document.getElementById(`${buttonId}`);
 
-  // Remove any existing event listeners by cloning the button
+  // Removed any existing event listeners by cloning the button
   if (addBtn && !addBtn.hasAttribute("data-listener-added")) {
     addBtn.addEventListener("click", () => {
       const wrapper = document.createElement("div");
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .then((res) => res.json())
         .then((data) => {
           console.log(data);
-          // Clear existing stoppages first
+          // Cleared existing stoppages first
           const editStoppageFields =
             document.getElementById("editStoppageFields");
           editStoppageFields.innerHTML = "";
@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
           }
 
-          // Initialize the add stoppage functionality after loading existing stoppages
+          // Initialized the add stoppage functionality after loading existing stoppages
           stoppageAdd("editStoppageFields", "addEditStoppage");
         })
         .catch((error) => {
@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
   stoppageAdd("stoppageFields", "addStoppage");
-  // Close modal
+  // Closed modal
   const closeEditRouteModalBtn = document.getElementById("closeEditRouteModal");
   const cancelEditRouteBtn = document.getElementById("cancelEditRoute");
 
@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Remove the client-side search since we now have server-side search
+  // Removed the client-side search since we now have server-side search
   // Search is now handled by the form submission in the template
 
   // Delegate remove-stoppage button click event for dynamically added buttons

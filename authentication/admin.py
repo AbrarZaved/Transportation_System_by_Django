@@ -143,3 +143,4 @@ class StudentLoginActivityAdmin(admin.ModelAdmin):
     search_fields = ["student__name", "student__student_id", "ip_address", "location"]
     readonly_fields = ["login_time"]
     date_hierarchy = "login_time"
+
