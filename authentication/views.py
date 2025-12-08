@@ -708,7 +708,7 @@ def delete_review(request, review_id):
         return JsonResponse(
             {"success": False, "message": "Student not found"}, status=404
         )
-    except Review.DoesNotExist:
+    except review.DoesNotExist:
         return JsonResponse(
             {"success": False, "message": "Review not found"}, status=404
         )
