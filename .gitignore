@@ -3,6 +3,9 @@
 script.py
 myenv
 __pycache__/
+**/__pycache__/
+*.pyo
+*.pyd
 *.pyc
 backups/*sql
 backup.sql
